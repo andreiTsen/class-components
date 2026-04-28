@@ -1,5 +1,7 @@
 import { Component } from 'react';
 
+const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
+
 type SearchSectionProps = {
   onSearch: (searchTerm: string) => void;
 };
@@ -13,12 +15,20 @@ class SearchSection extends Component<SearchSectionProps, SearchSectionState> {
     searchTerm: '',
   };
 
+  componentDidMount() {
+    const savedSearchTerm =
+      localStorage.getItem(SEARCH_TERM_STORAGE_KEY) ?? '';
+
+    this.setState({ searchTerm: savedSearchTerm });
+  }
+
   handleSearchTermChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ searchTerm: event.target.value });
   };
 
   handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
+    localStorage.setItem(SEARCH_TERM_STORAGE_KEY, this.state.searchTerm);
     this.props.onSearch(this.state.searchTerm);
   };
 

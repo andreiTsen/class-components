@@ -6,6 +6,8 @@ import Footer from './components/Footer';
 import { api, type Pokemon } from './services/api';
 import './App.css';
 
+const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
+
 type AppState = {
   error: string;
   isLoading: boolean;
@@ -20,10 +22,14 @@ class App extends Component<Record<string, never>, AppState> {
   };
 
   componentDidMount() {
-    this.loadPokemons();
+    const savedSearchTerm =
+      localStorage.getItem(SEARCH_TERM_STORAGE_KEY) ?? '';
+
+    this.loadPokemons(savedSearchTerm);
   }
 
   loadPokemons = async (searchTerm = '') => {
+    localStorage.setItem(SEARCH_TERM_STORAGE_KEY, searchTerm);
     this.setState({ error: '', isLoading: true });
 
     try {
@@ -31,7 +37,7 @@ class App extends Component<Record<string, never>, AppState> {
 
       this.setState({ pokemons });
     } catch {
-      this.setState({ error: 'Unable to load pokemons' });
+      this.setState({ error: 'ошібка загрузкі' });
     } finally {
       this.setState({ isLoading: false });
     }
