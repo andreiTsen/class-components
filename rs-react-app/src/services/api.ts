@@ -45,11 +45,7 @@ class Api {
       );
 
       if (!response.ok) {
-        if (response.status === 404) {
-          return [];
-        }
-
-        throw new Error('ошібка загрузкі покемонв');
+        throw new Error('Не удалось загрузить покемона.');
       }
 
       const pokemon = (await response.json()) as PokemonDetailsResponse;
@@ -61,7 +57,7 @@ class Api {
     const response = await fetch(`${this.apiBaseUrl}/pokemon?limit=10`);
 
     if (!response.ok) {
-      throw new Error('ошібка загрузкі покемонов');
+      throw new Error('Не удалось загрузить список покемонов.');
     }
 
     const data = (await response.json()) as PokemonListResponse;
@@ -77,7 +73,7 @@ class Api {
     const response = await fetch(`${this.apiBaseUrl}/pokemon/${name}`);
 
     if (!response.ok) {
-      throw new Error('ошібка загрузкі покемона');
+      throw new Error('Не удалось загрузить покемона.');
     }
 
     const pokemon = (await response.json()) as PokemonDetailsResponse;
@@ -90,7 +86,7 @@ class Api {
     const response = await fetch(`${this.apiBaseUrl}/pokemon-species/${id}`);
 
     if (!response.ok) {
-      throw new Error('ошібка загрузкі опісанія покемона');
+      throw new Error('Не удалось загрузить описание покемона.');
     }
 
     const species = (await response.json()) as PokemonSpeciesResponse;

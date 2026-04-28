@@ -3,6 +3,8 @@ import Header from './components/Header';
 import SearchSection from './components/SearchSection';
 import ResultsSection from './components/ResultsSection';
 import Footer from './components/Footer';
+import ErrorBoundary from './components/ErrorBoundary';
+import ErrorTestButton from './components/ErrorTestButton';
 import { api, type Pokemon } from './services/api';
 import './App.css';
 
@@ -45,7 +47,10 @@ class App extends Component<Record<string, never>, AppState> {
 
       this.setState({ lastSearchTerm: normalizedSearchTerm, pokemons });
     } catch {
-      this.setState({ error: 'ошібка загрузкі' });
+      this.setState({
+        error: 'Не удалось загрузить данные. Проверьте запрос и попробуйте снова.',
+        pokemons: [],
+      });
     } finally {
       this.setState({ isLoading: false });
     }
@@ -57,14 +62,17 @@ class App extends Component<Record<string, never>, AppState> {
     return (
       <div className="page">
         <Header />
-        <main className="application-page">
-          <SearchSection onSearch={this.loadPokemons} />
-          <ResultsSection
-            error={error}
-            isLoading={isLoading}
-            pokemons={pokemons}
-          />
-        </main>
+        <ErrorBoundary>
+          <main className="application-page">
+            <SearchSection onSearch={this.loadPokemons} />
+            <ErrorTestButton />
+            <ResultsSection
+              error={error}
+              isLoading={isLoading}
+              pokemons={pokemons}
+            />
+          </main>
+        </ErrorBoundary>
         <Footer />
       </div>
     );
