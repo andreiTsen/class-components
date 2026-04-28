@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import loadingImage from '../assets/loading_circles_blue_gradient.jpg';
 import type { Pokemon } from '../services/api';
 
 type ResultsSectionProps = {
@@ -18,7 +19,12 @@ class ResultsSection extends Component<ResultsSectionProps> {
           <p>Submitted Pokemon</p>
         </div>
 
-        {isLoading && <p className="status-message">Loading...</p>}
+        {isLoading && (
+          <div className="loading-indicator" role="status" aria-live="polite">
+            <img src={loadingImage} alt="" />
+            <span>Loading...</span>
+          </div>
+        )}
         {error && <p className="status-message status-message-error">{error}</p>}
         {!isLoading && !error && pokemons.length === 0 && (
           <p className="status-message">No pokemons found.</p>

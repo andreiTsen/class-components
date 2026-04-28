@@ -165,6 +165,35 @@ input {
   color: #b42318;
 }
 
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid #d7e4f7;
+  border-radius: 4px;
+  background: #f7fbff;
+  color: #1f2933;
+}
+
+.loading-indicator img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  animation: spin 1s linear infinite;
+}
+
+.loading-indicator span {
+  font-weight: 600;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 600px) {
   .page-header {
     padding: 20px 12px 8px;
