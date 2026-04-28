@@ -28,8 +28,10 @@ class SearchSection extends Component<SearchSectionProps, SearchSectionState> {
 
   handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
-    localStorage.setItem(SEARCH_TERM_STORAGE_KEY, this.state.searchTerm);
-    this.props.onSearch(this.state.searchTerm);
+    const normalizedSearchTerm = this.state.searchTerm.trim();
+
+    this.setState({ searchTerm: normalizedSearchTerm });
+    this.props.onSearch(normalizedSearchTerm);
   };
 
   render() {

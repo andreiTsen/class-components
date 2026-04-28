@@ -29,9 +29,12 @@ class ResultsSection extends Component<ResultsSectionProps> {
             <article className="result-item" key={pokemon.id}>
               <div className="pokemon-info">
                 {pokemon.imageUrl && (
-                  <img src={pokemon.imageUrl} alt={`${pokemon.name} sprite`} />
+                  <img src={pokemon.imageUrl} alt={`${pokemon.name} image`} />
                 )}
-                <span>{pokemon.name}</span>
+                <div>
+                  <h3>{pokemon.name}</h3>
+                  <p>{pokemon.description}</p>
+                </div>
               </div>
               <strong>#{pokemon.id}</strong>
             </article>

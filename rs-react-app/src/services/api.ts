@@ -1,7 +1,8 @@
 export type Pokemon = {
+  description: string;
   id: number;
-  name: string;
   imageUrl: string;
+  name: string;
 };
 
 type PokemonListResponse = {
@@ -17,6 +18,15 @@ type PokemonDetailsResponse = {
   sprites: {
     front_default: string | null;
   };
+};
+
+type PokemonSpeciesResponse = {
+  flavor_text_entries: Array<{
+    flavor_text: string;
+    language: {
+      name: string;
+    };
+  }>;
 };
 
 class Api {
@@ -43,8 +53,9 @@ class Api {
       }
 
       const pokemon = (await response.json()) as PokemonDetailsResponse;
+      const description = await this.getPokemonDescription(pokemon.id);
 
-      return [this.normalizePokemon(pokemon)];
+      return [this.normalizePokemon(pokemon, description)];
     }
 
     const response = await fetch(`${this.apiBaseUrl}/pokemon?limit=10`);
@@ -55,20 +66,53 @@ class Api {
 
     const data = (await response.json()) as PokemonListResponse;
 
-    return data.results.map((pokemon) => ({
-      id: this.getPokemonIdFromUrl(pokemon.url),
-      name: pokemon.name,
-      imageUrl: '',
-    }));
+    const pokemons = await Promise.all(
+      data.results.map((pokemon) => this.getPokemonByName(pokemon.name))
+    );
+
+    return pokemons;
   }
 
-  private getPokemonIdFromUrl(url: string): number {
-    const parts = url.split('/').filter(Boolean);
-    return Number(parts[parts.length - 1]);
+  private async getPokemonByName(name: string): Promise<Pokemon> {
+    const response = await fetch(`${this.apiBaseUrl}/pokemon/${name}`);
+
+    if (!response.ok) {
+      throw new Error('ошібка загрузкі покемона');
+    }
+
+    const pokemon = (await response.json()) as PokemonDetailsResponse;
+    const description = await this.getPokemonDescription(pokemon.id);
+
+    return this.normalizePokemon(pokemon, description);
   }
 
-  private normalizePokemon(pokemon: PokemonDetailsResponse): Pokemon {
+  private async getPokemonDescription(id: number): Promise<string> {
+    const response = await fetch(`${this.apiBaseUrl}/pokemon-species/${id}`);
+
+    if (!response.ok) {
+      throw new Error('ошібка загрузкі опісанія покемона');
+    }
+
+    const species = (await response.json()) as PokemonSpeciesResponse;
+    const englishEntry = species.flavor_text_entries.find(
+      (entry) => entry.language.name === 'en'
+    );
+
+    return this.formatDescription(
+      englishEntry?.flavor_text ?? 'Нет опісанія для этого покемона'
+    );
+  }
+
+  private formatDescription(description: string): string {
+    return description.replace(/\s+/g, ' ');
+  }
+
+  private normalizePokemon(
+    pokemon: PokemonDetailsResponse,
+    description: string
+  ): Pokemon {
     return {
+      description,
       id: pokemon.id,
       name: pokemon.name,
       imageUrl: pokemon.sprites.front_default ?? '',

@@ -131,12 +131,26 @@ input {
   display: flex;
   align-items: center;
   gap: 10px;
-  text-transform: capitalize;
 }
 
 .pokemon-info img {
+  flex: 0 0 auto;
   width: 40px;
   height: 40px;
+}
+
+.pokemon-info h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.pokemon-info p {
+  max-width: 640px;
+  margin: 0;
+  color: #667085;
+  line-height: 1.5;
 }
 
 .status-message {

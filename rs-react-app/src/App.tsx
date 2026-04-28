@@ -11,6 +11,7 @@ const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
 type AppState = {
   error: string;
   isLoading: boolean;
+  lastSearchTerm: string | null;
   pokemons: Pokemon[];
 };
 
@@ -18,6 +19,7 @@ class App extends Component<Record<string, never>, AppState> {
   state: AppState = {
     error: '',
     isLoading: false,
+    lastSearchTerm: null,
     pokemons: [],
   };
 
@@ -29,13 +31,19 @@ class App extends Component<Record<string, never>, AppState> {
   }
 
   loadPokemons = async (searchTerm = '') => {
-    localStorage.setItem(SEARCH_TERM_STORAGE_KEY, searchTerm);
+    const normalizedSearchTerm = searchTerm.trim();
+
+    if (this.state.lastSearchTerm === normalizedSearchTerm) {
+      return;
+    }
+
+    localStorage.setItem(SEARCH_TERM_STORAGE_KEY, normalizedSearchTerm);
     this.setState({ error: '', isLoading: true });
 
     try {
-      const pokemons = await api.getPokemons(searchTerm);
+      const pokemons = await api.getPokemons(normalizedSearchTerm);
 
-      this.setState({ pokemons });
+      this.setState({ lastSearchTerm: normalizedSearchTerm, pokemons });
     } catch {
       this.setState({ error: 'ошібка загрузкі' });
     } finally {
