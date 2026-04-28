@@ -15,14 +15,42 @@ input {
   font: inherit;
 }
 
-.application-page {
+.page {
   display: flex;
   flex-direction: column;
-  gap: 24px;
   min-height: 100vh;
+}
+
+.page-header,
+.page-footer,
+.application-page {
+  width: 100%;
   max-width: 960px;
   margin: 0 auto;
+}
+
+.page-header {
+  padding: 28px 20px 16px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.application-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 24px;
   padding: 32px 20px;
+}
+
+.page-footer {
+  padding: 16px 20px 28px;
+  color: #667085;
+  font-size: 14px;
 }
 
 .search-section,
@@ -86,6 +114,7 @@ input {
 
 .result-item {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding: 14px 16px;
@@ -98,9 +127,45 @@ input {
   font-weight: 600;
 }
 
+.pokemon-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-transform: capitalize;
+}
+
+.pokemon-info img {
+  width: 40px;
+  height: 40px;
+}
+
+.status-message {
+  padding: 14px 16px;
+  border: 1px solid #e2e6ea;
+  border-radius: 4px;
+  background: #fafafa;
+}
+
+.status-message-error {
+  border-color: #f1b8b8;
+  color: #b42318;
+}
+
 @media (max-width: 600px) {
+  .page-header {
+    padding: 20px 12px 8px;
+  }
+
+  .page-header h1 {
+    font-size: 24px;
+  }
+
   .application-page {
     padding: 20px 12px;
+  }
+
+  .page-footer {
+    padding: 8px 12px 20px;
   }
 
   .search-form,
