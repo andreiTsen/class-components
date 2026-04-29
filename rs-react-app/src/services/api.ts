@@ -29,6 +29,9 @@ type PokemonSpeciesResponse = {
   }>;
 };
 
+const FIRST_PAGE_OFFSET = 0;
+const PAGE_SIZE = 10;
+
 class Api {
   private apiBaseUrl: string;
 
@@ -38,32 +41,32 @@ class Api {
 
   async getPokemons(searchTerm = ''): Promise<Pokemon[]> {
     const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+    const queryParams = new URLSearchParams({
+      limit: normalizedSearchTerm ? '100000' : String(PAGE_SIZE),
+      offset: String(FIRST_PAGE_OFFSET),
+    });
 
     if (normalizedSearchTerm) {
-      const response = await fetch(
-        `${this.apiBaseUrl}/pokemon/${normalizedSearchTerm}`
-      );
-
-      if (!response.ok) {
-        throw new Error('Не удалось загрузить покемона.');
-      }
-
-      const pokemon = (await response.json()) as PokemonDetailsResponse;
-      const description = await this.getPokemonDescription(pokemon.id);
-
-      return [this.normalizePokemon(pokemon, description)];
+      queryParams.set('search', normalizedSearchTerm);
     }
 
-    const response = await fetch(`${this.apiBaseUrl}/pokemon?limit=10`);
+    const response = await fetch(`${this.apiBaseUrl}/pokemon?${queryParams}`);
 
     if (!response.ok) {
       throw new Error('Не удалось загрузить список покемонов.');
     }
 
     const data = (await response.json()) as PokemonListResponse;
+    const firstPageResults = data.results
+      .filter((pokemon) =>
+        normalizedSearchTerm
+          ? pokemon.name.includes(normalizedSearchTerm)
+          : true
+      )
+      .slice(0, PAGE_SIZE);
 
     const pokemons = await Promise.all(
-      data.results.map((pokemon) => this.getPokemonByName(pokemon.name))
+      firstPageResults.map((pokemon) => this.getPokemonByName(pokemon.name))
     );
 
     return pokemons;

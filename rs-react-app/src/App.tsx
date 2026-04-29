@@ -65,12 +65,12 @@ class App extends Component<Record<string, never>, AppState> {
         <ErrorBoundary>
           <main className="application-page">
             <SearchSection onSearch={this.loadPokemons} />
-            <ErrorTestButton />
             <ResultsSection
               error={error}
               isLoading={isLoading}
               pokemons={pokemons}
             />
+            <ErrorTestButton />
           </main>
         </ErrorBoundary>
         <Footer />
