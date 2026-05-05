@@ -8,7 +8,7 @@ import tseslint from 'typescript-eslint';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'coverage']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -22,6 +22,17 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: globals.browser,
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+  },
+  {
+    files: ['src/**/*.test.{ts,tsx}', 'src/**/*.spec.{ts,tsx}', 'src/__tests__/**/*'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   },
 ]);
