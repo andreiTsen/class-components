@@ -23,5 +23,17 @@ describe('SearchSection', () => {
     expect(onSearch).toHaveBeenCalledWith('eevee');
     expect(screen.getByRole('searchbox')).toHaveValue('eevee');
   });
-});
 
+  it('отправляет пустую строку если введены только пробелы', async () => {
+    const user = userEvent.setup();
+    const onSearch = vi.fn();
+
+    render(<SearchSection onSearch={onSearch} />);
+
+    await user.type(screen.getByRole('searchbox'), '     ');
+    await user.click(screen.getByRole('button', { name: 'Search' }));
+
+    expect(onSearch).toHaveBeenCalledWith('');
+    expect(screen.getByRole('searchbox')).toHaveValue('');
+  });
+});

@@ -19,7 +19,7 @@ describe('ResultsSection', () => {
       />
     );
 
-    expect(screen.getByText('Не удалось загрузіть данные')).toBeInTheDocument();
+    expect(screen.getByText('Не удалось загрузить данные')).toBeInTheDocument();
   });
 
   it('рендерит пустоту при пустом списке', () => {
@@ -40,4 +40,3 @@ describe('ResultsSection', () => {
     expect(screen.getByRole('heading', { name: 'charmander' })).toBeInTheDocument();
   });
 });
-
