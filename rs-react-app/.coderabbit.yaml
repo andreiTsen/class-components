@@ -23,6 +23,15 @@ reviews:
     enabled: false
     drafts: false
     ignore_title_keywords: ['coderabbit-ignore']
+  path_filters:
+    - "src/**"
+    - "package.json"
+    - "vite.config.ts"
+    - "tsconfig*.json"
+    - "eslint.config.js"
+    - "!coverage/**"
+    - "!dist/**"
+    - "!node_modules/**"
   path_instructions:
     - path: "**/*.{ts,tsx}"
       instructions: |
