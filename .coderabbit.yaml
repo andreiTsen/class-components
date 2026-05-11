@@ -24,16 +24,16 @@ reviews:
     drafts: false
     ignore_title_keywords: ['coderabbit-ignore']
   path_filters:
-    - "rs-react-app/src/**"
-    - "rs-react-app/package.json"
-    - "rs-react-app/vite.config.ts"
-    - "rs-react-app/tsconfig*.json"
-    - "rs-react-app/eslint.config.js"
-    - "!rs-react-app/coverage/**"
-    - "!rs-react-app/dist/**"
-    - "!rs-react-app/node_modules/**"
+    - "src/**"
+    - "package.json"
+    - "vite.config.ts"
+    - "tsconfig*.json"
+    - "eslint.config.js"
+    - "!coverage/**"
+    - "!dist/**"
+    - "!node_modules/**"
   path_instructions:
-    - path: "rs-react-app/**/*.{ts,tsx}"
+    - path: "**/*.{ts,tsx}"
       instructions: |
         Student React/TS review:
           - Describe accessibility issues without ARIA code
