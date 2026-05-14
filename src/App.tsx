@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Header from './components/Header';
 import SearchSection from './components/SearchSection';
 import ResultsSection from './components/ResultsSection';
@@ -10,73 +10,70 @@ import './App.css';
 
 const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
 
-type AppState = {
-  error: string;
-  isLoading: boolean;
-  lastSearchTerm: string | null;
-  pokemons: Pokemon[];
-};
+function App() {
+  const initialSearchTermRef = useRef(
+    localStorage.getItem(SEARCH_TERM_STORAGE_KEY) ?? ''
+  );
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const lastSearchTermRef = useRef<string | null>(null);
+  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
 
-class App extends Component<Record<string, never>, AppState> {
-  state: AppState = {
-    error: '',
-    isLoading: false,
-    lastSearchTerm: null,
-    pokemons: [],
-  };
-
-  componentDidMount() {
-    const savedSearchTerm =
-      localStorage.getItem(SEARCH_TERM_STORAGE_KEY) ?? '';
-
-    this.loadPokemons(savedSearchTerm);
-  }
-
-  loadPokemons = async (searchTerm = '') => {
-    const normalizedSearchTerm = searchTerm.trim();
-
-    if (this.state.lastSearchTerm === normalizedSearchTerm) {
-      return;
-    }
-
+  const requestPokemons = useCallback(async (normalizedSearchTerm: string) => {
     localStorage.setItem(SEARCH_TERM_STORAGE_KEY, normalizedSearchTerm);
-    this.setState({ error: '', isLoading: true });
 
     try {
       const pokemons = await api.getPokemons(normalizedSearchTerm);
 
-      this.setState({ lastSearchTerm: normalizedSearchTerm, pokemons });
+      lastSearchTermRef.current = normalizedSearchTerm;
+      setPokemons(pokemons);
     } catch {
-      this.setState({
-        error: 'Не удалось загрузить данные. Проверьте запрос и попробуйте снова.',
-        pokemons: [],
-      });
+      setError(
+        'Не удалось загрузить данные. Проверьте запрос и попробуйте снова.'
+      );
+      setPokemons([]);
     } finally {
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     }
-  };
+  }, []);
 
-  render() {
-    const { error, isLoading, pokemons } = this.state;
+  const loadPokemons = useCallback(
+    async (searchTerm = '') => {
+      const normalizedSearchTerm = searchTerm.trim();
 
-    return (
-      <div className="page">
-        <Header />
-        <ErrorBoundary>
-          <main className="application-page">
-            <SearchSection onSearch={this.loadPokemons} />
-            <ResultsSection
-              error={error}
-              isLoading={isLoading}
-              pokemons={pokemons}
-            />
-            <ErrorTestButton />
-          </main>
-        </ErrorBoundary>
-        <Footer />
-      </div>
-    );
-  }
+      if (lastSearchTermRef.current === normalizedSearchTerm) {
+        return;
+      }
+
+      setError('');
+      setIsLoading(true);
+
+      await requestPokemons(normalizedSearchTerm);
+    },
+    [requestPokemons]
+  );
+
+  useEffect(() => {
+    void requestPokemons(initialSearchTermRef.current);
+  }, [requestPokemons]);
+
+  return (
+    <div className="page">
+      <Header />
+      <ErrorBoundary>
+        <main className="application-page">
+          <SearchSection onSearch={loadPokemons} />
+          <ResultsSection
+            error={error}
+            isLoading={isLoading}
+            pokemons={pokemons}
+          />
+          <ErrorTestButton />
+        </main>
+      </ErrorBoundary>
+      <Footer />
+    </div>
+  );
 }
 
 export default App;
