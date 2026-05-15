@@ -130,4 +130,23 @@ describe('api', () => {
       'Не удалось загрузить описание покемона.'
     );
   });
+
+  it('загружает покемона по id для детальной панели', async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(bulbasaurResponse))
+      .mockResolvedValueOnce(jsonResponse(speciesResponse));
+
+    const pokemon = await api.getPokemonById(1);
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      'https://pokeapi.co/api/v2/pokemon/1'
+    );
+    expect(pokemon).toEqual({
+      description: 'Какое то опісаніе',
+      id: 1,
+      imageUrl: 'https://example.com/bulbasaur.png',
+      name: 'bulbasaur',
+    });
+  });
 });

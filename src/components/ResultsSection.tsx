@@ -6,7 +6,9 @@ type ResultsSectionProps = {
   error: string;
   isLoading: boolean;
   onPageChange: (page: number) => void;
+  onPokemonSelect: (pokemonId: number) => void;
   pokemons: Pokemon[];
+  selectedPokemonId?: number | null;
   totalPages: number;
 };
 
@@ -15,7 +17,9 @@ function ResultsSection({
   error,
   isLoading,
   onPageChange,
+  onPokemonSelect,
   pokemons,
+  selectedPokemonId = null,
   totalPages,
 }: ResultsSectionProps) {
   const showPagination =
@@ -42,16 +46,28 @@ function ResultsSection({
       <div className="result-list">
         {pokemons.map((pokemon) => (
           <article className="result-item" key={pokemon.id}>
-            <div className="pokemon-info">
-              {pokemon.imageUrl && (
-                <img src={pokemon.imageUrl} alt={`${pokemon.name} image`} />
-              )}
-              <div>
-                <h3>{pokemon.name}</h3>
-                <p>{pokemon.description}</p>
+            <button
+              className="result-button"
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onPokemonSelect(pokemon.id);
+              }}
+              aria-current={
+                selectedPokemonId === pokemon.id ? 'true' : undefined
+              }
+            >
+              <div className="pokemon-info">
+                {pokemon.imageUrl && (
+                  <img src={pokemon.imageUrl} alt={`${pokemon.name} image`} />
+                )}
+                <div>
+                  <h3>{pokemon.name}</h3>
+                  <p>{pokemon.description}</p>
+                </div>
               </div>
-            </div>
-            <strong>#{pokemon.id}</strong>
+              <strong>#{pokemon.id}</strong>
+            </button>
           </article>
         ))}
       </div>

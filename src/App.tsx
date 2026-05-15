@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { Outlet, useMatch, useNavigate, useSearchParams } from 'react-router';
 import Header from './components/Header';
 import SearchSection from './components/SearchSection';
 import ResultsSection from './components/ResultsSection';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import ErrorTestButton from './components/ErrorTestButton';
+import DetailsSkeletonPanel from './components/DetailsSkeletonPanel';
 import useLocalStorage from './hooks/useLocalStorage';
 import { api, type Pokemon } from './services/api';
 import './App.css';
@@ -20,6 +21,8 @@ const getPageFromSearchParams = (searchParams: URLSearchParams) => {
 
 function App() {
   const { getItem, setItem } = useLocalStorage();
+  const detailsMatch = useMatch('/details/:pokemonId');
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [initialSearchTerm] = useState(
     () => getItem(SEARCH_TERM_STORAGE_KEY) ?? ''
@@ -35,6 +38,9 @@ function App() {
   );
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [totalPages, setTotalPages] = useState(0);
+  const selectedPokemonId = detailsMatch?.params.pokemonId
+    ? Number(detailsMatch.params.pokemonId)
+    : null;
 
   const updatePageInUrl = useCallback(
     (page: number, replace = false) => {
@@ -145,6 +151,30 @@ function App() {
     [loadPage]
   );
 
+  const getSearchWithCurrentPage = useCallback(() => {
+    const nextSearchParams = new URLSearchParams(searchParams);
+
+    nextSearchParams.set('page', String(currentPage));
+    return `?${nextSearchParams.toString()}`;
+  }, [currentPage, searchParams]);
+
+  const handlePokemonSelect = useCallback(
+    (pokemonId: number) => {
+      navigate({
+        pathname: `/details/${pokemonId}`,
+        search: getSearchWithCurrentPage(),
+      });
+    },
+    [getSearchWithCurrentPage, navigate]
+  );
+
+  const handleCloseDetails = useCallback(() => {
+    navigate({
+      pathname: '/',
+      search: getSearchWithCurrentPage(),
+    });
+  }, [getSearchWithCurrentPage, navigate]);
+
   useEffect(() => {
     const initialPage = getPageFromSearchParams(searchParams);
 
@@ -158,14 +188,28 @@ function App() {
       <ErrorBoundary>
         <main className="application-page">
           <SearchSection onSearch={loadPokemons} />
-          <ResultsSection
-            currentPage={currentPage}
-            error={error}
-            isLoading={isLoading}
-            onPageChange={loadPage}
-            pokemons={pokemons}
-            totalPages={totalPages}
-          />
+          <div className="master-detail-layout">
+            <div
+              className="master-pane"
+              onClick={selectedPokemonId ? handleCloseDetails : undefined}
+            >
+              <ResultsSection
+                currentPage={currentPage}
+                error={error}
+                isLoading={isLoading}
+                onPageChange={loadPage}
+                onPokemonSelect={handlePokemonSelect}
+                pokemons={pokemons}
+                selectedPokemonId={selectedPokemonId}
+                totalPages={totalPages}
+              />
+            </div>
+            {selectedPokemonId ? (
+              <Outlet context={{ onClose: handleCloseDetails }} />
+            ) : (
+              <DetailsSkeletonPanel />
+            )}
+          </div>
           <ErrorTestButton />
         </main>
       </ErrorBoundary>

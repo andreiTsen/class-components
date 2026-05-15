@@ -76,7 +76,9 @@ class Api {
           currentPage * PAGE_SIZE
         )
       : filteredResults;
-    const totalItems = normalizedSearchTerm ? filteredResults.length : data.count;
+    const totalItems = normalizedSearchTerm
+      ? filteredResults.length
+      : data.count;
     const totalPages = Math.ceil(totalItems / PAGE_SIZE);
 
     const pokemons = await Promise.all(
@@ -87,6 +89,19 @@ class Api {
       pokemons,
       totalPages,
     };
+  }
+
+  async getPokemonById(id: number): Promise<Pokemon> {
+    const response = await fetch(`${this.apiBaseUrl}/pokemon/${id}`);
+
+    if (!response.ok) {
+      throw new Error('Не удалось загрузить покемона.');
+    }
+
+    const pokemon = (await response.json()) as PokemonDetailsResponse;
+    const description = await this.getPokemonDescription(pokemon.id);
+
+    return this.normalizePokemon(pokemon, description);
   }
 
   private async getPokemonByName(name: string): Promise<Pokemon> {

@@ -13,6 +13,7 @@ const renderResultsSection = (
       error=""
       isLoading={false}
       onPageChange={() => undefined}
+      onPokemonSelect={() => undefined}
       pokemons={[]}
       totalPages={1}
       {...props}
