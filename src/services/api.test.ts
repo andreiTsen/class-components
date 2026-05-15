@@ -8,6 +8,7 @@ const jsonResponse = (body: unknown, ok = true) =>
   });
 
 const pokemonListResponse = {
+  count: 2,
   results: [
     { name: 'bulbasaur', url: 'https://pokeapi.co/api/v2/pokemon/1/' },
     { name: 'charmander', url: 'https://pokeapi.co/api/v2/pokemon/4/' },
@@ -58,26 +59,29 @@ describe('api', () => {
       .mockResolvedValueOnce(jsonResponse(speciesResponse))
       .mockResolvedValueOnce(jsonResponse({ flavor_text_entries: [] }));
 
-    const pokemons = await api.getPokemons();
+    const pokemonPage = await api.getPokemons();
 
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
       'https://pokeapi.co/api/v2/pokemon?limit=10&offset=0'
     );
-    expect(pokemons).toEqual([
-      {
-        description: 'Какое то опісаніе',
-        id: 1,
-        imageUrl: 'https://example.com/bulbasaur.png',
-        name: 'bulbasaur',
-      },
-      {
-        description: 'Нет опісанія для этого покемона',
-        id: 4,
-        imageUrl: '',
-        name: 'charmander',
-      },
-    ]);
+    expect(pokemonPage).toEqual({
+      pokemons: [
+        {
+          description: 'Какое то опісаніе',
+          id: 1,
+          imageUrl: 'https://example.com/bulbasaur.png',
+          name: 'bulbasaur',
+        },
+        {
+          description: 'Нет опісанія для этого покемона',
+          id: 4,
+          imageUrl: '',
+          name: 'charmander',
+        },
+      ],
+      totalPages: 1,
+    });
   });
 
   it('фильтрует покемонов по названию', async () => {
@@ -86,15 +90,16 @@ describe('api', () => {
       .mockResolvedValueOnce(jsonResponse(bulbasaurResponse))
       .mockResolvedValueOnce(jsonResponse(speciesResponse));
 
-    const pokemons = await api.getPokemons('  SAUR ');
+    const pokemonPage = await api.getPokemons('  SAUR ');
 
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
       'https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0&search=saur'
     );
     expect(fetchMock).toHaveBeenCalledTimes(3);
-    expect(pokemons).toHaveLength(1);
-    expect(pokemons[0].name).toBe('bulbasaur');
+    expect(pokemonPage.pokemons).toHaveLength(1);
+    expect(pokemonPage.pokemons[0].name).toBe('bulbasaur');
+    expect(pokemonPage.totalPages).toBe(1);
   });
 
   it('ошібка при загрузке списка покемонов', async () => {

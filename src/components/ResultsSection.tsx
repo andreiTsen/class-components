@@ -2,12 +2,25 @@ import loadingImage from '../assets/loading_circles_blue_gradient.jpg';
 import type { Pokemon } from '../services/api';
 
 type ResultsSectionProps = {
+  currentPage: number;
   error: string;
   isLoading: boolean;
+  onPageChange: (page: number) => void;
   pokemons: Pokemon[];
+  totalPages: number;
 };
 
-function ResultsSection({ error, isLoading, pokemons }: ResultsSectionProps) {
+function ResultsSection({
+  currentPage,
+  error,
+  isLoading,
+  onPageChange,
+  pokemons,
+  totalPages,
+}: ResultsSectionProps) {
+  const showPagination =
+    !isLoading && !error && pokemons.length > 0 && totalPages > 1;
+
   return (
     <section className="results-section" aria-labelledby="results-title">
       <div>
@@ -42,6 +55,28 @@ function ResultsSection({ error, isLoading, pokemons }: ResultsSectionProps) {
           </article>
         ))}
       </div>
+
+      {showPagination && (
+        <nav className="pagination" aria-label="Pagination">
+          <button
+            type="button"
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <span aria-current="page">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            type="button"
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </nav>
+      )}
     </section>
   );
 }

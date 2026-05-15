@@ -5,7 +5,13 @@ export type Pokemon = {
   name: string;
 };
 
+export type PokemonPage = {
+  pokemons: Pokemon[];
+  totalPages: number;
+};
+
 type PokemonListResponse = {
+  count: number;
   results: Array<{
     name: string;
     url: string;
@@ -39,11 +45,15 @@ class Api {
     this.apiBaseUrl = apiBaseUrl.replace(/\/$/, '');
   }
 
-  async getPokemons(searchTerm = ''): Promise<Pokemon[]> {
+  async getPokemons(searchTerm = '', page = 1): Promise<PokemonPage> {
     const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+    const currentPage = Math.max(page, 1);
+    const offset = normalizedSearchTerm
+      ? FIRST_PAGE_OFFSET
+      : (currentPage - 1) * PAGE_SIZE;
     const queryParams = new URLSearchParams({
       limit: normalizedSearchTerm ? '100000' : String(PAGE_SIZE),
-      offset: String(FIRST_PAGE_OFFSET),
+      offset: String(offset),
     });
 
     if (normalizedSearchTerm) {
@@ -57,19 +67,26 @@ class Api {
     }
 
     const data = (await response.json()) as PokemonListResponse;
-    const firstPageResults = data.results
-      .filter((pokemon) =>
-        normalizedSearchTerm
-          ? pokemon.name.includes(normalizedSearchTerm)
-          : true
-      )
-      .slice(0, PAGE_SIZE);
+    const filteredResults = data.results.filter((pokemon) =>
+      normalizedSearchTerm ? pokemon.name.includes(normalizedSearchTerm) : true
+    );
+    const pageResults = normalizedSearchTerm
+      ? filteredResults.slice(
+          (currentPage - 1) * PAGE_SIZE,
+          currentPage * PAGE_SIZE
+        )
+      : filteredResults;
+    const totalItems = normalizedSearchTerm ? filteredResults.length : data.count;
+    const totalPages = Math.ceil(totalItems / PAGE_SIZE);
 
     const pokemons = await Promise.all(
-      firstPageResults.map((pokemon) => this.getPokemonByName(pokemon.name))
+      pageResults.map((pokemon) => this.getPokemonByName(pokemon.name))
     );
 
-    return pokemons;
+    return {
+      pokemons,
+      totalPages,
+    };
   }
 
   private async getPokemonByName(name: string): Promise<Pokemon> {

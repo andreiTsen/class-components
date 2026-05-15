@@ -219,6 +219,37 @@ input {
   font-weight: 600;
 }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.pagination button {
+  min-width: 96px;
+  padding: 8px 12px;
+  border: 1px solid #1f2933;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #1f2933;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  border-color: #c9d0d8;
+  color: #98a2b3;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  min-width: 104px;
+  color: #1f2933;
+  font-weight: 600;
+  text-align: center;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
