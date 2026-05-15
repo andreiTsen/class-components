@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type SyntheticEvent } from 'react';
+import useLocalStorage from '../hooks/useLocalStorage';
 
 const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
 
@@ -7,8 +8,9 @@ type SearchSectionProps = {
 };
 
 function SearchSection({ onSearch }: SearchSectionProps) {
+  const { getItem } = useLocalStorage();
   const [searchTerm, setSearchTerm] = useState(
-    () => localStorage.getItem(SEARCH_TERM_STORAGE_KEY) ?? ''
+    () => getItem(SEARCH_TERM_STORAGE_KEY) ?? ''
   );
 
   const handleSearchTermChange = (event: ChangeEvent<HTMLInputElement>) => {

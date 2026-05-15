@@ -5,14 +5,16 @@ import ResultsSection from './components/ResultsSection';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import ErrorTestButton from './components/ErrorTestButton';
+import useLocalStorage from './hooks/useLocalStorage';
 import { api, type Pokemon } from './services/api';
 import './App.css';
 
 const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
 
 function App() {
+  const { getItem, setItem } = useLocalStorage();
   const initialSearchTermRef = useRef(
-    localStorage.getItem(SEARCH_TERM_STORAGE_KEY) ?? ''
+    getItem(SEARCH_TERM_STORAGE_KEY) ?? ''
   );
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +22,7 @@ function App() {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
 
   const requestPokemons = useCallback(async (normalizedSearchTerm: string) => {
-    localStorage.setItem(SEARCH_TERM_STORAGE_KEY, normalizedSearchTerm);
+    setItem(SEARCH_TERM_STORAGE_KEY, normalizedSearchTerm);
 
     try {
       const pokemons = await api.getPokemons(normalizedSearchTerm);
@@ -35,7 +37,7 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [setItem]);
 
   const loadPokemons = useCallback(
     async (searchTerm = '') => {
