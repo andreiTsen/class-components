@@ -7,7 +7,7 @@ describe('Header', () => {
     render(<Header />);
 
     expect(
-      screen.getByRole('heading', { name: 'Pokemon super creature' })
+      screen.getByRole('heading', { name: 'Pokemon super monster' })
     ).toBeInTheDocument();
   });
 
