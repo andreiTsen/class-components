@@ -21,6 +21,9 @@ type PokemonListResponse = {
 type PokemonDetailsResponse = {
   id: number;
   name: string;
+  species: {
+    name: string;
+  };
   sprites: {
     front_default: string | null;
   };
@@ -55,10 +58,6 @@ class Api {
       limit: normalizedSearchTerm ? '100000' : String(PAGE_SIZE),
       offset: String(offset),
     });
-
-    if (normalizedSearchTerm) {
-      queryParams.set('search', normalizedSearchTerm);
-    }
 
     const response = await fetch(`${this.apiBaseUrl}/pokemon?${queryParams}`);
 
@@ -99,7 +98,7 @@ class Api {
     }
 
     const pokemon = (await response.json()) as PokemonDetailsResponse;
-    const description = await this.getPokemonDescription(pokemon.id);
+    const description = await this.getPokemonDescription(pokemon.species.name);
 
     return this.normalizePokemon(pokemon, description);
   }
@@ -112,13 +111,15 @@ class Api {
     }
 
     const pokemon = (await response.json()) as PokemonDetailsResponse;
-    const description = await this.getPokemonDescription(pokemon.id);
+    const description = await this.getPokemonDescription(pokemon.species.name);
 
     return this.normalizePokemon(pokemon, description);
   }
 
-  private async getPokemonDescription(id: number): Promise<string> {
-    const response = await fetch(`${this.apiBaseUrl}/pokemon-species/${id}`);
+  private async getPokemonDescription(speciesName: string): Promise<string> {
+    const response = await fetch(
+      `${this.apiBaseUrl}/pokemon-species/${speciesName}`
+    );
 
     if (!response.ok) {
       throw new Error('Failed to load Pokemon description.');
