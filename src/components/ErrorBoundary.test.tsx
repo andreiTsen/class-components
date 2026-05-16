@@ -26,7 +26,7 @@ describe('ErrorBoundary', () => {
     consoleErrorSpy.mockClear();
   });
 
-  it('рендерит контент без ошібки', () => {
+  it('renders content without error', () => {
     render(
       <ErrorBoundary>
         <ThrowingChild shouldThrow={false} />
@@ -36,7 +36,7 @@ describe('ErrorBoundary', () => {
     expect(screen.getByText('Working content')).toBeInTheDocument();
   });
 
-  it('рендерит резервный UI и может сбросить границу', async () => {
+  it('renders fallback UI and can reset the boundary', async () => {
     const user = userEvent.setup();
 
     render(
@@ -46,13 +46,13 @@ describe('ErrorBoundary', () => {
     );
 
     expect(
-      screen.getByRole('heading', { name: 'Что-то пошло не так' })
+      screen.getByRole('heading', { name: 'Something went wrong' })
     ).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Попробовать снова' }));
+    await user.click(screen.getByRole('button', { name: 'Try again' }));
 
     expect(
-      screen.getByRole('heading', { name: 'Что-то пошло не так' })
+      screen.getByRole('heading', { name: 'Something went wrong' })
     ).toBeInTheDocument();
   });
 });

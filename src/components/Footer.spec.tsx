@@ -3,7 +3,7 @@ import { render, screen } from '../__tests__/test-utils';
 import Footer from './Footer';
 
 describe('Footer', () => {
-  it('рендеріт футер', () => {
+  it('renders footer', () => {
     render(<Footer />);
 
     expect(

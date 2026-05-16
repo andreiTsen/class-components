@@ -21,25 +21,25 @@ const renderResultsSection = (
   );
 
 describe('ResultsSection', () => {
-  it('рендерит загрузчик', () => {
+  it('renders loader', () => {
     renderResultsSection({ isLoading: true });
 
     expect(screen.getByRole('status')).toHaveTextContent('Loading...');
   });
 
-  it('рендерит сообщение об ошібке', () => {
-    renderResultsSection({ error: 'Не удалось загрузить данные' });
+  it('renders error message', () => {
+    renderResultsSection({ error: 'Failed to load data' });
 
-    expect(screen.getByText('Не удалось загрузить данные')).toBeInTheDocument();
+    expect(screen.getByText('Failed to load data')).toBeInTheDocument();
   });
 
-  it('рендерит пустоту при пустом списке', () => {
+  it('renders emptiness with an empty list', () => {
     renderResultsSection();
 
     expect(screen.getByText('No pokemons found.')).toBeInTheDocument();
   });
 
-  it('рендерит карточки покемонов', () => {
+  it('renders Pokemon cards', () => {
     renderResultsSection({ pokemons: pokemonList });
 
     expect(screen.getByRole('heading', { name: 'bulbasaur' })).toBeInTheDocument();
@@ -51,7 +51,7 @@ describe('ResultsSection', () => {
     expect(screen.getByRole('heading', { name: 'charmander' })).toBeInTheDocument();
   });
 
-  it('рендерит пагинацию после загрузки нескольких страниц', () => {
+  it('renders pagination after loading multiple pages', () => {
     renderResultsSection({
       currentPage: 2,
       pokemons: pokemonList,

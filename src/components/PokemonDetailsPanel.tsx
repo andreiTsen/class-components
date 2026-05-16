@@ -21,7 +21,7 @@ function PokemonDetailsPanel() {
     if (!Number.isInteger(id) || id <= 0) {
       queueMicrotask(() => {
         if (!ignore) {
-          setError('Не удалось загрузить данные покемона.');
+          setError('Failed to load Pokemon data.');
           setIsLoading(false);
         }
       });
@@ -45,7 +45,7 @@ function PokemonDetailsPanel() {
       })
       .catch(() => {
         if (!ignore) {
-          setError('Не удалось загрузить данные покемона.');
+          setError('Failed to load Pokemon data.');
         }
       })
       .finally(() => {

@@ -4,7 +4,7 @@ import ErrorBoundary from './ErrorBoundary';
 import ErrorTestButton from './ErrorTestButton';
 
 describe('ErrorTestButton', () => {
-  it('отображает сообщение об ошібке через ErrorBoundary после клика', async () => {
+  it('shows the error message through ErrorBoundary after click', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const user = userEvent.setup();
 
@@ -17,7 +17,7 @@ describe('ErrorTestButton', () => {
     await user.click(screen.getByRole('button', { name: 'Test Error' }));
 
     expect(
-      screen.getByRole('heading', { name: 'Что-то пошло не так' })
+      screen.getByRole('heading', { name: 'Something went wrong' })
     ).toBeInTheDocument();
   });
 });

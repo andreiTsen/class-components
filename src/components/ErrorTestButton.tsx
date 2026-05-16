@@ -8,7 +8,7 @@ function ErrorTestButton() {
   };
 
   if (shouldThrowError) {
-    throw new Error('Ошібка для тестірованія');
+    throw new Error('Error for testing');
   }
 
   return (

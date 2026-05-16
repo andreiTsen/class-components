@@ -63,7 +63,7 @@ class Api {
     const response = await fetch(`${this.apiBaseUrl}/pokemon?${queryParams}`);
 
     if (!response.ok) {
-      throw new Error('Не удалось загрузить список покемонов.');
+      throw new Error('Failed to load Pokemon list.');
     }
 
     const data = (await response.json()) as PokemonListResponse;
@@ -95,7 +95,7 @@ class Api {
     const response = await fetch(`${this.apiBaseUrl}/pokemon/${id}`);
 
     if (!response.ok) {
-      throw new Error('Не удалось загрузить покемона.');
+      throw new Error('Failed to load Pokemon.');
     }
 
     const pokemon = (await response.json()) as PokemonDetailsResponse;
@@ -108,7 +108,7 @@ class Api {
     const response = await fetch(`${this.apiBaseUrl}/pokemon/${name}`);
 
     if (!response.ok) {
-      throw new Error('Не удалось загрузить покемона.');
+      throw new Error('Failed to load Pokemon.');
     }
 
     const pokemon = (await response.json()) as PokemonDetailsResponse;
@@ -121,7 +121,7 @@ class Api {
     const response = await fetch(`${this.apiBaseUrl}/pokemon-species/${id}`);
 
     if (!response.ok) {
-      throw new Error('Не удалось загрузить описание покемона.');
+      throw new Error('Failed to load Pokemon description.');
     }
 
     const species = (await response.json()) as PokemonSpeciesResponse;
@@ -130,7 +130,7 @@ class Api {
     );
 
     return this.formatDescription(
-      englishEntry?.flavor_text ?? 'Нет опісанія для этого покемона'
+      englishEntry?.flavor_text ?? 'No description for this Pokemon'
     );
   }
 

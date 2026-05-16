@@ -34,7 +34,7 @@ const charmanderResponse = {
 const speciesResponse = {
   flavor_text_entries: [
     {
-      flavor_text: 'Какое то опісаніе',
+      flavor_text: 'Some description',
       language: { name: 'en' },
     },
   ],
@@ -51,7 +51,7 @@ describe('api', () => {
     vi.unstubAllGlobals();
   });
 
-  it('загружает страницу покемонов', async () => {
+  it('loads Pokemon page', async () => {
     fetchMock
       .mockResolvedValueOnce(jsonResponse(pokemonListResponse))
       .mockResolvedValueOnce(jsonResponse(bulbasaurResponse))
@@ -68,13 +68,13 @@ describe('api', () => {
     expect(pokemonPage).toEqual({
       pokemons: [
         {
-          description: 'Какое то опісаніе',
+          description: 'Some description',
           id: 1,
           imageUrl: 'https://example.com/bulbasaur.png',
           name: 'bulbasaur',
         },
         {
-          description: 'Нет опісанія для этого покемона',
+          description: 'No description for this Pokemon',
           id: 4,
           imageUrl: '',
           name: 'charmander',
@@ -84,7 +84,7 @@ describe('api', () => {
     });
   });
 
-  it('фильтрует покемонов по названию', async () => {
+  it('filters Pokemons by name', async () => {
     fetchMock
       .mockResolvedValueOnce(jsonResponse(pokemonListResponse))
       .mockResolvedValueOnce(jsonResponse(bulbasaurResponse))
@@ -102,36 +102,36 @@ describe('api', () => {
     expect(pokemonPage.totalPages).toBe(1);
   });
 
-  it('ошібка при загрузке списка покемонов', async () => {
+  it('error while loading Pokemon list', async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({}, false));
 
     await expect(api.getPokemons()).rejects.toThrow(
-      'Не удалось загрузить список покемонов.'
+      'Failed to load Pokemon list.'
     );
   });
 
-  it('ошібка при загрузке данных покемона', async () => {
+  it('error while loading Pokemon data', async () => {
     fetchMock
       .mockResolvedValueOnce(jsonResponse(pokemonListResponse))
       .mockResolvedValueOnce(jsonResponse({}, false));
 
     await expect(api.getPokemons()).rejects.toThrow(
-      'Не удалось загрузить покемона.'
+      'Failed to load Pokemon.'
     );
   });
 
-  it('ошібка при загрузке описания покемона', async () => {
+  it('error while loading Pokemon description', async () => {
     fetchMock
       .mockResolvedValueOnce(jsonResponse(pokemonListResponse))
       .mockResolvedValueOnce(jsonResponse(bulbasaurResponse))
       .mockResolvedValueOnce(jsonResponse({}, false));
 
     await expect(api.getPokemons('bulb')).rejects.toThrow(
-      'Не удалось загрузить описание покемона.'
+      'Failed to load Pokemon description.'
     );
   });
 
-  it('загружает покемона по id для детальной панели', async () => {
+  it('loads Pokemon by id for the details panel', async () => {
     fetchMock
       .mockResolvedValueOnce(jsonResponse(bulbasaurResponse))
       .mockResolvedValueOnce(jsonResponse(speciesResponse));
@@ -143,7 +143,7 @@ describe('api', () => {
       'https://pokeapi.co/api/v2/pokemon/1'
     );
     expect(pokemon).toEqual({
-      description: 'Какое то опісаніе',
+      description: 'Some description',
       id: 1,
       imageUrl: 'https://example.com/bulbasaur.png',
       name: 'bulbasaur',

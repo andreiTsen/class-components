@@ -3,7 +3,7 @@ import { render, screen } from '../__tests__/test-utils';
 import AppRoutes from '../AppRoutes';
 
 describe('Page404', () => {
-  it('рендерит 404 для неизвестного маршрута и ссылку домой', () => {
+  it('renders 404 for unknown route and a link home', () => {
     window.history.replaceState({}, '', '/unknown-route');
 
     render(<AppRoutes />);

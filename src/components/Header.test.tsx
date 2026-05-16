@@ -3,15 +3,15 @@ import { render, screen } from '../__tests__/test-utils';
 import Header from './Header';
 
 describe('Header', () => {
-  it('рендеріт тітул', () => {
+  it('renders title', () => {
     render(<Header />);
 
     expect(
-      screen.getByRole('heading', { name: 'Покемон суперсущество' })
+      screen.getByRole('heading', { name: 'Pokemon super creature' })
     ).toBeInTheDocument();
   });
 
-  it('рендерит ссылку на страницу about', () => {
+  it('renders link to the about page', () => {
     render(<Header />);
 
     expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute(

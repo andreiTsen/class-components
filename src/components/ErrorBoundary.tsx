@@ -18,7 +18,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Ошібка пріложенія:', error, errorInfo);
+    console.error('Application error:', error, errorInfo);
   }
 
   handleReset = () => {
@@ -29,10 +29,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     if (this.state.hasError) {
       return (
         <section className="error-boundary">
-          <h2>Что-то пошло не так</h2>
-          <p>Проізошла ошібка. Вы можете вернуться к работе.</p>
+          <h2>Something went wrong</h2>
+          <p>An error occurred. You can return to work.</p>
           <button onClick={this.handleReset}>
-            Попробовать снова
+            Try again
           </button>
         </section>
       );

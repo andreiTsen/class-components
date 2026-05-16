@@ -96,7 +96,7 @@ function App() {
         setTotalPages(pokemonPage.totalPages);
       } catch {
         setError(
-          'Не удалось загрузить данные. Проверьте запрос и попробуйте снова.'
+          'Failed to load data. Check the request and try again.'
         );
         setPokemons([]);
         setTotalPages(0);

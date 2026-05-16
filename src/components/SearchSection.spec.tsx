@@ -3,7 +3,7 @@ import { render, screen, userEvent } from '../__tests__/test-utils';
 import SearchSection from './SearchSection';
 
 describe('SearchSection', () => {
-  it('загружает сохраненный терм поіска из локального хранилища', () => {
+  it('loads saved search term from local storage', () => {
     localStorage.setItem('pokemon-search-term', 'pikachu');
 
     render(<SearchSection onSearch={vi.fn()} />);
@@ -11,7 +11,7 @@ describe('SearchSection', () => {
     expect(screen.getByRole('searchbox')).toHaveValue('pikachu');
   });
 
-  it('обрезает и отправляет терм поіска', async () => {
+  it('trims and sends search term', async () => {
     const user = userEvent.setup();
     const onSearch = vi.fn();
 
@@ -24,7 +24,7 @@ describe('SearchSection', () => {
     expect(screen.getByRole('searchbox')).toHaveValue('eevee');
   });
 
-  it('отправляет пустую строку если введены только пробелы', async () => {
+  it('sends empty string if only spaces are entered', async () => {
     const user = userEvent.setup();
     const onSearch = vi.fn();
 

@@ -29,7 +29,7 @@ describe('App', () => {
     getPokemonsMock.mockReset();
   });
 
-  it('загрузка покемонгов прі открытіі прілагі', async () => {
+  it('loads Pokemons when opening the app', async () => {
     localStorage.setItem('pokemon-search-term', 'bulbasaur');
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 1 });
 
@@ -39,7 +39,7 @@ describe('App', () => {
     expect(await screen.findByRole('heading', { name: 'bulbasaur' })).toBeInTheDocument();
   });
 
-  it('загружает покемонов с пустым поиском если localStorage пустой', async () => {
+  it('loads Pokemons with empty search if localStorage is empty', async () => {
     getPokemonsMock.mockResolvedValue({ pokemons: [], totalPages: 0 });
 
     render(<AppRoutes />);
@@ -54,7 +54,7 @@ describe('App', () => {
     });
   });
 
-  it('записывает новый поисковый запрос в localStorage после поиска', async () => {
+  it('writes a new search request to localStorage after search', async () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: [], totalPages: 0 });
 
@@ -77,7 +77,7 @@ describe('App', () => {
     });
   });
 
-  it('обновляет сохраненный запрос при повторном поиске', async () => {
+  it('updates the saved request on repeated search', async () => {
     const user = userEvent.setup();
     localStorage.setItem('pokemon-search-term', 'pikachu');
     getPokemonsMock.mockResolvedValue({ pokemons: [], totalPages: 0 });
@@ -103,7 +103,7 @@ describe('App', () => {
     });
   });
 
-  it('показать ошібку прі неудачной звгрузкі', async () => {
+  it('shows an error on failed loading', async () => {
     getPokemonsMock.mockRejectedValue(new Error('Network error'));
 
     render(<AppRoutes />);
@@ -111,13 +111,13 @@ describe('App', () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          'Не удалось загрузить данные. Проверьте запрос и попробуйте снова.'
+          'Failed to load data. Check the request and try again.'
         )
       ).toBeInTheDocument();
     });
   });
 
-  it('показывает пагинацию после загрузки элементов', async () => {
+  it('shows pagination after loading items', async () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
 
     render(<AppRoutes />);
@@ -128,7 +128,7 @@ describe('App', () => {
     expect(screen.getByText('Page 1 of 2')).toBeInTheDocument();
   });
 
-  it('обновляет page параметр при смене страницы', async () => {
+  it('updates the page parameter when changing page', async () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
 
@@ -144,7 +144,7 @@ describe('App', () => {
     });
   });
 
-  it('синхронизирует видимую страницу со страницей из URL', async () => {
+  it('synchronizes the visible page with the page from URL', async () => {
     window.history.replaceState({}, '', '/?page=2');
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 3 });
 
@@ -154,7 +154,7 @@ describe('App', () => {
     expect(getPokemonsMock).toHaveBeenCalledWith('', 2);
   });
 
-  it('сбрасывает страницу в URL при новом поиске', async () => {
+  it('resets the page in URL on new search', async () => {
     const user = userEvent.setup();
     window.history.replaceState({}, '', '/?page=2');
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 3 });
@@ -171,7 +171,7 @@ describe('App', () => {
     });
   });
 
-  it('открывает детальную панель справа при клике по элементу', async () => {
+  it('opens the details panel on the right when clicking an item', async () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
     getPokemonByIdMock.mockResolvedValue(bulbasaur);
@@ -188,7 +188,7 @@ describe('App', () => {
     expect(window.location.search).toBe('?page=1');
   });
 
-  it('закрывает детальную панель кнопкой закрытия', async () => {
+  it('closes the details panel with the close button', async () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
     getPokemonByIdMock.mockResolvedValue(bulbasaur);
@@ -208,7 +208,7 @@ describe('App', () => {
     });
   });
 
-  it('показывает загрузчик во время загрузки детальной информации', async () => {
+  it('shows the loader while loading detailed information', async () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
     getPokemonByIdMock.mockReturnValue(new Promise(() => undefined));
@@ -220,7 +220,7 @@ describe('App', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Loading details...');
   });
 
-  it('закрывает детальную панель кликом по главной панели', async () => {
+  it('closes the details panel by clicking the main panel', async () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
     getPokemonByIdMock.mockResolvedValue(bulbasaur);
@@ -240,7 +240,7 @@ describe('App', () => {
     });
   });
 
-  it('показывает skeleton деталей до выбора покемона', async () => {
+  it('shows the details skeleton before choosing a Pokemon', async () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
 
     render(<AppRoutes />);
