@@ -10,5 +10,14 @@ describe('Header', () => {
       screen.getByRole('heading', { name: 'Покемон суперсущество' })
     ).toBeInTheDocument();
   });
+
+  it('рендерит ссылку на страницу about', () => {
+    render(<Header />);
+
+    expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute(
+      'href',
+      '/about'
+    );
+  });
 });
 

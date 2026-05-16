@@ -39,6 +39,22 @@ input {
   font-weight: 700;
 }
 
+.main-nav {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.main-nav a {
+  color: #1f2933;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.main-nav a:hover {
+  text-decoration: underline;
+}
+
 .application-page {
   display: flex;
   flex: 1;
