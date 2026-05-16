@@ -1,4 +1,3 @@
-import { Component, type ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent } from '../__tests__/test-utils';
 import ErrorBoundary from './ErrorBoundary';
@@ -7,14 +6,12 @@ type ThrowingChildProps = {
   shouldThrow: boolean;
 };
 
-class ThrowingChild extends Component<ThrowingChildProps> {
-  render(): ReactNode {
-    if (this.props.shouldThrow) {
-      throw new Error('Test error');
-    }
-
-    return <p>Working content</p>;
+function ThrowingChild({ shouldThrow }: ThrowingChildProps) {
+  if (shouldThrow) {
+    throw new Error('Test error');
   }
+
+  return <p>Working content</p>;
 }
 
 describe('ErrorBoundary', () => {

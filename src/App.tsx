@@ -6,7 +6,6 @@ import ResultsSection from './components/ResultsSection';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import ErrorTestButton from './components/ErrorTestButton';
-import DetailsSkeletonPanel from './components/DetailsSkeletonPanel';
 import useLocalStorage from './hooks/useLocalStorage';
 import { api, type Pokemon } from './services/api';
 import './App.css';
@@ -204,10 +203,8 @@ function App() {
                 totalPages={totalPages}
               />
             </div>
-            {selectedPokemonId ? (
+            {selectedPokemonId && (
               <Outlet context={{ onClose: handleCloseDetails }} />
-            ) : (
-              <DetailsSkeletonPanel />
             )}
           </div>
           <ErrorTestButton />

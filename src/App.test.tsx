@@ -202,9 +202,7 @@ describe('App', () => {
     await waitFor(() => {
       expect(window.location.pathname).toBe('/');
       expect(window.location.search).toBe('?page=1');
-      expect(
-        screen.getByText('Select a Pokemon to view details.')
-      ).toBeInTheDocument();
+      expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     });
   });
 
@@ -234,20 +232,17 @@ describe('App', () => {
     await waitFor(() => {
       expect(window.location.pathname).toBe('/');
       expect(window.location.search).toBe('?page=1');
-      expect(
-        screen.getByText('Select a Pokemon to view details.')
-      ).toBeInTheDocument();
+      expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     });
   });
 
-  it('shows the details skeleton before choosing a Pokemon', async () => {
+  it('keeps the details panel closed before choosing a Pokemon', async () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
 
     render(<AppRoutes />);
 
-    expect(
-      await screen.findByText('Select a Pokemon to view details.')
-    ).toBeInTheDocument();
+    await screen.findByRole('heading', { name: 'Pokemons Results' });
+    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     expect(window.location.pathname).toBe('/');
   });
 });
