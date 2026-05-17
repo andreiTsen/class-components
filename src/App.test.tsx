@@ -110,9 +110,7 @@ describe('App', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(
-          'Failed to load data. Check the request and try again.'
-        )
+        screen.getByText('Failed to load data')
       ).toBeInTheDocument();
     });
   });
