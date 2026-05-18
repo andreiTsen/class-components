@@ -7,7 +7,12 @@ body {
   background: #f7f7f8;
   color: #1f2933;
   font-family:
-    Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
 }
 
 button,
@@ -168,31 +173,26 @@ input {
 }
 
 .result-item {
-  border: 1px solid #e2e6ea;
-  border-radius: 4px;
-  background: #fafafa;
-}
-
-.result-button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
   gap: 16px;
+  width: 100%;
   padding: 14px 16px;
-  border: 0;
-  background: transparent;
+  border: 1px solid #e2e6ea;
+  border-radius: 4px;
+  background: #fafafa;
   color: inherit;
   cursor: pointer;
   text-align: left;
 }
 
-.result-button[aria-current='true'] {
+.result-item[aria-current='true'] {
   outline: 2px solid #1f2933;
   outline-offset: -2px;
 }
 
-.result-button strong {
+.result-item strong {
   font-weight: 600;
 }
 
@@ -265,7 +265,7 @@ input {
   padding-top: 4px;
 }
 
-.pagination button {
+.pagination-link {
   min-width: 96px;
   padding: 8px 12px;
   border: 1px solid #1f2933;
@@ -273,15 +273,17 @@ input {
   background: #ffffff;
   color: #1f2933;
   cursor: pointer;
+  text-align: center;
+  text-decoration: none;
 }
 
-.pagination button:disabled {
+.pagination-link-disabled {
   border-color: #c9d0d8;
   color: #98a2b3;
   cursor: not-allowed;
 }
 
-.pagination span {
+.pagination-current {
   min-width: 104px;
   color: #1f2933;
   font-weight: 600;
@@ -341,51 +343,9 @@ input {
   line-height: 1.5;
 }
 
-.details-pane-skeleton {
-  pointer-events: none;
-}
-
-.details-pane-skeleton p {
-  margin: 0;
-  color: #667085;
-}
-
-.skeleton-line,
-.skeleton-image {
-  overflow: hidden;
-  border-radius: 4px;
-  background: linear-gradient(90deg, #edf0f3 0%, #f8fafc 50%, #edf0f3 100%);
-  background-size: 200% 100%;
-  animation: skeleton-pulse 1.4s ease-in-out infinite;
-}
-
-.skeleton-line {
-  width: 72%;
-  height: 16px;
-}
-
-.skeleton-line-short {
-  width: 36%;
-}
-
-.skeleton-line-wide {
-  width: 92%;
-}
-
-.skeleton-image {
-  width: 96px;
-  height: 96px;
-}
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-@keyframes skeleton-pulse {
-  to {
-    background-position: -200% 0;
   }
 }
 
@@ -407,7 +367,7 @@ input {
   }
 
   .search-form,
-  .result-button {
+  .result-item {
     flex-direction: column;
   }
 

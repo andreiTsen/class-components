@@ -1,13 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, userEvent, waitFor } from './__tests__/test-utils';
-import { bulbasaur, pokemonList } from './__tests__/test-utils/mockData';
-import AppRoutes from './AppRoutes';
-import { api } from './services/api';
+import { render, screen, userEvent, waitFor } from './test-utils';
+import { bulbasaur, pokemonList } from './test-utils/mockData';
+import AppRoutes from '../AppRoutes';
+import { api } from '../services/api';
 
-vi.mock('./services/api', async () => {
-  const actual = await vi.importActual<typeof import('./services/api')>(
-    './services/api'
-  );
+vi.mock('../services/api', async () => {
+  const actual =
+    await vi.importActual<typeof import('../services/api')>('../services/api');
 
   return {
     ...actual,
@@ -36,7 +35,9 @@ describe('App', () => {
     render(<AppRoutes />);
 
     expect(getPokemonsMock).toHaveBeenCalledWith('bulbasaur', 1);
-    expect(await screen.findByRole('heading', { name: 'bulbasaur' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'bulbasaur' })
+    ).toBeInTheDocument();
   });
 
   it('loads Pokemons with empty search if localStorage is empty', async () => {
@@ -109,9 +110,7 @@ describe('App', () => {
     render(<AppRoutes />);
 
     await waitFor(() => {
-      expect(
-        screen.getByText('Failed to load data')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Failed to load data')).toBeInTheDocument();
     });
   });
 
@@ -133,7 +132,7 @@ describe('App', () => {
     render(<AppRoutes />);
 
     await screen.findByRole('navigation', { name: 'Pagination' });
-    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await user.click(screen.getByRole('link', { name: 'Next' }));
 
     await waitFor(() => {
       expect(window.location.search).toBe('?page=2');
@@ -176,12 +175,14 @@ describe('App', () => {
 
     render(<AppRoutes />);
 
-    await user.click(await screen.findByRole('button', { name: /bulbasaur/i }));
+    await user.click(
+      await screen.findByRole('article', { name: /bulbasaur/i })
+    );
 
     expect(
       await screen.findByRole('complementary', { name: 'Pokemon details' })
     ).toBeInTheDocument();
-    expect(getPokemonByIdMock).toHaveBeenCalledWith(1);
+    expect(getPokemonByIdMock).toHaveBeenCalledWith('1');
     expect(window.location.pathname).toBe('/details/1');
     expect(window.location.search).toBe('?page=1');
   });
@@ -193,7 +194,9 @@ describe('App', () => {
 
     render(<AppRoutes />);
 
-    await user.click(await screen.findByRole('button', { name: /bulbasaur/i }));
+    await user.click(
+      await screen.findByRole('article', { name: /bulbasaur/i })
+    );
     await screen.findByRole('button', { name: 'Close' });
     await user.click(screen.getByRole('button', { name: 'Close' }));
 
@@ -211,7 +214,9 @@ describe('App', () => {
 
     render(<AppRoutes />);
 
-    await user.click(await screen.findByRole('button', { name: /bulbasaur/i }));
+    await user.click(
+      await screen.findByRole('article', { name: /bulbasaur/i })
+    );
 
     expect(screen.getByRole('status')).toHaveTextContent('Loading details...');
   });
@@ -223,7 +228,9 @@ describe('App', () => {
 
     render(<AppRoutes />);
 
-    await user.click(await screen.findByRole('button', { name: /bulbasaur/i }));
+    await user.click(
+      await screen.findByRole('article', { name: /bulbasaur/i })
+    );
     await screen.findByRole('button', { name: 'Close' });
     await user.click(screen.getByRole('heading', { name: 'Pokemons Results' }));
 

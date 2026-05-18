@@ -1,12 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, userEvent } from '../__tests__/test-utils';
-import AppRoutes from '../AppRoutes';
-import { api } from '../services/api';
+import { render, screen, userEvent } from '../test-utils';
+import AppRoutes from '../../AppRoutes';
+import { api } from '../../services/api';
 
-vi.mock('../services/api', async () => {
-  const actual = await vi.importActual<typeof import('../services/api')>(
-    '../services/api'
-  );
+vi.mock('../../services/api', async () => {
+  const actual =
+    await vi.importActual<typeof import('../../services/api')>(
+      '../../services/api'
+    );
 
   return {
     ...actual,

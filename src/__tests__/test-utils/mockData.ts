@@ -15,4 +15,3 @@ export const charmander: Pokemon = {
 };
 
 export const pokemonList: Pokemon[] = [bulbasaur, charmander];
-

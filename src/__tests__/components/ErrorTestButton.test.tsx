@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, userEvent } from '../__tests__/test-utils';
-import ErrorBoundary from './ErrorBoundary';
-import ErrorTestButton from './ErrorTestButton';
+import { render, screen, userEvent } from '../test-utils';
+import ErrorBoundary from '../../components/ErrorBoundary';
+import ErrorTestButton from '../../components/ErrorTestButton';
 
 describe('ErrorTestButton', () => {
   it('shows the error message through ErrorBoundary after click', async () => {
@@ -21,4 +21,3 @@ describe('ErrorTestButton', () => {
     ).toBeInTheDocument();
   });
 });
-

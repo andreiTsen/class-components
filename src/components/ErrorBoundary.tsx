@@ -31,7 +31,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
         <section className="error-boundary">
           <h2>Something went wrong</h2>
           <p>An error occurred. You can return to work.</p>
-          <button onClick={this.handleReset}>
+          <button type="button" onClick={this.handleReset}>
             Try again
           </button>
         </section>

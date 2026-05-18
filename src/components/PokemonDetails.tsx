@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router';
-import loadingImage from '../assets/loading_circles_blue_gradient.jpg';
+import LoadingIndicator from './LoadingIndicator';
 import { api, type Pokemon } from '../services/api';
 
 type DetailsOutletContext = {
   onClose: () => void;
 };
 
-function PokemonDetailsPanel() {
+function PokemonDetails() {
   const { pokemonId } = useParams();
   const { onClose } = useOutletContext<DetailsOutletContext>();
   const [error, setError] = useState('');
@@ -15,44 +15,31 @@ function PokemonDetailsPanel() {
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
 
   useEffect(() => {
-    const id = Number(pokemonId);
     let ignore = false;
 
-    if (!Number.isInteger(id) || id <= 0) {
-      queueMicrotask(() => {
-        if (!ignore) {
-          setError('Failed to load Pokemon data.');
-          setIsLoading(false);
-        }
-      });
-      return;
-    }
+    const loadPokemonDetails = async () => {
+      setError('');
+      setIsLoading(true);
+      setPokemon(null);
 
-    void Promise.resolve()
-      .then(() => {
-        if (!ignore) {
-          setError('');
-          setIsLoading(true);
-          setPokemon(null);
-        }
+      try {
+        const pokemonDetails = await api.getPokemonById(pokemonId);
 
-        return api.getPokemonById(id);
-      })
-      .then((pokemonDetails) => {
         if (!ignore) {
           setPokemon(pokemonDetails);
         }
-      })
-      .catch(() => {
+      } catch {
         if (!ignore) {
           setError('Failed to load Pokemon data.');
         }
-      })
-      .finally(() => {
+      } finally {
         if (!ignore) {
           setIsLoading(false);
         }
-      });
+      }
+    };
+
+    void loadPokemonDetails();
 
     return () => {
       ignore = true;
@@ -60,30 +47,22 @@ function PokemonDetailsPanel() {
   }, [pokemonId]);
 
   return (
-    <aside
-      className="details-pane"
-      aria-label="Pokemon details"
-    >
+    <aside className="details-pane" aria-label="Pokemon details">
       <button className="details-close-button" type="button" onClick={onClose}>
         Close
       </button>
 
-      {isLoading && (
-        <div className="loading-indicator" role="status" aria-live="polite">
-          <img src={loadingImage} alt="" />
-          <span>Loading details...</span>
-        </div>
-      )}
+      {isLoading && <LoadingIndicator label="Loading details..." />}
 
       {error && <p className="status-message status-message-error">{error}</p>}
 
       {pokemon && !isLoading && !error && (
         <div className="details-content">
           {pokemon.imageUrl && (
-            <img src={pokemon.imageUrl} alt={`${pokemon.name} image`} />
+            <img src={pokemon.imageUrl} alt={pokemon.name} />
           )}
           <div>
-            <h2 id="details-title">{pokemon.name}</h2>
+            <h2>{pokemon.name}</h2>
             <strong>#{pokemon.id}</strong>
           </div>
           <p>{pokemon.description}</p>
@@ -93,4 +72,4 @@ function PokemonDetailsPanel() {
   );
 }
 
-export default PokemonDetailsPanel;
+export default PokemonDetails;

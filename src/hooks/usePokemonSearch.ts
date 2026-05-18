@@ -1,159 +1,125 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useCallback, useRef, useState } from 'react';
 import { api, type Pokemon } from '../services/api';
-import useLocalStorage from './useLocalStorage';
 
-const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
-
-const getPageFromSearchParams = (searchParams: URLSearchParams) => {
-  const page = Number(searchParams.get('page'));
-
-  return Number.isInteger(page) && page > 0 ? page : 1;
+type RequestPokemonsParams = {
+  activeRequestIdRef: { current: number };
+  lastRequestRef: { current: { page: number; searchTerm: string } | null };
+  normalizedSearchTerm: string;
+  page: number;
+  requestId: number;
+  setCurrentPage: (page: number) => void;
+  setError: (error: string) => void;
+  setIsLoading: (isLoading: boolean) => void;
+  setPokemons: (pokemons: Pokemon[]) => void;
+  setTotalPages: (totalPages: number) => void;
 };
 
-function usePokemonSearch() {
-  const { getItem, setItem } = useLocalStorage();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [initialSearchTerm] = useState(
-    () => getItem(SEARCH_TERM_STORAGE_KEY) ?? ''
-  );
-  const activeSearchTermRef = useRef(initialSearchTerm);
+const requestPokemons = async ({
+  activeRequestIdRef,
+  lastRequestRef,
+  normalizedSearchTerm,
+  page,
+  requestId,
+  setCurrentPage,
+  setError,
+  setIsLoading,
+  setPokemons,
+  setTotalPages,
+}: RequestPokemonsParams) => {
+  const currentPage = Math.max(page, 1);
+  const isLatestRequest = () => activeRequestIdRef.current === requestId;
+
+  try {
+    const pokemonPage = await api.getPokemons(
+      normalizedSearchTerm,
+      currentPage
+    );
+
+    if (!isLatestRequest()) {
+      return;
+    }
+
+    lastRequestRef.current = {
+      page: currentPage,
+      searchTerm: normalizedSearchTerm,
+    };
+    setCurrentPage(currentPage);
+    setPokemons(pokemonPage.pokemons);
+    setTotalPages(pokemonPage.totalPages);
+  } catch {
+    if (isLatestRequest()) {
+      lastRequestRef.current = null;
+      setError('Failed to load data');
+      setPokemons([]);
+      setTotalPages(0);
+    }
+  } finally {
+    if (isLatestRequest()) {
+      setIsLoading(false);
+    }
+  }
+};
+
+type UsePokemonSearchResult = {
+  currentPage: number;
+  error: string;
+  isLoading: boolean;
+  loadPage: (page: number, searchTerm: string) => Promise<void>;
+  loadPokemons: (searchTerm: string) => Promise<void>;
+  pokemons: Pokemon[];
+  totalPages: number;
+};
+
+function usePokemonSearch(): UsePokemonSearchResult {
+  const activeRequestIdRef = useRef(0);
   const lastRequestRef = useRef<{ page: number; searchTerm: string } | null>(
     null
   );
-  const [currentPage, setCurrentPage] = useState(() =>
-    getPageFromSearchParams(searchParams)
-  );
+  const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [totalPages, setTotalPages] = useState(0);
 
-  const updatePageInUrl = useCallback(
-    (page: number, replace = false) => {
-      setSearchParams(
-        (currentSearchParams) => {
-          const nextSearchParams = new URLSearchParams(currentSearchParams);
+  const loadPage = useCallback(async (page: number, searchTerm: string) => {
+    const nextPage = Math.max(page, 1);
+    const normalizedSearchTerm = searchTerm.trim();
 
-          nextSearchParams.set('page', String(page));
-          return nextSearchParams;
-        },
-        { replace }
-      );
-    },
-    [setSearchParams]
-  );
+    if (
+      lastRequestRef.current?.searchTerm === normalizedSearchTerm &&
+      lastRequestRef.current.page === nextPage
+    ) {
+      return;
+    }
 
-  const requestPokemons = useCallback(
-    async (normalizedSearchTerm: string, page: number) => {
-      const currentPage = Math.max(page, 1);
+    setError('');
+    setIsLoading(true);
+    setCurrentPage(nextPage);
 
-      try {
-        const pokemonPage = await api.getPokemons(
-          normalizedSearchTerm,
-          currentPage
-        );
+    const requestId = activeRequestIdRef.current + 1;
+    activeRequestIdRef.current = requestId;
 
-        if (
-          pokemonPage.totalPages > 0 &&
-          currentPage > pokemonPage.totalPages
-        ) {
-          const lastPage = pokemonPage.totalPages;
-          const lastPageData = await api.getPokemons(
-            normalizedSearchTerm,
-            lastPage
-          );
+    await requestPokemons({
+      activeRequestIdRef,
+      lastRequestRef,
+      normalizedSearchTerm,
+      page: nextPage,
+      requestId,
+      setCurrentPage,
+      setError,
+      setIsLoading,
+      setPokemons,
+      setTotalPages,
+    });
+  }, []);
 
-          setCurrentPage(lastPage);
-          updatePageInUrl(lastPage, true);
-          lastRequestRef.current = {
-            page: lastPage,
-            searchTerm: normalizedSearchTerm,
-          };
-          setPokemons(lastPageData.pokemons);
-          setTotalPages(lastPageData.totalPages);
-          return;
-        }
-
-        lastRequestRef.current = {
-          page: currentPage,
-          searchTerm: normalizedSearchTerm,
-        };
-        setPokemons(pokemonPage.pokemons);
-        setTotalPages(pokemonPage.totalPages);
-      } catch {
-        setError('Failed to load data');
-        setPokemons([]);
-        setTotalPages(0);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [updatePageInUrl]
-  );
-
-  const loadPage = useCallback(
-    async (
-      page: number,
-      searchTerm = activeSearchTermRef.current,
-      replaceUrl = false
-    ) => {
-      const nextPage = Math.max(page, 1);
-      const normalizedSearchTerm = searchTerm.trim();
-
-      if (
-        lastRequestRef.current?.searchTerm === normalizedSearchTerm &&
-        lastRequestRef.current.page === nextPage
-      ) {
-        return;
-      }
-
-      activeSearchTermRef.current = normalizedSearchTerm;
-      setItem(SEARCH_TERM_STORAGE_KEY, normalizedSearchTerm);
-      setError('');
-      setIsLoading(true);
-      setCurrentPage(nextPage);
-      updatePageInUrl(nextPage, replaceUrl);
-
-      await requestPokemons(normalizedSearchTerm, nextPage);
-    },
-    [requestPokemons, setItem, updatePageInUrl]
-  );
-
-  const loadPokemons = useCallback(
-    async (searchTerm = '') => {
-      const normalizedSearchTerm = searchTerm.trim();
-
-      if (
-        lastRequestRef.current?.searchTerm === normalizedSearchTerm &&
-        lastRequestRef.current.page === 1
-      ) {
-        return;
-      }
-
-      await loadPage(1, normalizedSearchTerm);
-    },
-    [loadPage]
-  );
-
-  const getSearchWithCurrentPage = useCallback(() => {
-    const nextSearchParams = new URLSearchParams(searchParams);
-
-    nextSearchParams.set('page', String(currentPage));
-    return `?${nextSearchParams.toString()}`;
-  }, [currentPage, searchParams]);
-
-  useEffect(() => {
-    const initialPage = getPageFromSearchParams(searchParams);
-
-    updatePageInUrl(initialPage, true);
-    void loadPage(initialPage, activeSearchTermRef.current, true);
-  }, [loadPage, searchParams, updatePageInUrl]);
+  const loadPokemons = async (searchTerm: string) => {
+    await loadPage(1, searchTerm);
+  };
 
   return {
     currentPage,
     error,
-    getSearchWithCurrentPage,
     isLoading,
     loadPage,
     loadPokemons,

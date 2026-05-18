@@ -1,25 +1,19 @@
-import { Link } from 'react-router';
+import PageLayout from './PageLayout';
 import './AboutPage.css';
 
 function AboutPage() {
   return (
-    <div className="page">
-      <header className="page-header">
-        <h1>About Pokemon Search</h1>
-        <nav className="main-nav" aria-label="Main navigation">
-          <Link to="/">Home</Link>
-        </nav>
-      </header>
+    <PageLayout>
       <main className="about-page">
         <section className="about-section" aria-labelledby="about-title">
           <h2 id="about-title">About this app</h2>
-          <p>
-            Pokemons are my love
-          </p>
-          <p>
-            Author: andreiTsen. This is a crazy project 
-          </p>
-          <a href="https://github.com/andreiTsen" target="_blank" rel="noreferrer">
+          <p>Pokemons are my love</p>
+          <p>Author: andreiTsen. This is a crazy project</p>
+          <a
+            href="https://github.com/andreiTsen"
+            target="_blank"
+            rel="noreferrer"
+          >
             My name is Andrei, My GitHub
           </a>
           <a
@@ -31,7 +25,7 @@ function AboutPage() {
           </a>
         </section>
       </main>
-    </div>
+    </PageLayout>
   );
 }
 

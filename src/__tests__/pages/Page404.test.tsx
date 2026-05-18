@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { render, screen } from '../__tests__/test-utils';
-import AppRoutes from '../AppRoutes';
+import { render, screen } from '../test-utils';
+import AppRoutes from '../../AppRoutes';
 
 describe('Page404', () => {
   it('renders 404 for unknown route and a link home', () => {

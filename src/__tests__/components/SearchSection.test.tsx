@@ -1,12 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, userEvent } from '../__tests__/test-utils';
-import SearchSection from './SearchSection';
+import { render, screen, userEvent } from '../test-utils';
+import SearchSection from '../../components/SearchSection';
 
 describe('SearchSection', () => {
-  it('loads saved search term from local storage', () => {
-    localStorage.setItem('pokemon-search-term', 'pikachu');
-
-    render(<SearchSection onSearch={vi.fn()} />);
+  it('loads saved search term from props', () => {
+    render(<SearchSection onSearch={vi.fn()} initialSearchTerm="pikachu" />);
 
     expect(screen.getByRole('searchbox')).toHaveValue('pikachu');
   });

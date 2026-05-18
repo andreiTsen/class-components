@@ -30,7 +30,11 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/**/*.test.{ts,tsx}', 'src/**/*.spec.{ts,tsx}', 'src/__tests__/**/*'],
+    files: [
+      'src/**/*.test.{ts,tsx}',
+      'src/**/*.spec.{ts,tsx}',
+      'src/__tests__/**/*',
+    ],
     rules: {
       'react-refresh/only-export-components': 'off',
     },

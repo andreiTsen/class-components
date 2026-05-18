@@ -1,11 +1,11 @@
-import loadingImage from '../assets/loading_circles_blue_gradient.jpg';
+import { Link } from 'react-router';
+import LoadingIndicator from './LoadingIndicator';
 import type { Pokemon } from '../services/api';
 
 type ResultsSectionProps = {
   currentPage: number;
   error: string;
   isLoading: boolean;
-  onPageChange: (page: number) => void;
   onPokemonSelect: (pokemonId: number) => void;
   pokemons: Pokemon[];
   selectedPokemonId?: number | null;
@@ -16,14 +16,14 @@ function ResultsSection({
   currentPage,
   error,
   isLoading,
-  onPageChange,
   onPokemonSelect,
   pokemons,
   selectedPokemonId = null,
   totalPages,
 }: ResultsSectionProps) {
-  const showPagination =
-    !isLoading && !error && pokemons.length > 0 && totalPages > 1;
+  const showPagination = !error && totalPages > 1;
+  const isPreviousDisabled = isLoading || currentPage === 1;
+  const isNextDisabled = isLoading || currentPage === totalPages;
 
   return (
     <section className="results-section" aria-labelledby="results-title">
@@ -32,12 +32,7 @@ function ResultsSection({
         <p>Submitted Pokemon</p>
       </div>
 
-      {isLoading && (
-        <div className="loading-indicator" role="status" aria-live="polite">
-          <img src={loadingImage} alt="" />
-          <span>Loading...</span>
-        </div>
-      )}
+      {isLoading && <LoadingIndicator />}
       {error && <p className="status-message status-message-error">{error}</p>}
       {!isLoading && !error && pokemons.length === 0 && (
         <p className="status-message">No pokemons found.</p>
@@ -45,52 +40,66 @@ function ResultsSection({
 
       <div className="result-list">
         {pokemons.map((pokemon) => (
-          <article className="result-item" key={pokemon.id}>
-            <button
-              className="result-button"
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
+          <article
+            className="result-item"
+            key={pokemon.id}
+            tabIndex={0}
+            aria-current={selectedPokemonId === pokemon.id ? 'true' : undefined}
+            aria-label={pokemon.name}
+            onClick={(event) => {
+              event.stopPropagation();
+              onPokemonSelect(pokemon.id);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
                 onPokemonSelect(pokemon.id);
-              }}
-              aria-current={
-                selectedPokemonId === pokemon.id ? 'true' : undefined
               }
-            >
-              <div className="pokemon-info">
-                {pokemon.imageUrl && (
-                  <img src={pokemon.imageUrl} alt={`${pokemon.name} image`} />
-                )}
-                <div>
-                  <h3>{pokemon.name}</h3>
-                  <p>{pokemon.description}</p>
-                </div>
+            }}
+          >
+            <div className="pokemon-info">
+              {pokemon.imageUrl && (
+                <img src={pokemon.imageUrl} alt={pokemon.name} />
+              )}
+              <div>
+                <h3>{pokemon.name}</h3>
+                <p>{pokemon.description}</p>
               </div>
-              <strong>#{pokemon.id}</strong>
-            </button>
+            </div>
+            <strong>#{pokemon.id}</strong>
           </article>
         ))}
       </div>
 
       {showPagination && (
         <nav className="pagination" aria-label="Pagination">
-          <button
-            type="button"
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </button>
-          <span aria-current="page">
+          {isPreviousDisabled ? (
+            <span className="pagination-link pagination-link-disabled">
+              Previous
+            </span>
+          ) : (
+            <Link
+              className="pagination-link"
+              to={{ search: `?page=${currentPage - 1}` }}
+            >
+              Previous
+            </Link>
+          )}
+          <span className="pagination-current" aria-current="page">
             Page {currentPage} of {totalPages}
           </span>
-          <button
-            type="button"
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
+          {isNextDisabled ? (
+            <span className="pagination-link pagination-link-disabled">
+              Next
+            </span>
+          ) : (
+            <Link
+              className="pagination-link"
+              to={{ search: `?page=${currentPage + 1}` }}
+            >
+              Next
+            </Link>
+          )}
         </nav>
       )}
     </section>

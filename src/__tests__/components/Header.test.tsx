@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { render, screen } from '../__tests__/test-utils';
-import Header from './Header';
+import { render, screen } from '../test-utils';
+import Header from '../../components/Header';
 
 describe('Header', () => {
   it('renders title', () => {
@@ -20,4 +20,3 @@ describe('Header', () => {
     );
   });
 });
-

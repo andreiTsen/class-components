@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { api } from './api';
+import { api } from '../../services/api';
 
 const jsonResponse = (body: unknown, ok = true) =>
   new Response(JSON.stringify(body), {
@@ -178,9 +178,7 @@ describe('api', () => {
       .mockResolvedValueOnce(jsonResponse(pokemonListResponse))
       .mockResolvedValueOnce(jsonResponse({}, false));
 
-    await expect(api.getPokemons()).rejects.toThrow(
-      'Failed to load Pokemon.'
-    );
+    await expect(api.getPokemons()).rejects.toThrow('Failed to load Pokemon.');
   });
 
   it('error while loading Pokemon description', async () => {
@@ -215,6 +213,13 @@ describe('api', () => {
       imageUrl: 'https://example.com/bulbasaur.png',
       name: 'bulbasaur',
     });
+  });
+
+  it('rejects invalid Pokemon id before making a request', async () => {
+    await expect(api.getPokemonById('abc')).rejects.toThrow(
+      'Invalid Pokemon id.'
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('loads description by species name for Pokemon forms', async () => {

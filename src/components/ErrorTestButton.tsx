@@ -12,10 +12,7 @@ function ErrorTestButton() {
   }
 
   return (
-    <button
-      className="error-test-button"
-      onClick={handleClick}
-    >
+    <button className="error-test-button" type="button" onClick={handleClick}>
       Test Error
     </button>
   );

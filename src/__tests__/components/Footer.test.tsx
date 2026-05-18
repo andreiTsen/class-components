@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { render, screen } from '../__tests__/test-utils';
-import Footer from './Footer';
+import { render, screen } from '../test-utils';
+import Footer from '../../components/Footer';
 
 describe('Footer', () => {
   it('renders footer', () => {
@@ -11,4 +11,3 @@ describe('Footer', () => {
     ).toBeInTheDocument();
   });
 });
-

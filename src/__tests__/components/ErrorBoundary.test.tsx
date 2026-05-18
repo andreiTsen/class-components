@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, userEvent } from '../__tests__/test-utils';
-import ErrorBoundary from './ErrorBoundary';
+import { render, screen, userEvent } from '../test-utils';
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 type ThrowingChildProps = {
   shouldThrow: boolean;
@@ -53,4 +53,3 @@ describe('ErrorBoundary', () => {
     ).toBeInTheDocument();
   });
 });
-
