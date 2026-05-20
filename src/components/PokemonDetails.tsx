@@ -1,7 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useOutletContext, useParams } from 'react-router';
 import LoadingIndicator from './LoadingIndicator';
-import { api, type Pokemon } from '../services/api';
+import { api } from '../services/api';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import {
+  loadSelectedPokemonFailure,
+  loadSelectedPokemonStart,
+  loadSelectedPokemonSuccess,
+} from '../store/selectedPokemonSlice';
 
 type DetailsOutletContext = {
   onClose: () => void;
@@ -10,31 +16,27 @@ type DetailsOutletContext = {
 function PokemonDetails() {
   const { pokemonId } = useParams();
   const { onClose } = useOutletContext<DetailsOutletContext>();
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [pokemon, setPokemon] = useState<Pokemon | null>(null);
+  const dispatch = useAppDispatch();
+  const { error, isLoading, pokemon } = useAppSelector(
+    (state) => state.selectedPokemon
+  );
+  const shouldShowLoader = isLoading || (!pokemon && !error);
 
   useEffect(() => {
     let ignore = false;
 
     const loadPokemonDetails = async () => {
-      setError('');
-      setIsLoading(true);
-      setPokemon(null);
+      dispatch(loadSelectedPokemonStart());
 
       try {
         const pokemonDetails = await api.getPokemonById(pokemonId);
 
         if (!ignore) {
-          setPokemon(pokemonDetails);
+          dispatch(loadSelectedPokemonSuccess(pokemonDetails));
         }
       } catch {
         if (!ignore) {
-          setError('Failed to load Pokemon data.');
-        }
-      } finally {
-        if (!ignore) {
-          setIsLoading(false);
+          dispatch(loadSelectedPokemonFailure('Failed to load Pokemon data.'));
         }
       }
     };
@@ -44,7 +46,7 @@ function PokemonDetails() {
     return () => {
       ignore = true;
     };
-  }, [pokemonId]);
+  }, [dispatch, pokemonId]);
 
   return (
     <aside className="details-pane" aria-label="Pokemon details">
@@ -52,11 +54,11 @@ function PokemonDetails() {
         Close
       </button>
 
-      {isLoading && <LoadingIndicator label="Loading details..." />}
+      {shouldShowLoader && <LoadingIndicator label="Loading details..." />}
 
       {error && <p className="status-message status-message-error">{error}</p>}
 
-      {pokemon && !isLoading && !error && (
+      {pokemon && !shouldShowLoader && !error && (
         <div className="details-content">
           {pokemon.imageUrl && (
             <img src={pokemon.imageUrl} alt={pokemon.name} />

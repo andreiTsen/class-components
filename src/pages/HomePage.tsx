@@ -6,6 +6,11 @@ import ResultsSection from '../components/ResultsSection';
 import SearchSection from '../components/SearchSection';
 import useLocalStorage from '../hooks/useLocalStorage';
 import usePokemonSearch from '../hooks/usePokemonSearch';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import {
+  clearSelectedPokemon,
+  selectPokemon,
+} from '../store/selectedPokemonSlice';
 import { parsePositiveInteger } from '../utils/numbers';
 import PageLayout from './PageLayout';
 
@@ -20,6 +25,10 @@ function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(
     SEARCH_TERM_STORAGE_KEY
+  );
+  const dispatch = useAppDispatch();
+  const storedSelectedPokemonId = useAppSelector(
+    (state) => state.selectedPokemon.selectedPokemonId
   );
   const hasInitializedRef = useRef(false);
   const {
@@ -36,6 +45,19 @@ function HomePage() {
   const selectedPokemonId = parsePositiveInteger(
     detailsMatch?.params.pokemonId
   );
+
+  useEffect(() => {
+    if (selectedPokemonId === null) {
+      if (storedSelectedPokemonId !== null) {
+        dispatch(clearSelectedPokemon());
+      }
+      return;
+    }
+
+    if (storedSelectedPokemonId !== selectedPokemonId) {
+      dispatch(selectPokemon(selectedPokemonId));
+    }
+  }, [dispatch, selectedPokemonId, storedSelectedPokemonId]);
 
   const getSearchWithCurrentPage = () => {
     const nextSearchParams = new URLSearchParams(searchParams);
@@ -75,6 +97,7 @@ function HomePage() {
   }, [loadPage, searchParams, setSearchParams, storedSearchTerm]);
 
   const handlePokemonSelect = (pokemonId: number) => {
+    dispatch(selectPokemon(pokemonId));
     navigate({
       pathname: `/details/${pokemonId}`,
       search: getSearchWithCurrentPage(),
@@ -82,6 +105,7 @@ function HomePage() {
   };
 
   const handleCloseDetails = () => {
+    dispatch(clearSelectedPokemon());
     navigate({
       pathname: '/',
       search: getSearchWithCurrentPage(),
