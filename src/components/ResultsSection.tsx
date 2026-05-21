@@ -6,9 +6,11 @@ type ResultsSectionProps = {
   currentPage: number;
   error: string;
   isLoading: boolean;
+  onPokemonSelectionChange: (pokemonId: number, isSelected: boolean) => void;
   onPokemonSelect: (pokemonId: number) => void;
   pokemons: Pokemon[];
   selectedPokemonId?: number | null;
+  selectedPokemonIds?: number[];
   totalPages: number;
 };
 
@@ -16,9 +18,11 @@ function ResultsSection({
   currentPage,
   error,
   isLoading,
+  onPokemonSelectionChange,
   onPokemonSelect,
   pokemons,
   selectedPokemonId = null,
+  selectedPokemonIds = [],
   totalPages,
 }: ResultsSectionProps) {
   const showPagination = !error && totalPages > 1;
@@ -51,12 +55,34 @@ function ResultsSection({
               onPokemonSelect(pokemon.id);
             }}
             onKeyDown={(event) => {
+              if (event.target !== event.currentTarget) {
+                return;
+              }
+
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
                 onPokemonSelect(pokemon.id);
               }
             }}
           >
+            <label
+              className="result-checkbox"
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+            >
+              <input
+                type="checkbox"
+                aria-label={`Select ${pokemon.name}`}
+                checked={selectedPokemonIds.includes(pokemon.id)}
+                onChange={(event) => {
+                  onPokemonSelectionChange(pokemon.id, event.target.checked);
+                }}
+                onKeyDown={(event) => {
+                  event.stopPropagation();
+                }}
+              />
+            </label>
             <div className="pokemon-info">
               {pokemon.imageUrl && (
                 <img src={pokemon.imageUrl} alt={pokemon.name} />

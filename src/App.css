@@ -243,6 +243,22 @@ input {
   outline-offset: -2px;
 }
 
+.result-checkbox {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.result-checkbox input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
 .result-item strong {
   font-weight: 600;
 }

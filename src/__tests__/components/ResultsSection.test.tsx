@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { ComponentProps } from 'react';
-import { render, screen } from '../test-utils';
+import { render, screen, userEvent } from '../test-utils';
 import { pokemonList } from '../test-utils/mockData';
 import ResultsSection from '../../components/ResultsSection';
 
@@ -12,6 +12,7 @@ const renderResultsSection = (
       currentPage={1}
       error=""
       isLoading={false}
+      onPokemonSelectionChange={() => undefined}
       onPokemonSelect={() => undefined}
       pokemons={[]}
       totalPages={1}
@@ -52,6 +53,53 @@ describe('ResultsSection', () => {
     expect(
       screen.getByRole('heading', { name: 'charmander' })
     ).toBeInTheDocument();
+  });
+
+  it('renders a checkbox for each Pokemon', () => {
+    renderResultsSection({ pokemons: pokemonList });
+
+    expect(
+      screen.getByRole('checkbox', { name: 'Select bulbasaur' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('checkbox', { name: 'Select charmander' })
+    ).toBeInTheDocument();
+  });
+
+  it('marks selected Pokemon checkboxes', () => {
+    renderResultsSection({
+      pokemons: pokemonList,
+      selectedPokemonIds: [pokemonList[0].id],
+    });
+
+    expect(
+      screen.getByRole('checkbox', { name: 'Select bulbasaur' })
+    ).toBeChecked();
+    expect(
+      screen.getByRole('checkbox', { name: 'Select charmander' })
+    ).not.toBeChecked();
+  });
+
+  it('changes checkbox selection without opening details', async () => {
+    const user = userEvent.setup();
+    const handlePokemonSelect = vi.fn();
+    const handlePokemonSelectionChange = vi.fn();
+
+    renderResultsSection({
+      onPokemonSelect: handlePokemonSelect,
+      onPokemonSelectionChange: handlePokemonSelectionChange,
+      pokemons: pokemonList,
+    });
+
+    await user.click(
+      screen.getByRole('checkbox', { name: 'Select bulbasaur' })
+    );
+
+    expect(handlePokemonSelectionChange).toHaveBeenCalledWith(
+      pokemonList[0].id,
+      true
+    );
+    expect(handlePokemonSelect).not.toHaveBeenCalled();
   });
 
   it('renders pagination after loading multiple pages', () => {

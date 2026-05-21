@@ -187,6 +187,60 @@ describe('App', () => {
     expect(window.location.search).toBe('?page=1');
   });
 
+  it('selects an item with a checkbox without opening details', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+
+    render(<AppRoutes />);
+
+    const bulbasaurCheckbox = await screen.findByRole('checkbox', {
+      name: 'Select bulbasaur',
+    });
+
+    await user.click(bulbasaurCheckbox);
+
+    expect(bulbasaurCheckbox).toBeChecked();
+    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+    expect(getPokemonByIdMock).not.toHaveBeenCalled();
+    expect(window.location.pathname).toBe('/');
+  });
+
+  it('keeps checked items selected when navigating between result pages', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+
+    render(<AppRoutes />);
+
+    await user.click(
+      await screen.findByRole('checkbox', { name: 'Select bulbasaur' })
+    );
+    await user.click(screen.getByRole('link', { name: 'Next' }));
+
+    await waitFor(() => {
+      expect(window.location.search).toBe('?page=2');
+    });
+    expect(
+      screen.getByRole('checkbox', { name: 'Select bulbasaur' })
+    ).toBeChecked();
+  });
+
+  it('removes an item from selected state when its checkbox is unchecked', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+
+    render(<AppRoutes />);
+
+    const bulbasaurCheckbox = await screen.findByRole('checkbox', {
+      name: 'Select bulbasaur',
+    });
+
+    await user.click(bulbasaurCheckbox);
+    expect(bulbasaurCheckbox).toBeChecked();
+
+    await user.click(bulbasaurCheckbox);
+    expect(bulbasaurCheckbox).not.toBeChecked();
+  });
+
   it('closes the details panel with the close button', async () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });

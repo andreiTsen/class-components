@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   clearSelectedPokemon,
   selectPokemon,
+  setPokemonSelection,
 } from '../store/selectedPokemonSlice';
 import { parsePositiveInteger } from '../utils/numbers';
 import PageLayout from './PageLayout';
@@ -29,6 +30,9 @@ function HomePage() {
   const dispatch = useAppDispatch();
   const storedSelectedPokemonId = useAppSelector(
     (state) => state.selectedPokemon.selectedPokemonId
+  );
+  const selectedPokemonIds = useAppSelector(
+    (state) => state.selectedPokemon.selectedPokemonIds
   );
   const hasInitializedRef = useRef(false);
   const {
@@ -104,6 +108,13 @@ function HomePage() {
     });
   };
 
+  const handlePokemonSelectionChange = (
+    pokemonId: number,
+    isSelected: boolean
+  ) => {
+    dispatch(setPokemonSelection({ isSelected, pokemonId }));
+  };
+
   const handleCloseDetails = () => {
     dispatch(clearSelectedPokemon());
     navigate({
@@ -129,9 +140,11 @@ function HomePage() {
                 currentPage={currentPage}
                 error={error}
                 isLoading={isLoading}
+                onPokemonSelectionChange={handlePokemonSelectionChange}
                 onPokemonSelect={handlePokemonSelect}
                 pokemons={pokemons}
                 selectedPokemonId={selectedPokemonId}
+                selectedPokemonIds={selectedPokemonIds}
                 totalPages={totalPages}
               />
             </div>
