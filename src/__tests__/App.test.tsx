@@ -263,11 +263,37 @@ describe('App', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('runs the download action from the actions menu', async () => {
+  it('downloads selected items as a CSV file', async () => {
     const user = userEvent.setup();
-    const consoleLogMock = vi.spyOn(console, 'log').mockImplementation(() => {
-      return undefined;
+    const originalCreateElement = document.createElement.bind(document);
+    const createdLinks: HTMLAnchorElement[] = [];
+
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: vi.fn(),
     });
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: vi.fn(),
+    });
+    const createObjectUrlMock = vi
+      .spyOn(URL, 'createObjectURL')
+      .mockReturnValue('blob:selected-pokemons');
+    const revokeObjectUrlMock = vi.spyOn(URL, 'revokeObjectURL');
+    const clickMock = vi.fn();
+    const createElementMock = vi
+      .spyOn(document, 'createElement')
+      .mockImplementation((tagName) => {
+        const element = originalCreateElement(tagName);
+
+        if (tagName === 'a') {
+          const anchor = element as HTMLAnchorElement;
+          anchor.click = clickMock;
+          createdLinks.push(anchor);
+        }
+
+        return element;
+      });
 
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
 
@@ -278,11 +304,24 @@ describe('App', () => {
     );
     await user.click(screen.getByRole('button', { name: 'Download' }));
 
-    expect(consoleLogMock).toHaveBeenCalledWith('Selected Pokemon:', [
-      pokemonList[0],
-    ]);
+    expect(createObjectUrlMock).toHaveBeenCalledWith(expect.any(Blob));
+    const downloadedBlob = createObjectUrlMock.mock.calls[0][0] as Blob;
+    await expect(downloadedBlob.text()).resolves.toContain(
+      'id,name,description,imageUrl,detailsUrl'
+    );
+    await expect(downloadedBlob.text()).resolves.toContain(
+      '1,bulbasaur,likes eating bulb.,https://example.com/bulbasaur.png,http://localhost:3000/details/1'
+    );
+    const downloadLink = createdLinks.at(-1);
 
-    consoleLogMock.mockRestore();
+    expect(downloadLink).toHaveAttribute('download', '1_items.csv');
+    expect(downloadLink).toHaveAttribute('href', 'blob:selected-pokemons');
+    expect(clickMock).toHaveBeenCalled();
+    expect(revokeObjectUrlMock).toHaveBeenCalledWith('blob:selected-pokemons');
+
+    createElementMock.mockRestore();
+    createObjectUrlMock.mockRestore();
+    revokeObjectUrlMock.mockRestore();
   });
 
   it('keeps checked items selected when navigating between result pages', async () => {

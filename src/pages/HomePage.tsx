@@ -25,6 +25,35 @@ const getPageFromSearchParams = (searchParams: URLSearchParams) => {
   return page ?? 1;
 };
 
+const escapeCsvValue = (value: string | number) => {
+  const stringValue = String(value);
+
+  if (!/[",\n]/.test(stringValue)) {
+    return stringValue;
+  }
+
+  return `"${stringValue.replace(/"/g, '""')}"`;
+};
+
+const getPokemonDetailsUrl = (pokemonId: number) => {
+  return `${window.location.origin}/details/${pokemonId}`;
+};
+
+const getSelectedPokemonsCsv = (selectedPokemons: Pokemon[]) => {
+  const header = ['id', 'name', 'description', 'imageUrl', 'detailsUrl'];
+  const rows = selectedPokemons.map((pokemon) => [
+    pokemon.id,
+    pokemon.name,
+    pokemon.description,
+    pokemon.imageUrl,
+    getPokemonDetailsUrl(pokemon.id),
+  ]);
+
+  return [header, ...rows]
+    .map((row) => row.map(escapeCsvValue).join(','))
+    .join('\n');
+};
+
 function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(
@@ -126,7 +155,15 @@ function HomePage() {
   };
 
   const handleDownloadSelectedPokemons = () => {
-    console.log('Selected Pokemon:', selectedPokemons);
+    const csv = getSelectedPokemonsCsv(selectedPokemons);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = `${selectedPokemons.length}_items.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleCloseDetails = () => {
