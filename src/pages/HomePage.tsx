@@ -4,6 +4,7 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import ErrorTestButton from '../components/ErrorTestButton';
 import ResultsSection from '../components/ResultsSection';
 import SearchSection from '../components/SearchSection';
+import SelectedPokemonActions from '../components/SelectedPokemonActions';
 import useLocalStorage from '../hooks/useLocalStorage';
 import usePokemonSearch from '../hooks/usePokemonSearch';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -11,7 +12,9 @@ import {
   clearSelectedPokemon,
   selectPokemon,
   setPokemonSelection,
+  unselectAllPokemons,
 } from '../store/selectedPokemonSlice';
+import type { Pokemon } from '../services/api';
 import { parsePositiveInteger } from '../utils/numbers';
 import PageLayout from './PageLayout';
 
@@ -33,6 +36,9 @@ function HomePage() {
   );
   const selectedPokemonIds = useAppSelector(
     (state) => state.selectedPokemon.selectedPokemonIds
+  );
+  const selectedPokemons = useAppSelector(
+    (state) => state.selectedPokemon.selectedPokemons
   );
   const hasInitializedRef = useRef(false);
   const {
@@ -109,10 +115,18 @@ function HomePage() {
   };
 
   const handlePokemonSelectionChange = (
-    pokemonId: number,
+    pokemon: Pokemon,
     isSelected: boolean
   ) => {
-    dispatch(setPokemonSelection({ isSelected, pokemonId }));
+    dispatch(setPokemonSelection({ isSelected, pokemon }));
+  };
+
+  const handleClearSelectedPokemons = () => {
+    dispatch(unselectAllPokemons());
+  };
+
+  const handleDownloadSelectedPokemons = () => {
+    console.log('Selected Pokemon:', selectedPokemons);
   };
 
   const handleCloseDetails = () => {
@@ -153,6 +167,11 @@ function HomePage() {
             )}
           </div>
           <ErrorTestButton />
+          <SelectedPokemonActions
+            onClearAll={handleClearSelectedPokemons}
+            onDownload={handleDownloadSelectedPokemons}
+            selectedPokemons={selectedPokemons}
+          />
         </main>
       </ErrorBoundary>
     </PageLayout>

@@ -410,6 +410,48 @@ input {
   line-height: 1.5;
 }
 
+.selected-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  left: 20px;
+  z-index: 20;
+  width: min(920px, calc(100vw - 40px));
+  margin: 0 auto;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-details);
+}
+
+.selected-actions strong {
+  color: var(--color-text);
+}
+
+.selected-actions-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.selected-actions button {
+  padding: 9px 12px;
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.selected-actions button:last-child {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -450,5 +492,18 @@ input {
     left: 12px;
     width: auto;
     max-height: 46vh;
+  }
+
+  .selected-actions {
+    align-items: stretch;
+    flex-direction: column;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    width: auto;
+  }
+
+  .selected-actions-controls {
+    flex-direction: column;
   }
 }

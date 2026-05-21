@@ -6,7 +6,7 @@ type ResultsSectionProps = {
   currentPage: number;
   error: string;
   isLoading: boolean;
-  onPokemonSelectionChange: (pokemonId: number, isSelected: boolean) => void;
+  onPokemonSelectionChange: (pokemon: Pokemon, isSelected: boolean) => void;
   onPokemonSelect: (pokemonId: number) => void;
   pokemons: Pokemon[];
   selectedPokemonId?: number | null;
@@ -76,7 +76,7 @@ function ResultsSection({
                 aria-label={`Select ${pokemon.name}`}
                 checked={selectedPokemonIds.includes(pokemon.id)}
                 onChange={(event) => {
-                  onPokemonSelectionChange(pokemon.id, event.target.checked);
+                  onPokemonSelectionChange(pokemon, event.target.checked);
                 }}
                 onKeyDown={(event) => {
                   event.stopPropagation();

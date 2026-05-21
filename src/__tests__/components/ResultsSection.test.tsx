@@ -96,7 +96,7 @@ describe('ResultsSection', () => {
     );
 
     expect(handlePokemonSelectionChange).toHaveBeenCalledWith(
-      pokemonList[0].id,
+      pokemonList[0],
       true
     );
     expect(handlePokemonSelect).not.toHaveBeenCalled();

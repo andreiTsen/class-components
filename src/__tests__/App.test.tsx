@@ -200,9 +200,89 @@ describe('App', () => {
     await user.click(bulbasaurCheckbox);
 
     expect(bulbasaurCheckbox).toBeChecked();
-    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('complementary', { name: 'Pokemon details' })
+    ).not.toBeInTheDocument();
     expect(getPokemonByIdMock).not.toHaveBeenCalled();
     expect(window.location.pathname).toBe('/');
+  });
+
+  it('shows a fixed actions menu with the selected item count', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+
+    render(<AppRoutes />);
+
+    expect(
+      screen.queryByRole('complementary', {
+        name: 'Selected Pokemon actions',
+      })
+    ).not.toBeInTheDocument();
+
+    await user.click(
+      await screen.findByRole('checkbox', { name: 'Select bulbasaur' })
+    );
+
+    expect(
+      screen.getByRole('complementary', { name: 'Selected Pokemon actions' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('1 selected')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Unselect all' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Download' })
+    ).toBeInTheDocument();
+  });
+
+  it('unselects all checked items from the actions menu', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+
+    render(<AppRoutes />);
+
+    const bulbasaurCheckbox = await screen.findByRole('checkbox', {
+      name: 'Select bulbasaur',
+    });
+    const charmanderCheckbox = screen.getByRole('checkbox', {
+      name: 'Select charmander',
+    });
+
+    await user.click(bulbasaurCheckbox);
+    await user.click(charmanderCheckbox);
+    expect(screen.getByText('2 selected')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Unselect all' }));
+
+    expect(bulbasaurCheckbox).not.toBeChecked();
+    expect(charmanderCheckbox).not.toBeChecked();
+    expect(
+      screen.queryByRole('complementary', {
+        name: 'Selected Pokemon actions',
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it('runs the download action from the actions menu', async () => {
+    const user = userEvent.setup();
+    const consoleLogMock = vi.spyOn(console, 'log').mockImplementation(() => {
+      return undefined;
+    });
+
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+
+    render(<AppRoutes />);
+
+    await user.click(
+      await screen.findByRole('checkbox', { name: 'Select bulbasaur' })
+    );
+    await user.click(screen.getByRole('button', { name: 'Download' }));
+
+    expect(consoleLogMock).toHaveBeenCalledWith('Selected Pokemon:', [
+      pokemonList[0],
+    ]);
+
+    consoleLogMock.mockRestore();
   });
 
   it('keeps checked items selected when navigating between result pages', async () => {

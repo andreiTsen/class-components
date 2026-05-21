@@ -5,6 +5,7 @@ type SelectedPokemonState = {
   error: string;
   isLoading: boolean;
   pokemon: Pokemon | null;
+  selectedPokemons: Pokemon[];
   selectedPokemonIds: number[];
   selectedPokemonId: number | null;
 };
@@ -13,6 +14,7 @@ const initialState: SelectedPokemonState = {
   error: '',
   isLoading: false,
   pokemon: null,
+  selectedPokemons: [],
   selectedPokemonIds: [],
   selectedPokemonId: null,
 };
@@ -50,19 +52,27 @@ const selectedPokemonSlice = createSlice({
     },
     setPokemonSelection: (
       state,
-      action: PayloadAction<{ isSelected: boolean; pokemonId: number }>
+      action: PayloadAction<{ isSelected: boolean; pokemon: Pokemon }>
     ) => {
-      const { isSelected, pokemonId } = action.payload;
+      const { isSelected, pokemon } = action.payload;
 
-      if (isSelected && !state.selectedPokemonIds.includes(pokemonId)) {
-        state.selectedPokemonIds.push(pokemonId);
+      if (isSelected && !state.selectedPokemonIds.includes(pokemon.id)) {
+        state.selectedPokemonIds.push(pokemon.id);
+        state.selectedPokemons.push(pokemon);
       }
 
       if (!isSelected) {
         state.selectedPokemonIds = state.selectedPokemonIds.filter(
-          (selectedPokemonId) => selectedPokemonId !== pokemonId
+          (selectedPokemonId) => selectedPokemonId !== pokemon.id
+        );
+        state.selectedPokemons = state.selectedPokemons.filter(
+          (selectedPokemon) => selectedPokemon.id !== pokemon.id
         );
       }
+    },
+    unselectAllPokemons: (state) => {
+      state.selectedPokemonIds = [];
+      state.selectedPokemons = [];
     },
   },
 });
@@ -74,6 +84,7 @@ export const {
   loadSelectedPokemonSuccess,
   selectPokemon,
   setPokemonSelection,
+  unselectAllPokemons,
 } = selectedPokemonSlice.actions;
 
 export default selectedPokemonSlice.reducer;
