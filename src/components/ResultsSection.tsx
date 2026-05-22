@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import type { KeyboardEvent, MouseEvent } from 'react';
 import LoadingIndicator from './LoadingIndicator';
 import type { Pokemon } from '../services/api';
 
@@ -37,11 +38,11 @@ function PokemonResultItem({
       tabIndex={0}
       aria-current={isSelected ? 'true' : undefined}
       aria-label={pokemon.name}
-      onClick={(event) => {
+      onClick={(event: MouseEvent<HTMLElement>): void => {
         event.stopPropagation();
         handleSelect();
       }}
-      onKeyDown={(event) => {
+      onKeyDown={(event: KeyboardEvent<HTMLElement>): void => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           handleSelect();
@@ -71,8 +72,8 @@ function Pagination({
   isLoading,
   totalPages,
 }: PaginationProperties) {
-  const isPreviousDisabled = isLoading || currentPage === 1;
-  const isNextDisabled = isLoading || currentPage === totalPages;
+  const isPreviousDisabled: boolean = isLoading || currentPage === 1;
+  const isNextDisabled: boolean = isLoading || currentPage === totalPages;
 
   return (
     <nav className="pagination" aria-label="Pagination">
@@ -114,7 +115,7 @@ function ResultsSection({
   selectedPokemonId = null,
   totalPages,
 }: ResultsSectionProperties) {
-  const showPagination = !error && totalPages > 1;
+  const showPagination: boolean = !error && totalPages > 1;
 
   return (
     <section className="results-section" aria-labelledby="results-title">

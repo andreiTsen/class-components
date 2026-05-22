@@ -11,13 +11,15 @@ function SearchSection({
 }: SearchSectionProperties) {
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
 
-  const handleSearchTermChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleSearchTermChange = (
+    event: ChangeEvent<HTMLInputElement>
+  ): void => {
     setSearchTerm(event.target.value);
   };
 
-  const handleSubmit = (event: SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: SyntheticEvent<HTMLFormElement>): void => {
     event.preventDefault();
-    const normalizedSearchTerm = searchTerm.trim();
+    const normalizedSearchTerm: string = searchTerm.trim();
 
     setSearchTerm(normalizedSearchTerm);
     onSearch(normalizedSearchTerm);

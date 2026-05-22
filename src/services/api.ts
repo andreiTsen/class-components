@@ -10,6 +10,9 @@ import { parsePositiveInteger } from '../utils/numbers';
 
 export type { Pokemon, PokemonPage } from './apiTypes';
 
+type PokemonFlavorTextEntry =
+  PokemonSpeciesResponse['flavor_text_entries'][number];
+
 const API_BASE_URL = 'https://pokeapi.co/api/v2';
 const FIRST_PAGE_OFFSET = 0;
 const PAGE_SIZE = 10;
@@ -27,7 +30,7 @@ const getPokemonListQueryParameters = (
   normalizedSearchTerm: string,
   currentPage: number
 ): URLSearchParams => {
-  const offset = normalizedSearchTerm
+  const offset: number = normalizedSearchTerm
     ? FIRST_PAGE_OFFSET
     : (currentPage - 1) * PAGE_SIZE;
 
@@ -127,7 +130,7 @@ const fetchJson = async (
   errorMessage: string
 ): Promise<unknown> => {
   try {
-    const response = await fetch(url);
+    const response: Response = await fetch(url);
 
     if (!response.ok) {
       throw new Error(errorMessage);
@@ -144,7 +147,7 @@ const fetchJson = async (
 const fetchPokemonListResponse = async (
   url: string
 ): Promise<PokemonListResponse> => {
-  const data = await fetchJson(url, 'Failed to load Pokemon list.');
+  const data: unknown = await fetchJson(url, 'Failed to load Pokemon list.');
 
   if (!isPokemonListResponse(data)) {
     throw new Error('Failed to load Pokemon list.');
@@ -156,7 +159,7 @@ const fetchPokemonListResponse = async (
 const fetchPokemonDetailsResponse = async (
   url: string
 ): Promise<PokemonDetailsResponse> => {
-  const data = await fetchJson(url, 'Failed to load Pokemon.');
+  const data: unknown = await fetchJson(url, 'Failed to load Pokemon.');
 
   if (!isPokemonDetailsResponse(data)) {
     throw new Error('Failed to load Pokemon.');
@@ -168,7 +171,10 @@ const fetchPokemonDetailsResponse = async (
 const fetchPokemonSpeciesResponse = async (
   url: string
 ): Promise<PokemonSpeciesResponse> => {
-  const data = await fetchJson(url, 'Failed to load Pokemon description.');
+  const data: unknown = await fetchJson(
+    url,
+    'Failed to load Pokemon description.'
+  );
 
   if (!isPokemonSpeciesResponse(data)) {
     throw new Error('Failed to load Pokemon description.');
@@ -188,12 +194,11 @@ const normalizePokemon = (
 });
 
 const getPokemonDescription = async (speciesName: string): Promise<string> => {
-  const species = await fetchPokemonSpeciesResponse(
+  const species: PokemonSpeciesResponse = await fetchPokemonSpeciesResponse(
     `${API_BASE_URL}/pokemon-species/${speciesName}`
   );
-  const englishEntry = species.flavor_text_entries.find(
-    (entry) => entry.language.name === 'en'
-  );
+  const englishEntry: PokemonFlavorTextEntry | undefined =
+    species.flavor_text_entries.find((entry) => entry.language.name === 'en');
 
   return formatDescription(
     englishEntry?.flavor_text ?? 'No description for this Pokemon'
@@ -201,33 +206,38 @@ const getPokemonDescription = async (speciesName: string): Promise<string> => {
 };
 
 const getPokemonByName = async (name: string): Promise<Pokemon> => {
-  const pokemon = await fetchPokemonDetailsResponse(
+  const pokemon: PokemonDetailsResponse = await fetchPokemonDetailsResponse(
     `${API_BASE_URL}/pokemon/${name}`
   );
-  const description = await getPokemonDescription(pokemon.species.name);
+  const description: string = await getPokemonDescription(pokemon.species.name);
 
   return normalizePokemon(pokemon, description);
 };
 
 const getPokemons = async (searchTerm = '', page = 1): Promise<PokemonPage> => {
-  const normalizedSearchTerm = normalizeSearchTerm(searchTerm);
-  const currentPage = getCurrentPage(page);
-  const queryParameters = getPokemonListQueryParameters(
+  const normalizedSearchTerm: string = normalizeSearchTerm(searchTerm);
+  const currentPage: number = getCurrentPage(page);
+  const queryParameters: URLSearchParams = getPokemonListQueryParameters(
     normalizedSearchTerm,
     currentPage
   );
 
-  const data = await fetchPokemonListResponse(
+  const data: PokemonListResponse = await fetchPokemonListResponse(
     `${API_BASE_URL}/pokemon?${queryParameters}`
   );
-  const filteredResults = filterPokemonList(data.results, normalizedSearchTerm);
-  const pageResults = getPokemonPageItems(
+  const filteredResults: PokemonListItem[] = filterPokemonList(
+    data.results,
+    normalizedSearchTerm
+  );
+  const pageResults: PokemonListItem[] = getPokemonPageItems(
     filteredResults,
     normalizedSearchTerm,
     currentPage
   );
-  const totalItems = normalizedSearchTerm ? filteredResults.length : data.count;
-  const pokemons = await Promise.all(
+  const totalItems: number = normalizedSearchTerm
+    ? filteredResults.length
+    : data.count;
+  const pokemons: Pokemon[] = await Promise.all(
     pageResults.map((pokemon) => getPokemonByName(pokemon.name))
   );
 
@@ -238,16 +248,16 @@ const getPokemons = async (searchTerm = '', page = 1): Promise<PokemonPage> => {
 };
 
 const getPokemonById = async (id: string | number): Promise<Pokemon> => {
-  const pokemonId = parsePositiveInteger(String(id));
+  const pokemonId: number | null = parsePositiveInteger(String(id));
 
   if (pokemonId === null) {
     throw new Error('Invalid Pokemon id.');
   }
 
-  const pokemon = await fetchPokemonDetailsResponse(
+  const pokemon: PokemonDetailsResponse = await fetchPokemonDetailsResponse(
     `${API_BASE_URL}/pokemon/${String(pokemonId)}`
   );
-  const description = await getPokemonDescription(pokemon.species.name);
+  const description: string = await getPokemonDescription(pokemon.species.name);
 
   return normalizePokemon(pokemon, description);
 };

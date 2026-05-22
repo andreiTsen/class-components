@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useOutletContext, useParams } from 'react-router';
+import { useOutletContext, useParams, type Params } from 'react-router';
 import LoadingIndicator from './LoadingIndicator';
 import { api, type Pokemon } from '../services/api';
 
@@ -8,8 +8,9 @@ type DetailsOutletContext = {
 };
 
 function PokemonDetails() {
-  const { pokemonId } = useParams();
-  const { onClose } = useOutletContext<DetailsOutletContext>();
+  const { pokemonId }: Readonly<Params> = useParams();
+  const { onClose }: DetailsOutletContext =
+    useOutletContext<DetailsOutletContext>();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
@@ -17,7 +18,7 @@ function PokemonDetails() {
   useEffect(() => {
     let ignore = false;
 
-    const loadPokemonDetails = async () => {
+    const loadPokemonDetails = async (): Promise<void> => {
       setError('');
       setIsLoading(true);
       setPokemon(null);
@@ -29,7 +30,7 @@ function PokemonDetails() {
       }
 
       try {
-        const pokemonDetails = await api.getPokemonById(pokemonId);
+        const pokemonDetails: Pokemon = await api.getPokemonById(pokemonId);
 
         if (!ignore) {
           setPokemon(pokemonDetails);
@@ -47,7 +48,7 @@ function PokemonDetails() {
 
     void loadPokemonDetails();
 
-    return () => {
+    return (): void => {
       ignore = true;
     };
   }, [pokemonId]);

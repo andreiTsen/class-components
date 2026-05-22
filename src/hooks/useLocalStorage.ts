@@ -9,14 +9,19 @@ function useLocalStorage(
   );
 
   useEffect(() => {
-    if (localStorage.getItem(key) !== value) {
+    const currentValue: string | null = localStorage.getItem(key);
+
+    if (currentValue !== value) {
       localStorage.setItem(key, value);
     }
   }, [key, value]);
 
-  const updateValue = useCallback((nextValue: string) => {
-    setValue(nextValue);
-  }, []);
+  const updateValue: (nextValue: string) => void = useCallback(
+    (nextValue: string): void => {
+      setValue(nextValue);
+    },
+    []
+  );
 
   return [value, updateValue];
 }

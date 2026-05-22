@@ -3,7 +3,7 @@ import { useState } from 'react';
 function ErrorTestButton() {
   const [shouldThrowError, setShouldThrowError] = useState(false);
 
-  const handleClick = () => {
+  const handleClick = (): void => {
     setShouldThrowError(true);
   };
 

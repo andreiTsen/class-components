@@ -62,15 +62,13 @@ const applyPokemonError = ({
 const requestPokemons = async (
   parameters: RequestPokemonsParameters
 ): Promise<void> => {
-  const currentPage = Math.max(parameters.page, 1);
+  const currentPage: number = Math.max(parameters.page, 1);
   const isLatestRequest = (): boolean =>
     parameters.activeRequestIdRef.current === parameters.requestId;
 
   try {
-    const pokemonPage = await api.getPokemons(
-      parameters.normalizedSearchTerm,
-      currentPage
-    );
+    const pokemonPage: Awaited<ReturnType<typeof api.getPokemons>> =
+      await api.getPokemons(parameters.normalizedSearchTerm, currentPage);
 
     if (!isLatestRequest()) {
       return;
@@ -144,8 +142,8 @@ const loadPokemonPage = async ({
   page,
   searchTerm,
 }: LoadPokemonPageParameters): Promise<void> => {
-  const nextPage = Math.max(page, 1);
-  const normalizedSearchTerm = searchTerm.trim();
+  const nextPage: number = Math.max(page, 1);
+  const normalizedSearchTerm: string = searchTerm.trim();
 
   if (
     lastRequestReference.current?.searchTerm === normalizedSearchTerm &&
@@ -174,11 +172,11 @@ const loadPokemonPage = async ({
 };
 
 const usePokemonSearchState = (): PokemonSearchState => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [error, setError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
-  const [totalPages, setTotalPages] = useState(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
 
   return {
     currentPage,
@@ -218,8 +216,8 @@ const useLoadPage = (
 };
 
 function usePokemonSearch(): UsePokemonSearchResult {
-  const state = usePokemonSearchState();
-  const actions = useMemo(
+  const state: PokemonSearchState = usePokemonSearchState();
+  const actions: PokemonSearchActions = useMemo(
     () => ({
       setCurrentPage: state.setCurrentPage,
       setError: state.setError,
@@ -235,7 +233,7 @@ function usePokemonSearch(): UsePokemonSearchResult {
       state.setTotalPages,
     ]
   );
-  const loadPage = useLoadPage(actions);
+  const loadPage: UsePokemonSearchResult['loadPage'] = useLoadPage(actions);
 
   return {
     currentPage: state.currentPage,
