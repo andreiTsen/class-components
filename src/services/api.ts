@@ -5,10 +5,14 @@ import type {
   PokemonListResponse,
   PokemonPage,
   PokemonSpeciesResponse,
-} from './apiTypes';
-import { parsePositiveInteger } from '../utils/numbers';
-
-export type { Pokemon, PokemonPage } from './apiTypes';
+} from '../types';
+import { parseParameter } from '../utils/parameters';
+import {
+  isPokemonListResponse,
+  isPokemonDetailsResponse,
+  isPokemonSpeciesResponse,
+} from '../utils/validators';
+import { normalizePokemon } from './mappers';
 
 type PokemonFlavorTextEntry =
   PokemonSpeciesResponse['flavor_text_entries'][number];
@@ -17,113 +21,6 @@ const API_BASE_URL = 'https://pokeapi.co/api/v2';
 const FIRST_PAGE_OFFSET = 0;
 const PAGE_SIZE = 10;
 const SEARCH_RESULTS_LIMIT = 100_000;
-
-const normalizeSearchTerm = (searchTerm: string): string => {
-  return searchTerm.trim().toLowerCase();
-};
-
-const getCurrentPage = (page: number): number => {
-  return Math.max(page, 1);
-};
-
-const getPokemonListQueryParameters = (
-  normalizedSearchTerm: string,
-  currentPage: number
-): URLSearchParams => {
-  const offset: number = normalizedSearchTerm
-    ? FIRST_PAGE_OFFSET
-    : (currentPage - 1) * PAGE_SIZE;
-
-  return new URLSearchParams({
-    limit: String(normalizedSearchTerm ? SEARCH_RESULTS_LIMIT : PAGE_SIZE),
-    offset: String(offset),
-  });
-};
-
-const filterPokemonList = (
-  pokemons: PokemonListItem[],
-  normalizedSearchTerm: string
-): PokemonListItem[] => {
-  return pokemons.filter((pokemon) =>
-    normalizedSearchTerm ? pokemon.name.includes(normalizedSearchTerm) : true
-  );
-};
-
-const getPokemonPageItems = (
-  pokemons: PokemonListItem[],
-  normalizedSearchTerm: string,
-  currentPage: number
-): PokemonListItem[] => {
-  if (!normalizedSearchTerm) {
-    return pokemons;
-  }
-
-  return pokemons.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-};
-
-const getTotalPages = (totalItems: number): number => {
-  return Math.ceil(totalItems / PAGE_SIZE);
-};
-
-const formatDescription = (description: string): string => {
-  return description.replaceAll(/\s+/g, ' ');
-};
-
-const isRecord = (value: unknown): value is Record<string, unknown> => {
-  return typeof value === 'object' && value !== null;
-};
-
-const isNamedResource = (value: unknown): value is { name: string } => {
-  return isRecord(value) && typeof value.name === 'string';
-};
-
-const isPokemonListItem = (value: unknown): value is PokemonListItem => {
-  return (
-    isRecord(value) &&
-    typeof value.name === 'string' &&
-    typeof value.url === 'string'
-  );
-};
-
-const isPokemonListResponse = (
-  value: unknown
-): value is PokemonListResponse => {
-  return (
-    isRecord(value) &&
-    typeof value.count === 'number' &&
-    Array.isArray(value.results) &&
-    value.results.every(isPokemonListItem)
-  );
-};
-
-const isPokemonDetailsResponse = (
-  value: unknown
-): value is PokemonDetailsResponse => {
-  return (
-    isRecord(value) &&
-    typeof value.id === 'number' &&
-    typeof value.name === 'string' &&
-    isNamedResource(value.species) &&
-    isRecord(value.sprites) &&
-    (typeof value.sprites.front_default === 'string' ||
-      value.sprites.front_default === null)
-  );
-};
-
-const isPokemonSpeciesResponse = (
-  value: unknown
-): value is PokemonSpeciesResponse => {
-  return (
-    isRecord(value) &&
-    Array.isArray(value.flavor_text_entries) &&
-    value.flavor_text_entries.every(
-      (entry) =>
-        isRecord(entry) &&
-        typeof entry.flavor_text === 'string' &&
-        isNamedResource(entry.language)
-    )
-  );
-};
 
 const fetchJson = async (
   url: string,
@@ -183,16 +80,6 @@ const fetchPokemonSpeciesResponse = async (
   return data;
 };
 
-const normalizePokemon = (
-  pokemon: PokemonDetailsResponse,
-  description: string
-): Pokemon => ({
-  description,
-  id: pokemon.id,
-  name: pokemon.name,
-  imageUrl: pokemon.sprites.front_default ?? '',
-});
-
 const getPokemonDescription = async (speciesName: string): Promise<string> => {
   const species: PokemonSpeciesResponse = await fetchPokemonSpeciesResponse(
     `${API_BASE_URL}/pokemon-species/${speciesName}`
@@ -200,55 +87,54 @@ const getPokemonDescription = async (speciesName: string): Promise<string> => {
   const englishEntry: PokemonFlavorTextEntry | undefined =
     species.flavor_text_entries.find((entry) => entry.language.name === 'en');
 
-  return formatDescription(
-    englishEntry?.flavor_text ?? 'No description for this Pokemon'
-  );
+  return englishEntry?.flavor_text ?? 'No description for this Pokemon';
 };
 
 const getPokemonByName = async (name: string): Promise<Pokemon> => {
   const pokemon: PokemonDetailsResponse = await fetchPokemonDetailsResponse(
     `${API_BASE_URL}/pokemon/${name}`
   );
-  const description: string = await getPokemonDescription(pokemon.species.name);
+  const rawDescription = await getPokemonDescription(pokemon.species.name);
+  const description = rawDescription.replaceAll(/\s+/g, ' ');
 
   return normalizePokemon(pokemon, description);
 };
 
-const getPokemons = async (searchTerm = '', page = 1): Promise<PokemonPage> => {
-  const normalizedSearchTerm: string = normalizeSearchTerm(searchTerm);
-  const currentPage: number = getCurrentPage(page);
-  const queryParameters: URLSearchParams = getPokemonListQueryParameters(
-    normalizedSearchTerm,
-    currentPage
-  );
+const getPokemons = async (term = '', page = 1): Promise<PokemonPage> => {
+  const searchTerm: string = term.trim().toLowerCase();
+  const currentPage: number = Math.max(page, 1);
+  const offset: number = searchTerm
+    ? FIRST_PAGE_OFFSET
+    : (currentPage - 1) * PAGE_SIZE;
+  const queryParameters: URLSearchParams = new URLSearchParams({
+    limit: String(searchTerm ? SEARCH_RESULTS_LIMIT : PAGE_SIZE),
+    offset: String(offset),
+  });
 
   const data: PokemonListResponse = await fetchPokemonListResponse(
     `${API_BASE_URL}/pokemon?${queryParameters}`
   );
-  const filteredResults: PokemonListItem[] = filterPokemonList(
-    data.results,
-    normalizedSearchTerm
+  const filteredResults: PokemonListItem[] = data.results.filter((pokemon) =>
+    searchTerm ? pokemon.name.includes(searchTerm) : true
   );
-  const pageResults: PokemonListItem[] = getPokemonPageItems(
-    filteredResults,
-    normalizedSearchTerm,
-    currentPage
-  );
-  const totalItems: number = normalizedSearchTerm
-    ? filteredResults.length
-    : data.count;
+  const pageStartIndex: number = (currentPage - 1) * PAGE_SIZE;
+  const pageEndIndex: number = currentPage * PAGE_SIZE;
+  const pageResults: PokemonListItem[] = searchTerm
+    ? filteredResults.slice(pageStartIndex, pageEndIndex)
+    : filteredResults;
+  const totalItems: number = searchTerm ? filteredResults.length : data.count;
   const pokemons: Pokemon[] = await Promise.all(
     pageResults.map((pokemon) => getPokemonByName(pokemon.name))
   );
 
   return {
     pokemons,
-    totalPages: getTotalPages(totalItems),
+    totalPages: Math.ceil(totalItems / PAGE_SIZE),
   };
 };
 
 const getPokemonById = async (id: string | number): Promise<Pokemon> => {
-  const pokemonId: number | null = parsePositiveInteger(String(id));
+  const pokemonId: number | null = parseParameter(id);
 
   if (pokemonId === null) {
     throw new Error('Invalid Pokemon id.');
@@ -257,7 +143,8 @@ const getPokemonById = async (id: string | number): Promise<Pokemon> => {
   const pokemon: PokemonDetailsResponse = await fetchPokemonDetailsResponse(
     `${API_BASE_URL}/pokemon/${String(pokemonId)}`
   );
-  const description: string = await getPokemonDescription(pokemon.species.name);
+  const rawDescription = await getPokemonDescription(pokemon.species.name);
+  const description = rawDescription.replaceAll(/\s+/g, ' ');
 
   return normalizePokemon(pokemon, description);
 };

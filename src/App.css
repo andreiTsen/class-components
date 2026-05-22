@@ -26,15 +26,10 @@ input {
   min-height: 100vh;
 }
 
-.page-header,
-.page-footer,
-.application-page {
+.page-header {
   width: 100%;
   max-width: 960px;
   margin: 0 auto;
-}
-
-.page-header {
   padding: 28px 20px 16px;
 }
 
@@ -60,22 +55,57 @@ input {
   text-decoration: underline;
 }
 
+@media (max-width: 600px) {
+  .page-header {
+    padding: 20px 12px 8px;
+  }
+
+  .page-header h1 {
+    font-size: 24px;
+  }
+}
+
 .application-page {
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: 24px;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
   padding: 32px 20px;
 }
 
+.master-detail-layout {
+  display: block;
+}
+
+.master-pane {
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .application-page {
+    padding: 20px 12px;
+  }
+}
+
 .page-footer {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
   padding: 16px 20px 28px;
   color: #667085;
   font-size: 14px;
 }
 
-.error-test-button,
-.error-boundary button {
+@media (max-width: 600px) {
+  .page-footer {
+    padding: 8px 12px 20px;
+  }
+}
+
+.error-test-button {
   align-self: flex-start;
   padding: 10px 16px;
   border: 1px solid #1f2933;
@@ -105,19 +135,24 @@ input {
   color: #667085;
 }
 
-.search-section,
-.results-section {
-  border: 1px solid #d9dee5;
+.error-boundary button {
+  align-self: flex-start;
+  padding: 10px 16px;
+  border: 1px solid #1f2933;
+  border-radius: 4px;
   background: #ffffff;
-  border-radius: 6px;
+  color: #1f2933;
+  cursor: pointer;
 }
 
 .search-section {
   padding: 20px;
+  border: 1px solid #d9dee5;
+  border-radius: 6px;
+  background: #ffffff;
 }
 
-.search-section h1,
-.results-section h2 {
+.search-section h1 {
   margin: 0 0 14px;
   font-size: 24px;
   font-weight: 600;
@@ -146,20 +181,27 @@ input {
   cursor: pointer;
 }
 
+@media (max-width: 600px) {
+  .search-form {
+    flex-direction: column;
+  }
+}
+
 .results-section {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 28px;
   min-height: 360px;
+  padding: 28px;
+  border: 1px solid #d9dee5;
+  border-radius: 6px;
+  background: #ffffff;
 }
 
-.master-detail-layout {
-  display: block;
-}
-
-.master-pane {
-  min-width: 0;
+.results-section h2 {
+  margin: 0 0 14px;
+  font-size: 24px;
+  font-weight: 600;
 }
 
 .results-section p {
@@ -222,6 +264,45 @@ input {
   line-height: 1.5;
 }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.pagination-link {
+  min-width: 96px;
+  padding: 8px 12px;
+  border: 1px solid #1f2933;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #1f2933;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+}
+
+.pagination-link-disabled {
+  border-color: #c9d0d8;
+  color: #98a2b3;
+  cursor: not-allowed;
+}
+
+.pagination-current {
+  min-width: 104px;
+  color: #1f2933;
+  font-weight: 600;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .result-item {
+    flex-direction: column;
+  }
+}
+
 .status-message {
   padding: 14px 16px;
   border: 1px solid #e2e6ea;
@@ -257,37 +338,10 @@ input {
   font-weight: 600;
 }
 
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding-top: 4px;
-}
-
-.pagination-link {
-  min-width: 96px;
-  padding: 8px 12px;
-  border: 1px solid #1f2933;
-  border-radius: 4px;
-  background: #ffffff;
-  color: #1f2933;
-  cursor: pointer;
-  text-align: center;
-  text-decoration: none;
-}
-
-.pagination-link-disabled {
-  border-color: #c9d0d8;
-  color: #98a2b3;
-  cursor: not-allowed;
-}
-
-.pagination-current {
-  min-width: 104px;
-  color: #1f2933;
-  font-weight: 600;
-  text-align: center;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .details-pane {
@@ -343,34 +397,7 @@ input {
   line-height: 1.5;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @media (max-width: 600px) {
-  .page-header {
-    padding: 20px 12px 8px;
-  }
-
-  .page-header h1 {
-    font-size: 24px;
-  }
-
-  .application-page {
-    padding: 20px 12px;
-  }
-
-  .page-footer {
-    padding: 8px 12px 20px;
-  }
-
-  .search-form,
-  .result-item {
-    flex-direction: column;
-  }
-
   .details-pane {
     top: auto;
     right: 12px;

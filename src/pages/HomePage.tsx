@@ -1,23 +1,20 @@
 import { Outlet, useMatch, useNavigate, useSearchParams } from 'react-router';
 import type { NavigateFunction } from 'react-router';
 import { useCallback, useEffect, useMemo, type KeyboardEvent } from 'react';
-import ErrorBoundary from '../components/ErrorBoundary';
 import ErrorTestButton from '../components/ErrorTestButton';
 import ResultsSection from '../components/ResultsSection';
 import SearchSection from '../components/SearchSection';
 import useLocalStorage from '../hooks/useLocalStorage';
 import usePokemonSearch from '../hooks/usePokemonSearch';
-import { parsePositiveInteger } from '../utils/numbers';
-import PageLayout from './PageLayout';
+import { parseParameter } from '../utils/parameters';
+import PageLayout from '../components/PageLayout';
 
 const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
 
 const getPageFromSearchParameters = (
   searchParameters: URLSearchParams
 ): number => {
-  const page: number | null = parsePositiveInteger(
-    searchParameters.get('page')
-  );
+  const page: number | null = parseParameter(searchParameters.get('page'));
   return page ?? 1;
 };
 
@@ -197,7 +194,7 @@ function HomePage() {
   const detailsMatch: ReturnType<typeof useMatch> = useMatch(
     '/details/:pokemonId'
   );
-  const selectedPokemonId: number | null = parsePositiveInteger(
+  const selectedPokemonId: number | null = parseParameter(
     detailsMatch?.params.pokemonId
   );
   const handlers: HomePageHandlers = useHomePageHandlers({
@@ -216,26 +213,24 @@ function HomePage() {
 
   return (
     <PageLayout>
-      <ErrorBoundary>
-        <main className="application-page">
-          <SearchSection
-            initialSearchTerm={storedSearchTerm}
-            onSearch={handlers.handleSearch}
-          />
-          <MasterDetailLayout
-            currentPage={currentPage}
-            error={error}
-            handleCloseDetails={handlers.handleCloseDetails}
-            handleMasterPaneKeyDown={handlers.handleMasterPaneKeyDown}
-            handlePokemonSelect={handlers.handlePokemonSelect}
-            isLoading={isLoading}
-            pokemons={pokemons}
-            selectedPokemonId={selectedPokemonId}
-            totalPages={totalPages}
-          />
-          <ErrorTestButton />
-        </main>
-      </ErrorBoundary>
+      <main className="application-page">
+        <SearchSection
+          initialSearchTerm={storedSearchTerm}
+          onSearch={handlers.handleSearch}
+        />
+        <MasterDetailLayout
+          currentPage={currentPage}
+          error={error}
+          handleCloseDetails={handlers.handleCloseDetails}
+          handleMasterPaneKeyDown={handlers.handleMasterPaneKeyDown}
+          handlePokemonSelect={handlers.handlePokemonSelect}
+          isLoading={isLoading}
+          pokemons={pokemons}
+          selectedPokemonId={selectedPokemonId}
+          totalPages={totalPages}
+        />
+        <ErrorTestButton />
+      </main>
     </PageLayout>
   );
 }

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent, waitFor } from './test-utils';
 import { bulbasaur, pokemonList } from './test-utils/mockData';
-import AppRoutes from '../AppRoutes';
+import App from '../App';
 import { api } from '../services/api';
 import { localStorageMock } from '../setupTests';
 
@@ -33,7 +33,7 @@ describe('App', () => {
     localStorageMock.setItem('pokemon-search-term', 'bulbasaur');
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 1 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     expect(getPokemonsMock).toHaveBeenCalledWith('bulbasaur', 1);
     expect(
@@ -44,7 +44,7 @@ describe('App', () => {
   it('loads Pokemons with empty search if localStorage is empty', async () => {
     getPokemonsMock.mockResolvedValue({ pokemons: [], totalPages: 0 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await waitFor(() => {
       expect(localStorageMock.getItem).toHaveBeenCalledWith(
@@ -62,7 +62,7 @@ describe('App', () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: [], totalPages: 0 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await waitFor(() => {
       expect(getPokemonsMock).toHaveBeenCalledWith('', 1);
@@ -86,7 +86,7 @@ describe('App', () => {
     localStorageMock.setItem('pokemon-search-term', 'pikachu');
     getPokemonsMock.mockResolvedValue({ pokemons: [], totalPages: 0 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     const searchbox = screen.getByRole('searchbox');
 
@@ -110,7 +110,7 @@ describe('App', () => {
   it('shows an error on failed loading', async () => {
     getPokemonsMock.mockRejectedValue(new Error('Network error'));
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await waitFor(() => {
       expect(screen.getByText('Failed to load data')).toBeInTheDocument();
@@ -120,7 +120,7 @@ describe('App', () => {
   it('shows pagination after loading items', async () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     expect(
       await screen.findByRole('navigation', { name: 'Pagination' })
@@ -132,7 +132,7 @@ describe('App', () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await screen.findByRole('navigation', { name: 'Pagination' });
     await user.click(screen.getByRole('link', { name: 'Next' }));
@@ -148,7 +148,7 @@ describe('App', () => {
     globalThis.history.replaceState({}, '', '/?page=2');
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 3 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     expect(await screen.findByText('Page 2 of 3')).toBeInTheDocument();
     expect(getPokemonsMock).toHaveBeenCalledWith('', 2);
@@ -159,7 +159,7 @@ describe('App', () => {
     globalThis.history.replaceState({}, '', '/?page=2');
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 3 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await screen.findByText('Page 2 of 3');
     await user.type(screen.getByRole('searchbox'), 'mew');
@@ -176,7 +176,7 @@ describe('App', () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
     getPokemonByIdMock.mockResolvedValue(bulbasaur);
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await user.click(
       await screen.findByRole('article', { name: /bulbasaur/i })
@@ -195,7 +195,7 @@ describe('App', () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
     getPokemonByIdMock.mockResolvedValue(bulbasaur);
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await user.click(
       await screen.findByRole('article', { name: /bulbasaur/i })
@@ -215,7 +215,7 @@ describe('App', () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
     getPokemonByIdMock.mockReturnValue(new Promise(() => undefined));
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await user.click(
       await screen.findByRole('article', { name: /bulbasaur/i })
@@ -229,7 +229,7 @@ describe('App', () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
     getPokemonByIdMock.mockResolvedValue(bulbasaur);
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await user.click(
       await screen.findByRole('article', { name: /bulbasaur/i })
@@ -247,7 +247,7 @@ describe('App', () => {
   it('keeps the details panel closed before choosing a Pokemon', async () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await screen.findByRole('heading', { name: 'Pokemons Results' });
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument();

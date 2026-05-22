@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, useParams, type Params } from 'react-router';
 import LoadingIndicator from './LoadingIndicator';
-import { api, type Pokemon } from '../services/api';
+import { api } from '../services/api';
+import type { Pokemon } from '../types';
 
 type DetailsOutletContext = {
   onClose: () => void;

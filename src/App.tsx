@@ -1,8 +1,13 @@
-import { Outlet } from 'react-router';
+import AppRoutes from './AppRoutes';
+import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
 function App() {
-  return <Outlet />;
+  return (
+    <ErrorBoundary>
+      <AppRoutes />
+    </ErrorBoundary>
+  );
 }
 
 export default App;

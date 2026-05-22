@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { api, type Pokemon } from '../services/api';
+import { api } from '../services/api';
+import type { Pokemon } from '../types';
 
 type RequestPokemonsParameters = {
   activeRequestIdRef: { current: number };

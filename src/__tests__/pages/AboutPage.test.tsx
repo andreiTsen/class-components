@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent } from '../test-utils';
-import AppRoutes from '../../AppRoutes';
+import App from '../../App';
 import { api } from '../../services/api';
 
 vi.mock('../../services/api', async () => {
@@ -22,7 +22,7 @@ describe('AboutPage', () => {
   it('opens the about', async () => {
     const user = userEvent.setup();
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await user.click(screen.getByRole('link', { name: 'About' }));
 
