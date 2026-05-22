@@ -187,6 +187,32 @@ describe('App', () => {
     expect(window.location.search).toBe('?page=1');
   });
 
+  it('keeps loaded details visible when clicking the already opened item again', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+    getPokemonByIdMock.mockResolvedValue(bulbasaur);
+
+    render(<AppRoutes />);
+
+    const bulbasaurItem = await screen.findByRole('article', {
+      name: /bulbasaur/i,
+    });
+
+    await user.click(bulbasaurItem);
+
+    expect(
+      await screen.findByRole('complementary', { name: 'Pokemon details' })
+    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('Loading details...')).not.toBeInTheDocument();
+    });
+
+    await user.click(bulbasaurItem);
+
+    expect(screen.queryByText('Loading details...')).not.toBeInTheDocument();
+    expect(getPokemonByIdMock).toHaveBeenCalledTimes(1);
+  });
+
   it('selects an item with a checkbox without opening details', async () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });

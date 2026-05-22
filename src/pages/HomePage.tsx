@@ -136,7 +136,10 @@ function HomePage() {
   }, [loadPage, searchParams, setSearchParams, storedSearchTerm]);
 
   const handlePokemonSelect = (pokemonId: number) => {
-    dispatch(selectPokemon(pokemonId));
+    if (storedSelectedPokemonId !== pokemonId) {
+      dispatch(selectPokemon(pokemonId));
+    }
+
     navigate({
       pathname: `/details/${pokemonId}`,
       search: getSearchWithCurrentPage(),
