@@ -36,7 +36,7 @@ describe('AboutPage', () => {
     expect(
       screen.getByRole('link', { name: 'RS School React course' })
     ).toHaveAttribute('href', 'https://rs.school/courses/reactjs');
-    expect(window.location.pathname).toBe('/about');
+    expect(globalThis.location.pathname).toBe('/about');
     expect(api.getPokemons).toHaveBeenCalled();
   });
 });

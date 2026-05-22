@@ -1,6 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
-type ErrorBoundaryProps = {
+type ErrorBoundaryProperties = {
   children: ReactNode;
 };
 
@@ -8,24 +8,27 @@ type ErrorBoundaryState = {
   hasError: boolean;
 };
 
-class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  state: ErrorBoundaryState = {
+class ErrorBoundary extends Component<
+  ErrorBoundaryProperties,
+  ErrorBoundaryState
+> {
+  public state: ErrorBoundaryState = {
     hasError: false,
   };
 
-  static getDerivedStateFromError(): ErrorBoundaryState {
+  public static getDerivedStateFromError(): ErrorBoundaryState {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error('Application error:', error, errorInfo);
   }
 
-  handleReset = () => {
+  private readonly handleReset = (): void => {
     this.setState({ hasError: false });
   };
 
-  render() {
+  public render(): ReactNode {
     if (this.state.hasError) {
       return (
         <section className="error-boundary">

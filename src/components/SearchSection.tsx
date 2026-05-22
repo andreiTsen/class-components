@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent, type SyntheticEvent } from 'react';
 
-type SearchSectionProps = {
+type SearchSectionProperties = {
   initialSearchTerm?: string;
   onSearch: (searchTerm: string) => void;
 };
@@ -8,7 +8,7 @@ type SearchSectionProps = {
 function SearchSection({
   initialSearchTerm = '',
   onSearch,
-}: SearchSectionProps) {
+}: SearchSectionProperties) {
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
 
   const handleSearchTermChange = (event: ChangeEvent<HTMLInputElement>) => {

@@ -22,6 +22,12 @@ function PokemonDetails() {
       setIsLoading(true);
       setPokemon(null);
 
+      if (!pokemonId) {
+        setError('Failed to load Pokemon data.');
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const pokemonDetails = await api.getPokemonById(pokemonId);
 

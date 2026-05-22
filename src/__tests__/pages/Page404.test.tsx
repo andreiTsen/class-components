@@ -4,7 +4,7 @@ import AppRoutes from '../../AppRoutes';
 
 describe('Page404', () => {
   it('renders 404 for unknown route and a link home', () => {
-    window.history.replaceState({}, '', '/unknown-route');
+    globalThis.history.replaceState({}, '', '/unknown-route');
 
     render(<AppRoutes />);
 

@@ -1,10 +1,12 @@
 import loadingImage from '../assets/loading_circles_blue_gradient.jpg';
 
-type LoadingIndicatorProps = {
+type LoadingIndicatorProperties = {
   label?: string;
 };
 
-function LoadingIndicator({ label = 'Loading...' }: LoadingIndicatorProps) {
+function LoadingIndicator({
+  label = 'Loading...',
+}: LoadingIndicatorProperties) {
   return (
     <div className="loading-indicator" role="status" aria-live="polite">
       <img src={loadingImage} alt="" />

@@ -3,6 +3,7 @@ import { render, screen, userEvent, waitFor } from './test-utils';
 import { bulbasaur, pokemonList } from './test-utils/mockData';
 import AppRoutes from '../AppRoutes';
 import { api } from '../services/api';
+import { localStorageMock } from '../setupTests';
 
 vi.mock('../services/api', async () => {
   const actual =
@@ -22,14 +23,14 @@ describe('App', () => {
   const getPokemonsMock = vi.mocked(api.getPokemons);
 
   beforeEach(() => {
-    window.history.replaceState({}, '', '/');
-    localStorage.clear();
+    globalThis.history.replaceState({}, '', '/');
+    localStorageMock.clear();
     getPokemonByIdMock.mockReset();
     getPokemonsMock.mockReset();
   });
 
   it('loads Pokemons when opening the app', async () => {
-    localStorage.setItem('pokemon-search-term', 'bulbasaur');
+    localStorageMock.setItem('pokemon-search-term', 'bulbasaur');
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 1 });
 
     render(<AppRoutes />);
@@ -46,8 +47,10 @@ describe('App', () => {
     render(<AppRoutes />);
 
     await waitFor(() => {
-      expect(localStorage.getItem).toHaveBeenCalledWith('pokemon-search-term');
-      expect(localStorage.setItem).toHaveBeenCalledWith(
+      expect(localStorageMock.getItem).toHaveBeenCalledWith(
+        'pokemon-search-term'
+      );
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'pokemon-search-term',
         ''
       );
@@ -69,18 +72,18 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
     await waitFor(() => {
-      expect(localStorage.setItem).toHaveBeenLastCalledWith(
+      expect(localStorageMock.setItem).toHaveBeenLastCalledWith(
         'pokemon-search-term',
         'mew'
       );
       expect(getPokemonsMock).toHaveBeenLastCalledWith('mew', 1);
-      expect(window.location.search).toBe('?page=1');
+      expect(globalThis.location.search).toBe('?page=1');
     });
   });
 
   it('updates the saved request on repeated search', async () => {
     const user = userEvent.setup();
-    localStorage.setItem('pokemon-search-term', 'pikachu');
+    localStorageMock.setItem('pokemon-search-term', 'pikachu');
     getPokemonsMock.mockResolvedValue({ pokemons: [], totalPages: 0 });
 
     render(<AppRoutes />);
@@ -96,7 +99,7 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
     await waitFor(() => {
-      expect(localStorage.setItem).toHaveBeenLastCalledWith(
+      expect(localStorageMock.setItem).toHaveBeenLastCalledWith(
         'pokemon-search-term',
         'raichu'
       );
@@ -135,14 +138,14 @@ describe('App', () => {
     await user.click(screen.getByRole('link', { name: 'Next' }));
 
     await waitFor(() => {
-      expect(window.location.search).toBe('?page=2');
+      expect(globalThis.location.search).toBe('?page=2');
       expect(getPokemonsMock).toHaveBeenLastCalledWith('', 2);
       expect(screen.getByText('Page 2 of 2')).toBeInTheDocument();
     });
   });
 
   it('synchronizes the visible page with the page from URL', async () => {
-    window.history.replaceState({}, '', '/?page=2');
+    globalThis.history.replaceState({}, '', '/?page=2');
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 3 });
 
     render(<AppRoutes />);
@@ -153,7 +156,7 @@ describe('App', () => {
 
   it('resets the page in URL on new search', async () => {
     const user = userEvent.setup();
-    window.history.replaceState({}, '', '/?page=2');
+    globalThis.history.replaceState({}, '', '/?page=2');
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 3 });
 
     render(<AppRoutes />);
@@ -163,7 +166,7 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
     await waitFor(() => {
-      expect(window.location.search).toBe('?page=1');
+      expect(globalThis.location.search).toBe('?page=1');
       expect(getPokemonsMock).toHaveBeenLastCalledWith('mew', 1);
     });
   });
@@ -183,8 +186,8 @@ describe('App', () => {
       await screen.findByRole('complementary', { name: 'Pokemon details' })
     ).toBeInTheDocument();
     expect(getPokemonByIdMock).toHaveBeenCalledWith('1');
-    expect(window.location.pathname).toBe('/details/1');
-    expect(window.location.search).toBe('?page=1');
+    expect(globalThis.location.pathname).toBe('/details/1');
+    expect(globalThis.location.search).toBe('?page=1');
   });
 
   it('closes the details panel with the close button', async () => {
@@ -201,8 +204,8 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Close' }));
 
     await waitFor(() => {
-      expect(window.location.pathname).toBe('/');
-      expect(window.location.search).toBe('?page=1');
+      expect(globalThis.location.pathname).toBe('/');
+      expect(globalThis.location.search).toBe('?page=1');
       expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     });
   });
@@ -235,8 +238,8 @@ describe('App', () => {
     await user.click(screen.getByRole('heading', { name: 'Pokemons Results' }));
 
     await waitFor(() => {
-      expect(window.location.pathname).toBe('/');
-      expect(window.location.search).toBe('?page=1');
+      expect(globalThis.location.pathname).toBe('/');
+      expect(globalThis.location.search).toBe('?page=1');
       expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     });
   });
@@ -248,6 +251,6 @@ describe('App', () => {
 
     await screen.findByRole('heading', { name: 'Pokemons Results' });
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
-    expect(window.location.pathname).toBe('/');
+    expect(globalThis.location.pathname).toBe('/');
   });
 });

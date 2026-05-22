@@ -1,9 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../../services/api';
 
-const jsonResponse = (body: unknown, ok = true) =>
-  new Response(JSON.stringify(body), {
-    status: ok ? 200 : 500,
+const HTTP_STATUS_OK = 200;
+const HTTP_STATUS_ERROR = 500;
+const FILTERED_POKEMON_COUNT = 3;
+const FILTERED_FETCH_COUNT = 7;
+const IVYSAUR_INDEX = 1;
+const VENUSAUR_INDEX = 2;
+
+const jsonResponse = (body: unknown, ok = true): Response =>
+  Response.json(body, {
+    status: ok ? HTTP_STATUS_OK : HTTP_STATUS_ERROR,
     headers: { 'Content-Type': 'application/json' },
   });
 
@@ -62,7 +69,7 @@ const venusaurResponse = {
 };
 
 const megaVenusaurResponse = {
-  id: 10033,
+  id: 10_033,
   name: 'venusaur-mega',
   species: {
     name: 'venusaur',
@@ -157,11 +164,11 @@ describe('api', () => {
       1,
       'https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0'
     );
-    expect(fetchMock).toHaveBeenCalledTimes(7);
-    expect(pokemonPage.pokemons).toHaveLength(3);
+    expect(fetchMock).toHaveBeenCalledTimes(FILTERED_FETCH_COUNT);
+    expect(pokemonPage.pokemons).toHaveLength(FILTERED_POKEMON_COUNT);
     expect(pokemonPage.pokemons[0].name).toBe('bulbasaur');
-    expect(pokemonPage.pokemons[1].name).toBe('ivysaur');
-    expect(pokemonPage.pokemons[2].name).toBe('venusaur');
+    expect(pokemonPage.pokemons[IVYSAUR_INDEX].name).toBe('ivysaur');
+    expect(pokemonPage.pokemons[VENUSAUR_INDEX].name).toBe('venusaur');
     expect(pokemonPage.totalPages).toBe(1);
   });
 
@@ -241,12 +248,12 @@ describe('api', () => {
     const pokemonPage = await api.getPokemons('venusaur-mega');
 
     expect(fetchMock).toHaveBeenNthCalledWith(
-      3,
+      FILTERED_POKEMON_COUNT,
       'https://pokeapi.co/api/v2/pokemon-species/venusaur'
     );
     expect(pokemonPage.pokemons[0]).toEqual({
       description: 'Some description',
-      id: 10033,
+      id: 10_033,
       imageUrl: 'https://example.com/venusaur-mega.png',
       name: 'venusaur-mega',
     });

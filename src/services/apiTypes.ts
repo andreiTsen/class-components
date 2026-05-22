@@ -32,10 +32,10 @@ export type PokemonDetailsResponse = {
 };
 
 export type PokemonSpeciesResponse = {
-  flavor_text_entries: Array<{
+  flavor_text_entries: {
     flavor_text: string;
     language: {
       name: string;
     };
-  }>;
+  }[];
 };
