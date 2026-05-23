@@ -1,4 +1,5 @@
-import loadingImage from '../assets/loading_circles_blue_gradient.jpg';
+import loadingImage from '../../assets/loading_circles_blue_gradient.jpg';
+import './LoadingIndicator.css';
 
 type LoadingIndicatorProperties = {
   label?: string;

@@ -1,13 +1,14 @@
 import { Outlet, useMatch, useNavigate, useSearchParams } from 'react-router';
 import type { NavigateFunction } from 'react-router';
 import { useCallback, useEffect, useMemo, type KeyboardEvent } from 'react';
-import ErrorTestButton from '../components/ErrorTestButton';
-import ResultsSection from '../components/ResultsSection';
-import SearchSection from '../components/SearchSection';
+import ErrorTestButton from '../components/ErrorTestButton/ErrorTestButton';
+import ResultsSection from '../components/ResultsSection/ResultsSection';
+import SearchSection from '../components/SearchSection/SearchSection';
 import useLocalStorage from '../hooks/useLocalStorage';
 import usePokemonSearch from '../hooks/usePokemonSearch';
 import { parseParameter } from '../utils/parameters';
-import PageLayout from '../components/PageLayout';
+import PageLayout from '../components/PageLayout/PageLayout';
+import './HomePage.css';
 
 const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
 

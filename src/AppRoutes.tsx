@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router';
-import PokemonDetails from './components/PokemonDetails';
+import PokemonDetails from './components/PokemonDetails/PokemonDetails';
 import AboutPage from './pages/AboutPage';
 import HomePage from './pages/HomePage';
 import Page404 from './pages/Page404';

@@ -1,7 +1,9 @@
 import { Link } from 'react-router';
 import type { KeyboardEvent, MouseEvent } from 'react';
-import LoadingIndicator from './LoadingIndicator';
-import type { Pokemon } from '../types';
+import LoadingIndicator from '../LoadingIndicator';
+import type { Pokemon } from '../../types';
+import '../StatusMessage.css';
+import './ResultsSection.css';
 
 const getPageSearch = (page: number): string => {
   return `?page=${String(page)}`;

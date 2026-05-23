@@ -1,5 +1,5 @@
 import AppRoutes from './AppRoutes';
-import ErrorBoundary from './components/ErrorBoundary';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import './App.css';
 
 function App() {

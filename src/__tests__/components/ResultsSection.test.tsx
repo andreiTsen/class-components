@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { ComponentProps } from 'react';
 import { render, screen } from '../test-utils';
 import { pokemonList } from '../test-utils/mockData';
-import ResultsSection from '../../components/ResultsSection';
+import ResultsSection from '../../components/ResultsSection/ResultsSection';
 
 const renderResultsSection = (
   properties: Partial<ComponentProps<typeof ResultsSection>> = {}

@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type SyntheticEvent } from 'react';
+import './SearchSection.css';
 
 type SearchSectionProperties = {
   initialSearchTerm?: string;

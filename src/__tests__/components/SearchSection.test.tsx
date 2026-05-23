@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent } from '../test-utils';
-import SearchSection from '../../components/SearchSection';
+import SearchSection from '../../components/SearchSection/SearchSection';
 
 describe('SearchSection', () => {
   it('loads saved search term from props', () => {

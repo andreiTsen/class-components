@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './ErrorTestButton.css';
 
 function ErrorTestButton() {
   const [shouldThrowError, setShouldThrowError] = useState(false);
