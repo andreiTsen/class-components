@@ -2,25 +2,17 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent, waitFor } from './test-utils';
 import { bulbasaur, pokemonList } from './test-utils/mockData';
 import App from '../App';
-import { api } from '../services/api';
+import { getPokemonById, getPokemons } from '../services/pokemonService';
 import { localStorageMock } from '../setupTests';
 
-vi.mock('../services/api', async () => {
-  const actual =
-    await vi.importActual<typeof import('../services/api')>('../services/api');
-
-  return {
-    ...actual,
-    api: {
-      getPokemonById: vi.fn(),
-      getPokemons: vi.fn(),
-    },
-  };
-});
+vi.mock('../services/pokemonService', () => ({
+  getPokemonById: vi.fn(),
+  getPokemons: vi.fn(),
+}));
 
 describe('App', () => {
-  const getPokemonByIdMock = vi.mocked(api.getPokemonById);
-  const getPokemonsMock = vi.mocked(api.getPokemons);
+  const getPokemonByIdMock = vi.mocked(getPokemonById);
+  const getPokemonsMock = vi.mocked(getPokemons);
 
   beforeEach(() => {
     globalThis.history.replaceState({}, '', '/');

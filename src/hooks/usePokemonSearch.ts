@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { api } from '../services/api';
+import { getPokemons } from '../services/pokemonService';
 import type { Pokemon } from '../types';
 
 type RequestPokemonsParameters = {
@@ -24,7 +24,7 @@ type ApplyPokemonsParameters = Pick<
   | 'setTotalPages'
 > & {
   currentPage: number;
-  pokemonPage: Awaited<ReturnType<typeof api.getPokemons>>;
+  pokemonPage: Awaited<ReturnType<typeof getPokemons>>;
 };
 
 const applyPokemonPage = ({
@@ -68,8 +68,8 @@ const requestPokemons = async (
     parameters.activeRequestIdRef.current === parameters.requestId;
 
   try {
-    const pokemonPage: Awaited<ReturnType<typeof api.getPokemons>> =
-      await api.getPokemons(parameters.normalizedSearchTerm, currentPage);
+    const pokemonPage: Awaited<ReturnType<typeof getPokemons>> =
+      await getPokemons(parameters.normalizedSearchTerm, currentPage);
 
     if (!isLatestRequest()) {
       return;
