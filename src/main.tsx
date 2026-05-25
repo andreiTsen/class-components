@@ -1,9 +1,18 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router';
 import App from './App.tsx';
 
-createRoot(document.getElementById('root')!).render(
+const rootElement: Element | null = document.querySelector('#root');
+
+if (rootElement === null) {
+  throw new Error('Root element was not found.');
+}
+
+createRoot(rootElement).render(
   <StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </StrictMode>
 );

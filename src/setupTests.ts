@@ -1,7 +1,12 @@
 import '@testing-library/jest-dom/vitest';
 import { beforeEach, vi } from 'vitest';
 
-const localStorageMock = (() => {
+type LocalStorageMock = Pick<
+  Storage,
+  'clear' | 'getItem' | 'removeItem' | 'setItem'
+>;
+
+export const localStorageMock = ((): LocalStorageMock => {
   let store: Record<string, string> = {};
 
   return {
@@ -10,18 +15,14 @@ const localStorageMock = (() => {
     }),
     getItem: vi.fn((key: string) => store[key] ?? null),
     removeItem: vi.fn((key: string) => {
-      delete store[key];
+      const { [key]: _removedValue, ...nextStore } = store;
+      store = nextStore;
     }),
     setItem: vi.fn((key: string, value: string) => {
-      store[key] = String(value);
+      store[key] = value;
     }),
   };
 })();
-
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock,
-  writable: true,
-});
 
 Object.defineProperty(globalThis, 'localStorage', {
   value: localStorageMock,

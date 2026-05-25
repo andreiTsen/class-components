@@ -1,0 +1,22 @@
+import { describe, expect, it } from 'vitest';
+import { render, screen } from '../test-utils';
+import Header from '../../components/Header/Header';
+
+describe('Header', () => {
+  it('renders title', () => {
+    render(<Header />);
+
+    expect(
+      screen.getByRole('heading', { name: 'Pokemon super monster' })
+    ).toBeInTheDocument();
+  });
+
+  it('renders link to the about page', () => {
+    render(<Header />);
+
+    expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute(
+      'href',
+      '/about'
+    );
+  });
+});
