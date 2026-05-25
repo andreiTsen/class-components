@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, useParams, type Params } from 'react-router';
-import LoadingIndicator from '../LoadingIndicator';
+import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
 import { getPokemonById } from '../../services/pokemonService';
 import type { Pokemon } from '../../types';
 import '../StatusMessage.css';

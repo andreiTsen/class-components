@@ -184,14 +184,8 @@ function HomePage() {
   const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(
     SEARCH_TERM_STORAGE_KEY
   );
-  const {
-    currentPage,
-    error,
-    isLoading,
-    loadPage,
-    pokemons,
-    totalPages,
-  }: ReturnType<typeof usePokemonSearch> = usePokemonSearch();
+  const { currentPage, error, isLoading, loadPage, pokemons, totalPages } =
+    usePokemonSearch();
   const detailsMatch: ReturnType<typeof useMatch> = useMatch(
     '/details/:pokemonId'
   );
