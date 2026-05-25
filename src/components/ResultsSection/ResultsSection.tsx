@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import type { KeyboardEvent, MouseEvent } from 'react';
-import LoadingIndicator from '../LoadingIndicator';
+import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
 import type { Pokemon } from '../../types';
 import '../StatusMessage.css';
 import './ResultsSection.css';

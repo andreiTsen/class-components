@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, useParams, type Params } from 'react-router';
-import LoadingIndicator from '../LoadingIndicator';
-import { api } from '../../services/api';
+import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
+import { getPokemonById } from '../../services/pokemonService';
 import type { Pokemon } from '../../types';
 import '../StatusMessage.css';
 import './PokemonDetails.css';
@@ -33,7 +33,7 @@ function PokemonDetails() {
       }
 
       try {
-        const pokemonDetails: Pokemon = await api.getPokemonById(pokemonId);
+        const pokemonDetails: Pokemon = await getPokemonById(pokemonId);
 
         if (!ignore) {
           setPokemon(pokemonDetails);
