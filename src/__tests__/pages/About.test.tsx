@@ -8,7 +8,7 @@ vi.mock('../../services/pokemonService', () => ({
   getPokemons: vi.fn().mockResolvedValue({ pokemons: [], totalPages: 0 }),
 }));
 
-describe('AboutPage', () => {
+describe('About', () => {
   it('opens the about', async () => {
     const user = userEvent.setup();
 

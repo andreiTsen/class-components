@@ -7,8 +7,8 @@ import {
   isPokemonDetailsResponse,
   isPokemonListResponse,
   isPokemonSpeciesResponse,
-} from '../utils/validators';
-import { fetchValidated } from './http';
+} from '../utils/typeGuards';
+import { fetchValidatedResponse } from './fetchValidatedResponse';
 
 const API_BASE_URL = 'https://pokeapi.co/api/v2';
 
@@ -21,7 +21,7 @@ export const fetchPokemonList = async (
     offset: String(offset),
   });
 
-  return fetchValidated(
+  return fetchValidatedResponse(
     `${API_BASE_URL}/pokemon?${queryParameters}`,
     isPokemonListResponse,
     'Failed to load Pokemon list.'
@@ -31,7 +31,7 @@ export const fetchPokemonList = async (
 export const fetchPokemonDetails = (
   nameOrId: string | number
 ): Promise<PokemonDetailsResponse> => {
-  return fetchValidated(
+  return fetchValidatedResponse(
     `${API_BASE_URL}/pokemon/${String(nameOrId)}`,
     isPokemonDetailsResponse,
     'Failed to load Pokemon.'
@@ -41,7 +41,7 @@ export const fetchPokemonDetails = (
 export const fetchPokemonSpecies = (
   speciesName: string
 ): Promise<PokemonSpeciesResponse> => {
-  return fetchValidated(
+  return fetchValidatedResponse(
     `${API_BASE_URL}/pokemon-species/${speciesName}`,
     isPokemonSpeciesResponse,
     'Failed to load Pokemon description.'
