@@ -1,11 +1,14 @@
-import { Outlet } from 'react-router';
 import { ThemeProvider } from './context/ThemeContext';
+import AppRoutes from './AppRoutes';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import './App.css';
 
 function App() {
   return (
     <ThemeProvider>
-      <Outlet />
+      <ErrorBoundary>
+        <AppRoutes />
+      </ErrorBoundary>
     </ThemeProvider>
   );
 }

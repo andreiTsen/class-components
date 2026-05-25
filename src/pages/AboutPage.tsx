@@ -1,4 +1,4 @@
-import PageLayout from './PageLayout';
+import PageLayout from '../components/PageLayout/PageLayout';
 import './AboutPage.css';
 
 function AboutPage() {

@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent } from '../test-utils';
-import ErrorBoundary from '../../components/ErrorBoundary';
+import ErrorBoundary from '../../components/ErrorBoundary/ErrorBoundary';
 
-type ThrowingChildProps = {
+type ThrowingChildProperties = {
   shouldThrow: boolean;
 };
 
-function ThrowingChild({ shouldThrow }: ThrowingChildProps) {
+function ThrowingChild({ shouldThrow }: ThrowingChildProperties) {
   if (shouldThrow) {
     throw new Error('Test error');
   }

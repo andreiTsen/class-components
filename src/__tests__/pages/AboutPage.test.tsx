@@ -1,28 +1,18 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent } from '../test-utils';
-import AppRoutes from '../../AppRoutes';
-import { api } from '../../services/api';
+import App from '../../App';
+import { getPokemons } from '../../services/pokemonService';
 
-vi.mock('../../services/api', async () => {
-  const actual =
-    await vi.importActual<typeof import('../../services/api')>(
-      '../../services/api'
-    );
-
-  return {
-    ...actual,
-    api: {
-      getPokemonById: vi.fn(),
-      getPokemons: vi.fn().mockResolvedValue({ pokemons: [], totalPages: 0 }),
-    },
-  };
-});
+vi.mock('../../services/pokemonService', () => ({
+  getPokemonById: vi.fn(),
+  getPokemons: vi.fn().mockResolvedValue({ pokemons: [], totalPages: 0 }),
+}));
 
 describe('AboutPage', () => {
   it('opens the about', async () => {
     const user = userEvent.setup();
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await user.click(screen.getByRole('link', { name: 'About' }));
 
@@ -36,7 +26,7 @@ describe('AboutPage', () => {
     expect(
       screen.getByRole('link', { name: 'RS School React course' })
     ).toHaveAttribute('href', 'https://rs.school/courses/reactjs');
-    expect(window.location.pathname).toBe('/about');
-    expect(api.getPokemons).toHaveBeenCalled();
+    expect(globalThis.location.pathname).toBe('/about');
+    expect(getPokemons).toHaveBeenCalled();
   });
 });

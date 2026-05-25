@@ -1,15 +1,16 @@
 import { vi } from 'vitest';
 import { renderHook, act } from '../test-utils';
 import useLocalStorage from '../../hooks/useLocalStorage';
+import { localStorageMock } from '../../setupTests';
 
 describe('useLocalStorage', () => {
   it('trims initial value from local storage', () => {
-    localStorage.setItem('search-term', '  pikachu  ');
+    localStorageMock.setItem('search-term', '  pikachu  ');
 
     const { result } = renderHook(() => useLocalStorage('search-term'));
 
     expect(result.current[0]).toBe('pikachu');
-    expect(localStorage.setItem).toHaveBeenLastCalledWith(
+    expect(localStorageMock.setItem).toHaveBeenLastCalledWith(
       'search-term',
       'pikachu'
     );
@@ -23,14 +24,14 @@ describe('useLocalStorage', () => {
     });
 
     expect(result.current[0]).toBe('eevee');
-    expect(localStorage.setItem).toHaveBeenLastCalledWith(
+    expect(localStorageMock.setItem).toHaveBeenLastCalledWith(
       'search-term',
       'eevee'
     );
   });
 
   it('uses initial value if local storage cannot be read', () => {
-    vi.mocked(localStorage.getItem).mockImplementationOnce(() => {
+    vi.mocked(localStorageMock.getItem).mockImplementationOnce(() => {
       throw new Error('Storage is unavailable');
     });
 
@@ -42,7 +43,7 @@ describe('useLocalStorage', () => {
   });
 
   it('updates state if local storage cannot be written', () => {
-    vi.mocked(localStorage.setItem).mockImplementationOnce(() => {
+    vi.mocked(localStorageMock.setItem).mockImplementationOnce(() => {
       throw new Error('Storage is unavailable');
     });
     const { result } = renderHook(() => useLocalStorage('search-term'));

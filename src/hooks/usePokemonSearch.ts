@@ -1,131 +1,50 @@
-import { useCallback, useRef, useState } from 'react';
-import { api, type Pokemon } from '../services/api';
+import { useCallback, useReducer, useRef } from 'react';
+import { getPokemons } from '../services/pokemonService';
+import type { UsePokemonSearchResult } from '../types';
+import {
+  initialPokemonSearchState as initialSearchState,
+  pokemonSearchReducer as searchReducer,
+} from '../reducers/pokemonSearchReducer';
 
-type RequestPokemonsParams = {
-  activeRequestIdRef: { current: number };
-  lastRequestRef: { current: { page: number; searchTerm: string } | null };
-  normalizedSearchTerm: string;
-  page: number;
-  requestId: number;
-  setCurrentPage: (page: number) => void;
-  setError: (error: string) => void;
-  setIsLoading: (isLoading: boolean) => void;
-  setPokemons: (pokemons: Pokemon[]) => void;
-  setTotalPages: (totalPages: number) => void;
-};
+const usePokemonSearch = (): UsePokemonSearchResult => {
+  const [state, dispatch] = useReducer(searchReducer, initialSearchState);
+  const activeRequestId = useRef(0);
+  const lastRequest = useRef<{ page: number; searchTerm: string } | null>(null);
+  const loadPage = useCallback(
+    async (page: number, searchTerm: string): Promise<void> => {
+      const nextPage: number = Math.max(page, 1);
+      const normalizedSearchTerm: string = searchTerm.trim();
+      if (
+        lastRequest.current?.page === nextPage &&
+        lastRequest.current.searchTerm === normalizedSearchTerm
+      ) {
+        return;
+      }
+      activeRequestId.current += 1;
+      const requestId: number = activeRequestId.current;
+      dispatch({ page: nextPage, type: 'loading' });
+      try {
+        const pokemonPage = await getPokemons(normalizedSearchTerm, nextPage);
+        if (activeRequestId.current !== requestId) {
+          return;
+        }
+        lastRequest.current = {
+          page: nextPage,
+          searchTerm: normalizedSearchTerm,
+        };
+        dispatch({ page: nextPage, pokemonPage, type: 'success' });
+      } catch {
+        if (activeRequestId.current !== requestId) {
+          return;
+        }
 
-const requestPokemons = async ({
-  activeRequestIdRef,
-  lastRequestRef,
-  normalizedSearchTerm,
-  page,
-  requestId,
-  setCurrentPage,
-  setError,
-  setIsLoading,
-  setPokemons,
-  setTotalPages,
-}: RequestPokemonsParams) => {
-  const currentPage = Math.max(page, 1);
-  const isLatestRequest = () => activeRequestIdRef.current === requestId;
-
-  try {
-    const pokemonPage = await api.getPokemons(
-      normalizedSearchTerm,
-      currentPage
-    );
-
-    if (!isLatestRequest()) {
-      return;
-    }
-
-    lastRequestRef.current = {
-      page: currentPage,
-      searchTerm: normalizedSearchTerm,
-    };
-    setCurrentPage(currentPage);
-    setPokemons(pokemonPage.pokemons);
-    setTotalPages(pokemonPage.totalPages);
-  } catch {
-    if (isLatestRequest()) {
-      lastRequestRef.current = null;
-      setError('Failed to load data');
-      setPokemons([]);
-      setTotalPages(0);
-    }
-  } finally {
-    if (isLatestRequest()) {
-      setIsLoading(false);
-    }
-  }
-};
-
-type UsePokemonSearchResult = {
-  currentPage: number;
-  error: string;
-  isLoading: boolean;
-  loadPage: (page: number, searchTerm: string) => Promise<void>;
-  loadPokemons: (searchTerm: string) => Promise<void>;
-  pokemons: Pokemon[];
-  totalPages: number;
-};
-
-function usePokemonSearch(): UsePokemonSearchResult {
-  const activeRequestIdRef = useRef(0);
-  const lastRequestRef = useRef<{ page: number; searchTerm: string } | null>(
-    null
+        lastRequest.current = null;
+        dispatch({ type: 'error' });
+      }
+    },
+    []
   );
-  const [currentPage, setCurrentPage] = useState(1);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
-  const [totalPages, setTotalPages] = useState(0);
-
-  const loadPage = useCallback(async (page: number, searchTerm: string) => {
-    const nextPage = Math.max(page, 1);
-    const normalizedSearchTerm = searchTerm.trim();
-
-    if (
-      lastRequestRef.current?.searchTerm === normalizedSearchTerm &&
-      lastRequestRef.current.page === nextPage
-    ) {
-      return;
-    }
-
-    setError('');
-    setIsLoading(true);
-    setCurrentPage(nextPage);
-
-    const requestId = activeRequestIdRef.current + 1;
-    activeRequestIdRef.current = requestId;
-
-    await requestPokemons({
-      activeRequestIdRef,
-      lastRequestRef,
-      normalizedSearchTerm,
-      page: nextPage,
-      requestId,
-      setCurrentPage,
-      setError,
-      setIsLoading,
-      setPokemons,
-      setTotalPages,
-    });
-  }, []);
-
-  const loadPokemons = async (searchTerm: string) => {
-    await loadPage(1, searchTerm);
-  };
-
-  return {
-    currentPage,
-    error,
-    isLoading,
-    loadPage,
-    loadPokemons,
-    pokemons,
-    totalPages,
-  };
-}
+  return { ...state, loadPage };
+};
 
 export default usePokemonSearch;

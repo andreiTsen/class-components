@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen, userEvent } from '../test-utils';
-import Header from '../../components/Header';
+import Header from '../../components/Header/Header';
 
 describe('Header', () => {
   it('renders title', () => {

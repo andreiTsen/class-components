@@ -1,6 +1,6 @@
-import type { Pokemon } from '../services/api';
+import type { Pokemon } from '../../types';
 
-type SelectedPokemonActionsProps = {
+type SelectedPokemonActionsProperties = {
   onClearAll: () => void;
   onDownload: () => void;
   selectedPokemons: Pokemon[];
@@ -10,7 +10,7 @@ function SelectedPokemonActions({
   onClearAll,
   onDownload,
   selectedPokemons,
-}: SelectedPokemonActionsProps) {
+}: SelectedPokemonActionsProperties) {
   const selectedCount = selectedPokemons.length;
 
   if (selectedCount === 0) {

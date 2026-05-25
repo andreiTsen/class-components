@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent } from '../test-utils';
-import ErrorBoundary from '../../components/ErrorBoundary';
-import ErrorTestButton from '../../components/ErrorTestButton';
+import ErrorBoundary from '../../components/ErrorBoundary/ErrorBoundary';
+import ErrorTestButton from '../../components/ErrorTestButton/ErrorTestButton';
 
 describe('ErrorTestButton', () => {
   it('shows the error message through ErrorBoundary after click', async () => {

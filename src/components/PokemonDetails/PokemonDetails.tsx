@@ -1,13 +1,15 @@
 import { useEffect } from 'react';
 import { useOutletContext, useParams } from 'react-router';
-import LoadingIndicator from './LoadingIndicator';
-import { api } from '../services/api';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
+import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
+import { getPokemonById } from '../../services/pokemonService';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   loadSelectedPokemonFailure,
   loadSelectedPokemonStart,
   loadSelectedPokemonSuccess,
-} from '../store/selectedPokemonSlice';
+} from '../../store/selectedPokemonSlice';
+import '../StatusMessage.css';
+import './PokemonDetails.css';
 
 type DetailsOutletContext = {
   onClose: () => void;
@@ -25,11 +27,16 @@ function PokemonDetails() {
   useEffect(() => {
     let ignore = false;
 
-    const loadPokemonDetails = async () => {
+    const loadPokemonDetails = async (): Promise<void> => {
       dispatch(loadSelectedPokemonStart());
 
+      if (!pokemonId) {
+        dispatch(loadSelectedPokemonFailure('Failed to load Pokemon data.'));
+        return;
+      }
+
       try {
-        const pokemonDetails = await api.getPokemonById(pokemonId);
+        const pokemonDetails = await getPokemonById(pokemonId);
 
         if (!ignore) {
           dispatch(loadSelectedPokemonSuccess(pokemonDetails));
@@ -43,7 +50,7 @@ function PokemonDetails() {
 
     void loadPokemonDetails();
 
-    return () => {
+    return (): void => {
       ignore = true;
     };
   }, [dispatch, pokemonId]);

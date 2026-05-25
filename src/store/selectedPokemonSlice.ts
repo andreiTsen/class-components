@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { Pokemon } from '../services/api';
+import type { Pokemon } from '../types';
 
 type SelectedPokemonState = {
   error: string;

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 
-const normalizeStorageValue = (value: string) => {
+const normalizeStorageValue = (value: string): string => {
   return value.trim();
 };
 
-const getStoredValue = (key: string, initialValue: string) => {
+const getStoredValue = (key: string, initialValue: string): string => {
   try {
     return normalizeStorageValue(localStorage.getItem(key) ?? initialValue);
   } catch {
@@ -12,7 +12,7 @@ const getStoredValue = (key: string, initialValue: string) => {
   }
 };
 
-const setStoredValue = (key: string, value: string) => {
+const setStoredValue = (key: string, value: string): void => {
   try {
     if (localStorage.getItem(key) !== value) {
       localStorage.setItem(key, value);
@@ -32,7 +32,7 @@ function useLocalStorage(
     setStoredValue(key, value);
   }, [key, value]);
 
-  const updateValue = (nextValue: string) => {
+  const updateValue = (nextValue: string): void => {
     setValue(normalizeStorageValue(nextValue));
   };
 

@@ -1,4 +1,4 @@
-import type { Pokemon } from '../../services/api';
+import type { Pokemon } from '../../types';
 
 export const bulbasaur: Pokemon = {
   description: 'likes eating bulb.',

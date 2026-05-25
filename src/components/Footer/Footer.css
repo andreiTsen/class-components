@@ -1,0 +1,14 @@
+.page-footer {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px 20px 28px;
+  color: #667085;
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .page-footer {
+    padding: 8px 12px 20px;
+  }
+}

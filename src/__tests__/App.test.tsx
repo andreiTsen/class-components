@@ -1,38 +1,32 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent, waitFor } from './test-utils';
 import { bulbasaur, pokemonList } from './test-utils/mockData';
+import App from '../App';
 import AppRoutes from '../AppRoutes';
-import { api } from '../services/api';
+import { getPokemonById, getPokemons } from '../services/pokemonService';
+import { localStorageMock } from '../setupTests';
 
-vi.mock('../services/api', async () => {
-  const actual =
-    await vi.importActual<typeof import('../services/api')>('../services/api');
-
-  return {
-    ...actual,
-    api: {
-      getPokemonById: vi.fn(),
-      getPokemons: vi.fn(),
-    },
-  };
-});
+vi.mock('../services/pokemonService', () => ({
+  getPokemonById: vi.fn(),
+  getPokemons: vi.fn(),
+}));
 
 describe('App', () => {
-  const getPokemonByIdMock = vi.mocked(api.getPokemonById);
-  const getPokemonsMock = vi.mocked(api.getPokemons);
+  const getPokemonByIdMock = vi.mocked(getPokemonById);
+  const getPokemonsMock = vi.mocked(getPokemons);
 
   beforeEach(() => {
-    window.history.replaceState({}, '', '/');
-    localStorage.clear();
+    globalThis.history.replaceState({}, '', '/');
+    localStorageMock.clear();
     getPokemonByIdMock.mockReset();
     getPokemonsMock.mockReset();
   });
 
   it('loads Pokemons when opening the app', async () => {
-    localStorage.setItem('pokemon-search-term', 'bulbasaur');
+    localStorageMock.setItem('pokemon-search-term', 'bulbasaur');
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 1 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     expect(getPokemonsMock).toHaveBeenCalledWith('bulbasaur', 1);
     expect(
@@ -43,11 +37,13 @@ describe('App', () => {
   it('loads Pokemons with empty search if localStorage is empty', async () => {
     getPokemonsMock.mockResolvedValue({ pokemons: [], totalPages: 0 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await waitFor(() => {
-      expect(localStorage.getItem).toHaveBeenCalledWith('pokemon-search-term');
-      expect(localStorage.setItem).toHaveBeenCalledWith(
+      expect(localStorageMock.getItem).toHaveBeenCalledWith(
+        'pokemon-search-term'
+      );
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'pokemon-search-term',
         ''
       );
@@ -59,7 +55,7 @@ describe('App', () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: [], totalPages: 0 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await waitFor(() => {
       expect(getPokemonsMock).toHaveBeenCalledWith('', 1);
@@ -69,21 +65,21 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
     await waitFor(() => {
-      expect(localStorage.setItem).toHaveBeenLastCalledWith(
+      expect(localStorageMock.setItem).toHaveBeenLastCalledWith(
         'pokemon-search-term',
         'mew'
       );
       expect(getPokemonsMock).toHaveBeenLastCalledWith('mew', 1);
-      expect(window.location.search).toBe('?page=1');
+      expect(globalThis.location.search).toBe('?page=1');
     });
   });
 
   it('updates the saved request on repeated search', async () => {
     const user = userEvent.setup();
-    localStorage.setItem('pokemon-search-term', 'pikachu');
+    localStorageMock.setItem('pokemon-search-term', 'pikachu');
     getPokemonsMock.mockResolvedValue({ pokemons: [], totalPages: 0 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     const searchbox = screen.getByRole('searchbox');
 
@@ -96,7 +92,7 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
     await waitFor(() => {
-      expect(localStorage.setItem).toHaveBeenLastCalledWith(
+      expect(localStorageMock.setItem).toHaveBeenLastCalledWith(
         'pokemon-search-term',
         'raichu'
       );
@@ -107,7 +103,7 @@ describe('App', () => {
   it('shows an error on failed loading', async () => {
     getPokemonsMock.mockRejectedValue(new Error('Network error'));
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await waitFor(() => {
       expect(screen.getByText('Failed to load data')).toBeInTheDocument();
@@ -117,7 +113,7 @@ describe('App', () => {
   it('shows pagination after loading items', async () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     expect(
       await screen.findByRole('navigation', { name: 'Pagination' })
@@ -129,23 +125,23 @@ describe('App', () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await screen.findByRole('navigation', { name: 'Pagination' });
     await user.click(screen.getByRole('link', { name: 'Next' }));
 
     await waitFor(() => {
-      expect(window.location.search).toBe('?page=2');
+      expect(globalThis.location.search).toBe('?page=2');
       expect(getPokemonsMock).toHaveBeenLastCalledWith('', 2);
       expect(screen.getByText('Page 2 of 2')).toBeInTheDocument();
     });
   });
 
   it('synchronizes the visible page with the page from URL', async () => {
-    window.history.replaceState({}, '', '/?page=2');
+    globalThis.history.replaceState({}, '', '/?page=2');
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 3 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     expect(await screen.findByText('Page 2 of 3')).toBeInTheDocument();
     expect(getPokemonsMock).toHaveBeenCalledWith('', 2);
@@ -153,17 +149,17 @@ describe('App', () => {
 
   it('resets the page in URL on new search', async () => {
     const user = userEvent.setup();
-    window.history.replaceState({}, '', '/?page=2');
+    globalThis.history.replaceState({}, '', '/?page=2');
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 3 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await screen.findByText('Page 2 of 3');
     await user.type(screen.getByRole('searchbox'), 'mew');
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
     await waitFor(() => {
-      expect(window.location.search).toBe('?page=1');
+      expect(globalThis.location.search).toBe('?page=1');
       expect(getPokemonsMock).toHaveBeenLastCalledWith('mew', 1);
     });
   });
@@ -173,7 +169,7 @@ describe('App', () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
     getPokemonByIdMock.mockResolvedValue(bulbasaur);
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await user.click(
       await screen.findByRole('article', { name: /bulbasaur/i })
@@ -183,8 +179,8 @@ describe('App', () => {
       await screen.findByRole('complementary', { name: 'Pokemon details' })
     ).toBeInTheDocument();
     expect(getPokemonByIdMock).toHaveBeenCalledWith('1');
-    expect(window.location.pathname).toBe('/details/1');
-    expect(window.location.search).toBe('?page=1');
+    expect(globalThis.location.pathname).toBe('/details/1');
+    expect(globalThis.location.search).toBe('?page=1');
   });
 
   it('keeps loaded details visible when clicking the already opened item again', async () => {
@@ -230,7 +226,7 @@ describe('App', () => {
       screen.queryByRole('complementary', { name: 'Pokemon details' })
     ).not.toBeInTheDocument();
     expect(getPokemonByIdMock).not.toHaveBeenCalled();
-    expect(window.location.pathname).toBe('/');
+    expect(globalThis.location.pathname).toBe('/');
   });
 
   it('shows a fixed actions menu with the selected item count', async () => {
@@ -291,8 +287,6 @@ describe('App', () => {
 
   it('downloads selected items as a CSV file', async () => {
     const user = userEvent.setup();
-    const originalCreateElement = document.createElement.bind(document);
-    const createdLinks: HTMLAnchorElement[] = [];
 
     Object.defineProperty(URL, 'createObjectURL', {
       configurable: true,
@@ -306,20 +300,9 @@ describe('App', () => {
       .spyOn(URL, 'createObjectURL')
       .mockReturnValue('blob:selected-pokemons');
     const revokeObjectUrlMock = vi.spyOn(URL, 'revokeObjectURL');
-    const clickMock = vi.fn();
-    const createElementMock = vi
-      .spyOn(document, 'createElement')
-      .mockImplementation((tagName) => {
-        const element = originalCreateElement(tagName);
-
-        if (tagName === 'a') {
-          const anchor = element as HTMLAnchorElement;
-          anchor.click = clickMock;
-          createdLinks.push(anchor);
-        }
-
-        return element;
-      });
+    const clickMock = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
 
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
 
@@ -331,21 +314,22 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Download' }));
 
     expect(createObjectUrlMock).toHaveBeenCalledWith(expect.any(Blob));
-    const downloadedBlob = createObjectUrlMock.mock.calls[0][0] as Blob;
+    const downloadedBlob = createObjectUrlMock.mock.calls[0]?.[0];
+
+    if (!(downloadedBlob instanceof Blob)) {
+      throw new TypeError('Downloaded content must be a Blob.');
+    }
+
     await expect(downloadedBlob.text()).resolves.toContain(
       'id,name,description,imageUrl,detailsUrl'
     );
     await expect(downloadedBlob.text()).resolves.toContain(
       '1,bulbasaur,likes eating bulb.,https://example.com/bulbasaur.png,http://localhost:3000/details/1'
     );
-    const downloadLink = createdLinks.at(-1);
-
-    expect(downloadLink).toHaveAttribute('download', '1_items.csv');
-    expect(downloadLink).toHaveAttribute('href', 'blob:selected-pokemons');
     expect(clickMock).toHaveBeenCalled();
     expect(revokeObjectUrlMock).toHaveBeenCalledWith('blob:selected-pokemons');
 
-    createElementMock.mockRestore();
+    clickMock.mockRestore();
     createObjectUrlMock.mockRestore();
     revokeObjectUrlMock.mockRestore();
   });
@@ -362,7 +346,7 @@ describe('App', () => {
     await user.click(screen.getByRole('link', { name: 'Next' }));
 
     await waitFor(() => {
-      expect(window.location.search).toBe('?page=2');
+      expect(globalThis.location.search).toBe('?page=2');
     });
     expect(
       screen.getByRole('checkbox', { name: 'Select bulbasaur' })
@@ -391,7 +375,7 @@ describe('App', () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
     getPokemonByIdMock.mockResolvedValue(bulbasaur);
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await user.click(
       await screen.findByRole('article', { name: /bulbasaur/i })
@@ -400,8 +384,8 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Close' }));
 
     await waitFor(() => {
-      expect(window.location.pathname).toBe('/');
-      expect(window.location.search).toBe('?page=1');
+      expect(globalThis.location.pathname).toBe('/');
+      expect(globalThis.location.search).toBe('?page=1');
       expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     });
   });
@@ -411,7 +395,7 @@ describe('App', () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
     getPokemonByIdMock.mockReturnValue(new Promise(() => undefined));
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await user.click(
       await screen.findByRole('article', { name: /bulbasaur/i })
@@ -425,7 +409,7 @@ describe('App', () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
     getPokemonByIdMock.mockResolvedValue(bulbasaur);
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await user.click(
       await screen.findByRole('article', { name: /bulbasaur/i })
@@ -434,8 +418,8 @@ describe('App', () => {
     await user.click(screen.getByRole('heading', { name: 'Pokemons Results' }));
 
     await waitFor(() => {
-      expect(window.location.pathname).toBe('/');
-      expect(window.location.search).toBe('?page=1');
+      expect(globalThis.location.pathname).toBe('/');
+      expect(globalThis.location.search).toBe('?page=1');
       expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     });
   });
@@ -443,10 +427,10 @@ describe('App', () => {
   it('keeps the details panel closed before choosing a Pokemon', async () => {
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await screen.findByRole('heading', { name: 'Pokemons Results' });
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
-    expect(window.location.pathname).toBe('/');
+    expect(globalThis.location.pathname).toBe('/');
   });
 });

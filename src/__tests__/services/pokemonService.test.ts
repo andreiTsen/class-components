@@ -1,9 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { api } from '../../services/api';
+import { getPokemonById, getPokemons } from '../../services/pokemonService';
 
-const jsonResponse = (body: unknown, ok = true) =>
-  new Response(JSON.stringify(body), {
-    status: ok ? 200 : 500,
+const HTTP_STATUS_OK = 200;
+const HTTP_STATUS_ERROR = 500;
+const FILTERED_POKEMON_COUNT = 3;
+const FILTERED_FETCH_COUNT = 7;
+const IVYSAUR_INDEX = 1;
+const VENUSAUR_INDEX = 2;
+
+const jsonResponse = (body: unknown, ok = true): Response =>
+  Response.json(body, {
+    status: ok ? HTTP_STATUS_OK : HTTP_STATUS_ERROR,
     headers: { 'Content-Type': 'application/json' },
   });
 
@@ -62,7 +69,7 @@ const venusaurResponse = {
 };
 
 const megaVenusaurResponse = {
-  id: 10033,
+  id: 10_033,
   name: 'venusaur-mega',
   species: {
     name: 'venusaur',
@@ -81,7 +88,7 @@ const speciesResponse = {
   ],
 };
 
-describe('api', () => {
+describe('pokemonService', () => {
   const fetchMock = vi.fn();
 
   beforeEach(() => {
@@ -104,7 +111,7 @@ describe('api', () => {
       .mockResolvedValueOnce(jsonResponse(speciesResponse))
       .mockResolvedValueOnce(jsonResponse({ flavor_text_entries: [] }));
 
-    const pokemonPage = await api.getPokemons();
+    const pokemonPage = await getPokemons();
 
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
@@ -151,26 +158,24 @@ describe('api', () => {
       .mockResolvedValueOnce(jsonResponse(speciesResponse))
       .mockResolvedValueOnce(jsonResponse(speciesResponse));
 
-    const pokemonPage = await api.getPokemons('  SAUR ');
+    const pokemonPage = await getPokemons('  SAUR ');
 
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
       'https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0'
     );
-    expect(fetchMock).toHaveBeenCalledTimes(7);
-    expect(pokemonPage.pokemons).toHaveLength(3);
+    expect(fetchMock).toHaveBeenCalledTimes(FILTERED_FETCH_COUNT);
+    expect(pokemonPage.pokemons).toHaveLength(FILTERED_POKEMON_COUNT);
     expect(pokemonPage.pokemons[0].name).toBe('bulbasaur');
-    expect(pokemonPage.pokemons[1].name).toBe('ivysaur');
-    expect(pokemonPage.pokemons[2].name).toBe('venusaur');
+    expect(pokemonPage.pokemons[IVYSAUR_INDEX].name).toBe('ivysaur');
+    expect(pokemonPage.pokemons[VENUSAUR_INDEX].name).toBe('venusaur');
     expect(pokemonPage.totalPages).toBe(1);
   });
 
   it('error while loading Pokemon list', async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({}, false));
 
-    await expect(api.getPokemons()).rejects.toThrow(
-      'Failed to load Pokemon list.'
-    );
+    await expect(getPokemons()).rejects.toThrow('Failed to load Pokemon list.');
   });
 
   it('error while loading Pokemon data', async () => {
@@ -178,7 +183,7 @@ describe('api', () => {
       .mockResolvedValueOnce(jsonResponse(pokemonListResponse))
       .mockResolvedValueOnce(jsonResponse({}, false));
 
-    await expect(api.getPokemons()).rejects.toThrow('Failed to load Pokemon.');
+    await expect(getPokemons()).rejects.toThrow('Failed to load Pokemon.');
   });
 
   it('error while loading Pokemon description', async () => {
@@ -187,7 +192,7 @@ describe('api', () => {
       .mockResolvedValueOnce(jsonResponse(bulbasaurResponse))
       .mockResolvedValueOnce(jsonResponse({}, false));
 
-    await expect(api.getPokemons('bulb')).rejects.toThrow(
+    await expect(getPokemons('bulb')).rejects.toThrow(
       'Failed to load Pokemon description.'
     );
   });
@@ -197,7 +202,7 @@ describe('api', () => {
       .mockResolvedValueOnce(jsonResponse(bulbasaurResponse))
       .mockResolvedValueOnce(jsonResponse(speciesResponse));
 
-    const pokemon = await api.getPokemonById(1);
+    const pokemon = await getPokemonById(1);
 
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
@@ -216,9 +221,7 @@ describe('api', () => {
   });
 
   it('rejects invalid Pokemon id before making a request', async () => {
-    await expect(api.getPokemonById('abc')).rejects.toThrow(
-      'Invalid Pokemon id.'
-    );
+    await expect(getPokemonById('abc')).rejects.toThrow('Invalid Pokemon id.');
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -238,15 +241,15 @@ describe('api', () => {
       .mockResolvedValueOnce(jsonResponse(megaVenusaurResponse))
       .mockResolvedValueOnce(jsonResponse(speciesResponse));
 
-    const pokemonPage = await api.getPokemons('venusaur-mega');
+    const pokemonPage = await getPokemons('venusaur-mega');
 
     expect(fetchMock).toHaveBeenNthCalledWith(
-      3,
+      FILTERED_POKEMON_COUNT,
       'https://pokeapi.co/api/v2/pokemon-species/venusaur'
     );
     expect(pokemonPage.pokemons[0]).toEqual({
       description: 'Some description',
-      id: 10033,
+      id: 10_033,
       imageUrl: 'https://example.com/venusaur-mega.png',
       name: 'venusaur-mega',
     });

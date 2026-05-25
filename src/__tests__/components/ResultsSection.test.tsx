@@ -2,10 +2,10 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ComponentProps } from 'react';
 import { render, screen, userEvent } from '../test-utils';
 import { pokemonList } from '../test-utils/mockData';
-import ResultsSection from '../../components/ResultsSection';
+import ResultsSection from '../../components/ResultsSection/ResultsSection';
 
 const renderResultsSection = (
-  props: Partial<ComponentProps<typeof ResultsSection>> = {}
+  properties: Partial<ComponentProps<typeof ResultsSection>> = {}
 ) =>
   render(
     <ResultsSection
@@ -16,7 +16,7 @@ const renderResultsSection = (
       onPokemonSelect={() => undefined}
       pokemons={[]}
       totalPages={1}
-      {...props}
+      {...properties}
     />
   );
 
