@@ -10,15 +10,6 @@ export type PokemonPage = {
   totalPages: number;
 };
 
-export type UsePokemonSearchResult = {
-  currentPage: number;
-  error: string;
-  isLoading: boolean;
-  loadPage: (page: number, searchTerm: string) => Promise<void>;
-  pokemons: Pokemon[];
-  totalPages: number;
-};
-
 export type PokemonListItem = {
   name: string;
   url: string;

@@ -6,7 +6,7 @@ import ResultsSection from '../components/ResultsSection/ResultsSection';
 import SearchSection from '../components/SearchSection/SearchSection';
 import SelectedPokemonActions from '../components/SelectedPokemonActions/SelectedPokemonActions';
 import useLocalStorage from '../hooks/useLocalStorage';
-import usePokemonSearch from '../hooks/usePokemonSearch';
+import { useGetPokemonsQuery } from '../services/pokemonApi';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   clearSelectedPokemon,
@@ -20,6 +20,7 @@ import { parsePositiveInteger } from '../utils/parsePositiveInteger';
 import './Home.css';
 
 const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
+const EMPTY_POKEMONS: Pokemon[] = [];
 type SetSearchParameters = ReturnType<typeof useSearchParams>[1];
 
 type HomeHandlers = {
@@ -74,31 +75,28 @@ const getSelectedPokemonsCsv = (selectedPokemons: Pokemon[]): string => {
     .join('\n');
 };
 
-const usePokemonPageLoading = (
-  loadPage: (page: number, searchTerm: string) => Promise<void>,
+const usePageParameterNormalization = (
   searchParameters: URLSearchParams,
-  setSearchParameters: SetSearchParameters,
-  storedSearchTerm: string
+  setSearchParameters: SetSearchParameters
 ): void => {
   useEffect(() => {
     const nextPage = getPageFromSearchParameters(searchParameters);
 
-    if (searchParameters.get('page') !== String(nextPage)) {
-      setSearchParameters(
-        (currentSearchParameters) => {
-          const nextSearchParameters = new URLSearchParams(
-            currentSearchParameters
-          );
-          nextSearchParameters.set('page', String(nextPage));
-          return nextSearchParameters;
-        },
-        { replace: true }
-      );
+    if (searchParameters.get('page') === String(nextPage)) {
       return;
     }
 
-    void loadPage(nextPage, storedSearchTerm);
-  }, [loadPage, searchParameters, setSearchParameters, storedSearchTerm]);
+    setSearchParameters(
+      (currentSearchParameters) => {
+        const nextSearchParameters = new URLSearchParams(
+          currentSearchParameters
+        );
+        nextSearchParameters.set('page', String(nextPage));
+        return nextSearchParameters;
+      },
+      { replace: true }
+    );
+  }, [searchParameters, setSearchParameters]);
 };
 
 const useSelectedPokemonSynchronization = (
@@ -272,8 +270,14 @@ function Home() {
   const storedSelectedPokemonId = useAppSelector(
     (state) => state.selectedPokemon.selectedPokemonId
   );
-  const { currentPage, error, isLoading, loadPage, pokemons, totalPages } =
-    usePokemonSearch();
+  const currentPage = getPageFromSearchParameters(searchParameters);
+  const { data, isError, isFetching } = useGetPokemonsQuery({
+    page: currentPage,
+    searchTerm: storedSearchTerm.trim(),
+  });
+  const error = isError ? 'Failed to load data' : '';
+  const pokemons = data?.pokemons ?? EMPTY_POKEMONS;
+  const totalPages = data?.totalPages ?? 0;
   const selectedPokemonId = parsePositiveInteger(
     useMatch('/details/:pokemonId')?.params.pokemonId
   );
@@ -287,12 +291,7 @@ function Home() {
     storedSelectedPokemonId,
   });
 
-  usePokemonPageLoading(
-    loadPage,
-    searchParameters,
-    setSearchParameters,
-    storedSearchTerm
-  );
+  usePageParameterNormalization(searchParameters, setSearchParameters);
   useSelectedPokemonSynchronization(
     dispatch,
     selectedPokemonId,
@@ -310,7 +309,7 @@ function Home() {
           currentPage={currentPage}
           error={error}
           handlers={handlers}
-          isLoading={isLoading}
+          isLoading={isFetching}
           pokemons={pokemons}
           selectedPokemonId={selectedPokemonId}
           selectedPokemonIds={selectedPokemonIds}
