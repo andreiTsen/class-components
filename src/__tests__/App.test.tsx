@@ -465,6 +465,22 @@ describe('App', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Loading details...');
   });
 
+  it('shows an error when detailed information cannot be loaded', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+    getPokemonByIdMock.mockRejectedValue(new Error('Network error'));
+
+    render(<App />);
+
+    await user.click(
+      await screen.findByRole('article', { name: /bulbasaur/i })
+    );
+
+    expect(
+      await screen.findByText('Failed to load Pokemon data.')
+    ).toBeInTheDocument();
+  });
+
   it('closes the details panel by clicking the main panel', async () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
