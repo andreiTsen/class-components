@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent, waitFor } from './test-utils';
 import { bulbasaur, pokemonList } from './test-utils/mockData';
 import App from '../App';
@@ -12,6 +12,8 @@ vi.mock('../services/pokemonService', () => ({
 }));
 
 describe('App', () => {
+  const CACHE_START_TIME = Number('1000');
+  const CACHE_EXPIRED_TIME = Number('62000');
   const getPokemonByIdMock = vi.mocked(getPokemonById);
   const getPokemonsMock = vi.mocked(getPokemons);
 
@@ -20,6 +22,10 @@ describe('App', () => {
     localStorageMock.clear();
     getPokemonByIdMock.mockReset();
     getPokemonsMock.mockReset();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('loads Pokemons when opening the app', async () => {
@@ -51,6 +57,61 @@ describe('App', () => {
     });
   });
 
+  it('reuses persisted Pokemon data after revisiting the app', async () => {
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 1 });
+    const firstVisit = render(<App />);
+
+    expect(
+      await screen.findByRole('heading', { name: 'bulbasaur' })
+    ).toBeInTheDocument();
+
+    firstVisit.unmount();
+    render(<App />);
+
+    expect(
+      await screen.findByRole('heading', { name: 'bulbasaur' })
+    ).toBeInTheDocument();
+    expect(getPokemonsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not reuse persisted Pokemon data after cache TTL expires', async () => {
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(CACHE_START_TIME);
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 1 });
+    const firstVisit = render(<App />);
+
+    await screen.findByRole('heading', { name: 'bulbasaur' });
+    firstVisit.unmount();
+
+    clock.mockReturnValue(CACHE_EXPIRED_TIME);
+    render(<App />);
+
+    await screen.findByRole('heading', { name: 'bulbasaur' });
+    expect(getPokemonsMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('reuses persisted Pokemon details after revisiting the details route', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+    getPokemonByIdMock.mockResolvedValue(bulbasaur);
+    const firstVisit = render(<App />);
+
+    await user.click(
+      await screen.findByRole('article', { name: /bulbasaur/i })
+    );
+    await waitFor(() => {
+      expect(screen.queryByText('Loading details...')).not.toBeInTheDocument();
+    });
+
+    firstVisit.unmount();
+    render(<App />);
+
+    expect(
+      await screen.findByRole('complementary', { name: 'Pokemon details' })
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Loading details...')).not.toBeInTheDocument();
+    expect(getPokemonByIdMock).toHaveBeenCalledTimes(1);
+  });
+
   it('writes a new search request to localStorage after search', async () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: [], totalPages: 0 });
@@ -65,7 +126,7 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
     await waitFor(() => {
-      expect(localStorageMock.setItem).toHaveBeenLastCalledWith(
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'pokemon-search-term',
         'mew'
       );
@@ -92,7 +153,7 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
     await waitFor(() => {
-      expect(localStorageMock.setItem).toHaveBeenLastCalledWith(
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'pokemon-search-term',
         'raichu'
       );
