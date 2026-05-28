@@ -1,16 +1,33 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent } from '../test-utils';
 import App from '../../App';
-import { getPokemons } from '../../services/pokemonService';
 
-vi.mock('../../services/pokemonService', () => ({
-  getPokemonById: vi.fn(),
-  getPokemons: vi.fn().mockResolvedValue({ pokemons: [], totalPages: 0 }),
-}));
+const setupEmptyPokemonApiMock = () => {
+  const fetchMock = vi.fn(() =>
+    Promise.resolve(
+      Response.json(
+        { count: 0, results: [] },
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
+    )
+  );
+
+  vi.stubGlobal('fetch', fetchMock);
+
+  return fetchMock;
+};
 
 describe('About', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('opens the about', async () => {
     const user = userEvent.setup();
+    const fetchMock = setupEmptyPokemonApiMock();
 
     render(<App />);
 
@@ -27,6 +44,6 @@ describe('About', () => {
       screen.getByRole('link', { name: 'RS School React course' })
     ).toHaveAttribute('href', 'https://rs.school/courses/reactjs');
     expect(globalThis.location.pathname).toBe('/about');
-    expect(getPokemons).toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalled();
   });
 });

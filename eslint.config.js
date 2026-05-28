@@ -49,17 +49,7 @@ export default defineConfig([
     settings: {
       react: { version: 'detect' },
     },
-    plugins: {
-      // 'react': react,
-      // 'react-hooks': reactHooks,
-      // 'react-refresh': reactRefresh,
-      // 'import': importPlugin,
-      // 'vitest': vitest,
-      // 'sort-exports': sortExports,
-      // 'import-newlines': importNewlines,
-      // '@stylistic': stylistic,
-      // 'unicorn': eslintPluginUnicorn,
-    },
+    plugins: {},
     linterOptions: {
       noInlineConfig: true,
     },

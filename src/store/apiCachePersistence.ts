@@ -61,7 +61,10 @@ export const loadPersistedApiCache = (): PokemonApiState | undefined => {
       return undefined;
     }
 
-    return cache.state;
+    return {
+      ...cache.state,
+      subscriptions: {},
+    };
   } catch {
     removePersistedApiCache();
     return undefined;

@@ -26,7 +26,6 @@ type SetSearchParameters = ReturnType<typeof useSearchParams>[1];
 type HomeHandlers = {
   handleClearSelectedPokemons: () => void;
   handleCloseDetails: () => void;
-  handleDownloadSelectedPokemons: () => void;
   handleMasterPaneKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
   handlePokemonSelect: (pokemonId: number) => void;
   handlePokemonSelectionChange: (pokemon: Pokemon, isSelected: boolean) => void;
@@ -76,6 +75,14 @@ const getSelectedPokemonsCsv = (selectedPokemons: Pokemon[]): string => {
     .join('\n');
 };
 
+const getSelectedPokemonsDownloadHref = (
+  selectedPokemons: Pokemon[]
+): string => {
+  return `data:text/csv;charset=utf-8,${encodeURIComponent(
+    getSelectedPokemonsCsv(selectedPokemons)
+  )}`;
+};
+
 const usePageParameterNormalization = (
   searchParameters: URLSearchParams,
   setSearchParameters: SetSearchParameters
@@ -119,24 +126,10 @@ const useSelectedPokemonSynchronization = (
   }, [dispatch, selectedPokemonId, storedSelectedPokemonId]);
 };
 
-const downloadSelectedPokemons = (selectedPokemons: Pokemon[]): void => {
-  const blob = new Blob([getSelectedPokemonsCsv(selectedPokemons)], {
-    type: 'text/csv;charset=utf-8',
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-
-  link.href = url;
-  link.download = `${String(selectedPokemons.length)}_items.csv`;
-  link.click();
-  URL.revokeObjectURL(url);
-};
-
 type UseHomeHandlersProperties = {
   currentPage: number;
   dispatch: AppDispatch;
   searchParameters: URLSearchParams;
-  selectedPokemons: Pokemon[];
   setSearchParameters: SetSearchParameters;
   setStoredSearchTerm: (searchTerm: string) => void;
   storedSelectedPokemonId: number | null;
@@ -146,7 +139,6 @@ const useHomeHandlers = ({
   currentPage,
   dispatch,
   searchParameters,
-  selectedPokemons,
   setSearchParameters,
   setStoredSearchTerm,
   storedSelectedPokemonId,
@@ -203,9 +195,6 @@ const useHomeHandlers = ({
       dispatch(unselectAllPokemons());
     },
     handleCloseDetails,
-    handleDownloadSelectedPokemons: (): void => {
-      downloadSelectedPokemons(selectedPokemons);
-    },
     handleMasterPaneKeyDown,
     handlePokemonSelect,
     handlePokemonSelectionChange: (pokemon, isSelected): void => {
@@ -292,7 +281,6 @@ function Home() {
     currentPage,
     dispatch,
     searchParameters,
-    selectedPokemons,
     setSearchParameters,
     setStoredSearchTerm,
     storedSelectedPokemonId,
@@ -324,8 +312,9 @@ function Home() {
         />
         <ErrorTestButton />
         <SelectedPokemonActions
+          downloadFileName={`${String(selectedPokemons.length)}_items.csv`}
+          downloadHref={getSelectedPokemonsDownloadHref(selectedPokemons)}
           onClearAll={handlers.handleClearSelectedPokemons}
-          onDownload={handlers.handleDownloadSelectedPokemons}
           selectedPokemons={selectedPokemons}
         />
       </main>

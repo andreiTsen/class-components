@@ -1,4 +1,9 @@
-import { configureStore, type EnhancedStore } from '@reduxjs/toolkit';
+import {
+  configureStore,
+  type Tuple,
+  type UnknownAction,
+} from '@reduxjs/toolkit';
+import type { ThunkMiddleware } from 'redux-thunk';
 import { pokemonApi } from '../services/pokemonApi';
 import {
   loadPersistedApiCache,
@@ -11,9 +16,20 @@ export type RootState = {
   [pokemonApi.reducerPath]: ReturnType<typeof pokemonApi.reducer>;
 };
 
-const subscribeToApiCachePersistence = (
-  appStore: EnhancedStore<RootState>
-): void => {
+type PokemonApiState = ReturnType<typeof pokemonApi.reducer>;
+type AppMiddleware = Tuple<
+  [typeof pokemonApi.middleware, ThunkMiddleware<RootState, UnknownAction>]
+>;
+type AppStore = ReturnType<
+  typeof configureStore<RootState, UnknownAction, AppMiddleware>
+>;
+
+type StoreWithApiCache = {
+  getState: () => RootState;
+  subscribe: (listener: () => void) => () => void;
+};
+
+const subscribeToApiCachePersistence = (appStore: StoreWithApiCache): void => {
   let previousApiState = appStore.getState()[pokemonApi.reducerPath];
 
   appStore.subscribe(() => {
@@ -28,9 +44,8 @@ const subscribeToApiCachePersistence = (
   });
 };
 
-export const setupStore = (): EnhancedStore<RootState> => {
-  const persistedApiState = loadPersistedApiCache();
-  const appStore: EnhancedStore<RootState> = configureStore({
+const createConfiguredStore = (persistedApiState?: PokemonApiState): AppStore =>
+  configureStore({
     reducer: {
       selectedPokemon: selectedPokemonReducer,
       [pokemonApi.reducerPath]: pokemonApi.reducer,
@@ -41,6 +56,10 @@ export const setupStore = (): EnhancedStore<RootState> => {
       ? { [pokemonApi.reducerPath]: persistedApiState }
       : undefined,
   });
+
+export const setupStore = (): AppStore => {
+  const persistedApiState = loadPersistedApiCache();
+  const appStore = createConfiguredStore(persistedApiState);
 
   subscribeToApiCachePersistence(appStore);
 

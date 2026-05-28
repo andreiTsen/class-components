@@ -1,14 +1,16 @@
 import type { Pokemon } from '../../types';
 
 type SelectedPokemonActionsProperties = {
+  downloadFileName: string;
+  downloadHref: string;
   onClearAll: () => void;
-  onDownload: () => void;
   selectedPokemons: Pokemon[];
 };
 
 function SelectedPokemonActions({
+  downloadFileName,
+  downloadHref,
   onClearAll,
-  onDownload,
   selectedPokemons,
 }: SelectedPokemonActionsProperties) {
   const selectedCount = selectedPokemons.length;
@@ -24,9 +26,9 @@ function SelectedPokemonActions({
         <button type="button" onClick={onClearAll}>
           Unselect all
         </button>
-        <button type="button" onClick={onDownload}>
+        <a href={downloadHref} download={downloadFileName}>
           Download
-        </button>
+        </a>
       </div>
     </aside>
   );
