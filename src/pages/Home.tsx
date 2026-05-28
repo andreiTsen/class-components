@@ -6,7 +6,7 @@ import ResultsSection from '../components/ResultsSection/ResultsSection';
 import SearchSection from '../components/SearchSection/SearchSection';
 import SelectedPokemonActions from '../components/SelectedPokemonActions/SelectedPokemonActions';
 import useLocalStorage from '../hooks/useLocalStorage';
-import { useGetPokemonsQuery } from '../services/pokemonApi';
+import { pokemonApi, useGetPokemonsQuery } from '../services/pokemonApi';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   clearSelectedPokemon,
@@ -30,6 +30,7 @@ type HomeHandlers = {
   handleMasterPaneKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
   handlePokemonSelect: (pokemonId: number) => void;
   handlePokemonSelectionChange: (pokemon: Pokemon, isSelected: boolean) => void;
+  handleRefreshResults: () => void;
   handleSearch: (searchTerm: string) => void;
 };
 
@@ -210,6 +211,11 @@ const useHomeHandlers = ({
     handlePokemonSelectionChange: (pokemon, isSelected): void => {
       dispatch(setPokemonSelection({ isSelected, pokemon }));
     },
+    handleRefreshResults: (): void => {
+      dispatch(
+        pokemonApi.util.invalidateTags([{ type: 'PokemonList', id: 'LIST' }])
+      );
+    },
     handleSearch,
   };
 };
@@ -242,6 +248,7 @@ function ResultsWithDetails({
           isLoading={isLoading}
           onPokemonSelectionChange={handlers.handlePokemonSelectionChange}
           onPokemonSelect={handlers.handlePokemonSelect}
+          onRefresh={handlers.handleRefreshResults}
           pokemons={pokemons}
           selectedPokemonId={selectedPokemonId}
           selectedPokemonIds={selectedPokemonIds}

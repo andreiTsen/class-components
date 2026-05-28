@@ -14,6 +14,7 @@ const renderResultsSection = (
       isLoading={false}
       onPokemonSelectionChange={() => undefined}
       onPokemonSelect={() => undefined}
+      onRefresh={() => undefined}
       pokemons={[]}
       totalPages={1}
       {...properties}
@@ -31,6 +32,17 @@ describe('ResultsSection', () => {
     renderResultsSection({ error: 'Failed to load data' });
 
     expect(screen.getByText('Failed to load data')).toBeInTheDocument();
+  });
+
+  it('refreshes results on button click', async () => {
+    const user = userEvent.setup();
+    const handleRefresh = vi.fn();
+
+    renderResultsSection({ onRefresh: handleRefresh });
+
+    await user.click(screen.getByRole('button', { name: 'Refresh results' }));
+
+    expect(handleRefresh).toHaveBeenCalled();
   });
 
   it('renders emptiness with an empty list', () => {

@@ -15,6 +15,7 @@ type ResultsSectionProperties = {
   isLoading: boolean;
   onPokemonSelectionChange: (pokemon: Pokemon, isSelected: boolean) => void;
   onPokemonSelect: (pokemonId: number) => void;
+  onRefresh: () => void;
   pokemons: Pokemon[];
   selectedPokemonId?: number | null;
   selectedPokemonIds?: number[];
@@ -142,6 +143,7 @@ function ResultsSection({
   isLoading,
   onPokemonSelectionChange,
   onPokemonSelect,
+  onRefresh,
   pokemons,
   selectedPokemonId = null,
   selectedPokemonIds = [],
@@ -154,6 +156,9 @@ function ResultsSection({
       <div>
         <h2 id="results-title">Pokemons Results</h2>
         <p>Submitted Pokemon</p>
+        <button type="button" onClick={onRefresh} disabled={isLoading}>
+          Refresh results
+        </button>
       </div>
 
       {isLoading && <LoadingIndicator />}

@@ -20,7 +20,7 @@ export const pokemonApi = createApi({
   keepUnusedDataFor: apiCacheTtlSeconds,
   refetchOnFocus: true,
   refetchOnReconnect: true,
-  tagTypes: ['Pokemon'],
+  tagTypes: ['PokemonList', 'PokemonDetails'],
   endpoints: (builder) => ({
     getPokemonById: builder.query<Pokemon, string | number>({
       queryFn: async (id) => {
@@ -31,7 +31,7 @@ export const pokemonApi = createApi({
         }
       },
       providesTags: (result, _error, id) => [
-        { type: 'Pokemon', id: result?.id ?? id },
+        { type: 'PokemonDetails', id: result?.id ?? id },
       ],
     }),
     getPokemons: builder.query<PokemonPage, PokemonPageQueryArguments>({
@@ -42,20 +42,10 @@ export const pokemonApi = createApi({
           return { error: getQueryError('Failed to load data') };
         }
       },
-      providesTags: (result) => {
-        const listTag = { type: 'Pokemon' as const, id: 'LIST' };
+      providesTags: () => {
+        const listTag = { type: 'PokemonList' as const, id: 'LIST' };
 
-        if (!result) {
-          return [listTag];
-        }
-
-        return [
-          listTag,
-          ...result.pokemons.map((pokemon) => ({
-            type: 'Pokemon' as const,
-            id: pokemon.id,
-          })),
-        ];
+        return [listTag];
       },
     }),
   }),

@@ -182,6 +182,20 @@ describe('App', () => {
     expect(screen.getByText('Page 1 of 2')).toBeInTheDocument();
   });
 
+  it('invalidates cache and reloads Pokemons after manual refresh', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+
+    render(<App />);
+
+    await screen.findByRole('heading', { name: 'bulbasaur' });
+    await user.click(screen.getByRole('button', { name: 'Refresh results' }));
+
+    await waitFor(() => {
+      expect(getPokemonsMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
   it('updates the page parameter when changing page', async () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
@@ -463,6 +477,24 @@ describe('App', () => {
     );
 
     expect(screen.getByRole('status')).toHaveTextContent('Loading details...');
+  });
+
+  it('invalidates cache and reloads Pokemon details after manual refresh', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+    getPokemonByIdMock.mockResolvedValue(bulbasaur);
+
+    render(<App />);
+
+    await user.click(
+      await screen.findByRole('article', { name: /bulbasaur/i })
+    );
+    await screen.findByRole('complementary', { name: 'Pokemon details' });
+    await user.click(screen.getByRole('button', { name: 'Refresh details' }));
+
+    await waitFor(() => {
+      expect(getPokemonByIdMock).toHaveBeenCalledTimes(2);
+    });
   });
 
   it('shows an error when detailed information cannot be loaded', async () => {
