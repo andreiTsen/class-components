@@ -404,7 +404,7 @@ describe('App', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Loading details...');
   });
 
-  it('closes the details panel by clicking the main panel', async () => {
+  it('keeps the details panel open when clicking the main panel', async () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
     getPokemonByIdMock.mockResolvedValue(bulbasaur);
@@ -415,13 +415,13 @@ describe('App', () => {
       await screen.findByRole('article', { name: /bulbasaur/i })
     );
     await screen.findByRole('button', { name: 'Close' });
-    await user.click(screen.getByRole('heading', { name: 'Pokemons Results' }));
+    await user.click(screen.getByRole('heading', { name: 'Pokemon Results' }));
 
-    await waitFor(() => {
-      expect(globalThis.location.pathname).toBe('/');
-      expect(globalThis.location.search).toBe('?page=1');
-      expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
-    });
+    expect(globalThis.location.pathname).toBe('/details/1');
+    expect(globalThis.location.search).toBe('?page=1');
+    expect(
+      screen.getByRole('complementary', { name: 'Pokemon details' })
+    ).toBeInTheDocument();
   });
 
   it('keeps the details panel closed before choosing a Pokemon', async () => {
@@ -429,7 +429,7 @@ describe('App', () => {
 
     render(<App />);
 
-    await screen.findByRole('heading', { name: 'Pokemons Results' });
+    await screen.findByRole('heading', { name: 'Pokemon Results' });
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     expect(globalThis.location.pathname).toBe('/');
   });
