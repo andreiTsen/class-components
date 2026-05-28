@@ -187,7 +187,7 @@ describe('App', () => {
     await waitFor(() => {
       expect(globalThis.location.search).toBe('?page=2');
     });
-    await user.click(screen.getByRole('link', { name: 'Previous' }));
+    await user.click(await screen.findByRole('link', { name: 'Previous' }));
     await waitFor(() => {
       expect(globalThis.location.search).toBe('?page=1');
     });
