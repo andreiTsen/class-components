@@ -16,10 +16,6 @@ function PokemonResultItem({
   onPokemonSelect,
   pokemon,
 }: PokemonResultItemProperties) {
-  const handleSelect = (): void => {
-    onPokemonSelect(pokemon.id);
-  };
-
   return (
     <article
       className="result-item"
@@ -28,7 +24,7 @@ function PokemonResultItem({
       aria-label={pokemon.name}
       onClick={(event: MouseEvent<HTMLElement>): void => {
         event.stopPropagation();
-        handleSelect();
+        onPokemonSelect(pokemon.id);
       }}
       onKeyDown={(event: KeyboardEvent<HTMLElement>): void => {
         if (event.target !== event.currentTarget) {
@@ -37,7 +33,7 @@ function PokemonResultItem({
 
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          handleSelect();
+          onPokemonSelect(pokemon.id);
         }
       }}
     >
