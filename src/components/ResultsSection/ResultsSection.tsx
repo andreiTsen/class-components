@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
 import type { Pokemon } from '../../types';
 import Pagination from './Pagination';
 import PokemonResultItem from './PokemonResultItem';
+import { ResultsSectionContext } from './ResultsSectionContext';
 import '../StatusMessage.css';
 import './ResultsSection.css';
 
@@ -29,6 +31,20 @@ function ResultsSection({
   totalPages,
 }: ResultsSectionProperties) {
   const showPagination: boolean = !error && totalPages > 1;
+  const resultsSectionContextValue = useMemo(
+    () => ({
+      onPokemonSelectionChange,
+      onPokemonSelect,
+      selectedPokemonId,
+      selectedPokemonIds,
+    }),
+    [
+      onPokemonSelectionChange,
+      onPokemonSelect,
+      selectedPokemonId,
+      selectedPokemonIds,
+    ]
+  );
 
   return (
     <section className="results-section" aria-labelledby="results-title">
@@ -43,18 +59,13 @@ function ResultsSection({
         <p className="status-message">No pokemons found.</p>
       )}
 
-      <div className="result-list">
-        {pokemons.map((pokemon) => (
-          <PokemonResultItem
-            isChecked={selectedPokemonIds.includes(pokemon.id)}
-            isSelected={selectedPokemonId === pokemon.id}
-            key={pokemon.id}
-            onPokemonSelectionChange={onPokemonSelectionChange}
-            onPokemonSelect={onPokemonSelect}
-            pokemon={pokemon}
-          />
-        ))}
-      </div>
+      <ResultsSectionContext.Provider value={resultsSectionContextValue}>
+        <div className="result-list">
+          {pokemons.map((pokemon) => (
+            <PokemonResultItem key={pokemon.id} pokemon={pokemon} />
+          ))}
+        </div>
+      </ResultsSectionContext.Provider>
 
       {showPagination && (
         <Pagination

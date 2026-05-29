@@ -9,6 +9,7 @@ import ErrorTestButton from '../components/ErrorTestButton/ErrorTestButton';
 import Flyout from '../components/Flyout/Flyout';
 import Layout from '../components/Layout/Layout';
 import PokemonResultsLayout from '../components/PokemonResultsLayout/PokemonResultsLayout';
+import ResultsSection from '../components/ResultsSection/ResultsSection';
 import SearchSection from '../components/SearchSection/SearchSection';
 import useLocalStorage from '../hooks/useLocalStorage';
 import usePokemonSearch from '../hooks/usePokemonSearch';
@@ -25,6 +26,15 @@ import './Home.css';
 
 const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
 type SetSearchParameters = ReturnType<typeof useSearchParams>[1];
+type HomeSynchronizationProperties = {
+  dispatch: AppDispatch;
+  loadPage: (page: number, searchTerm: string) => Promise<void>;
+  searchParameters: URLSearchParams;
+  selectedPokemonId: number | null;
+  setSearchParameters: SetSearchParameters;
+  storedSearchTerm: string;
+  storedSelectedPokemonId: number | null;
+};
 
 const getFirstPageSearchParameters = (
   currentSearchParameters: URLSearchParams
@@ -112,6 +122,36 @@ const synchronizeSelectedPokemon = (
   }
 };
 
+function useHomeSynchronization({
+  dispatch,
+  loadPage,
+  searchParameters,
+  selectedPokemonId,
+  setSearchParameters,
+  storedSearchTerm,
+  storedSelectedPokemonId,
+}: HomeSynchronizationProperties) {
+  useEffect(() => {
+    loadCurrentPokemonPage(
+      loadPage,
+      searchParameters,
+      setSearchParameters,
+      storedSearchTerm
+    );
+  }, [loadPage, searchParameters, setSearchParameters, storedSearchTerm]);
+
+  useEffect(() => {
+    synchronizeSelectedPokemon(
+      dispatch,
+      selectedPokemonId,
+      storedSelectedPokemonId
+    );
+  }, [dispatch, selectedPokemonId, storedSelectedPokemonId]);
+}
+
+const useSelectedPokemonState = () =>
+  useAppSelector((state) => state.selectedPokemon);
+
 function Home() {
   const [searchParameters, setSearchParameters] = useSearchParams();
   const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(
@@ -119,12 +159,8 @@ function Home() {
   );
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const selectedPokemonIds = useAppSelector(
-    (state) => state.selectedPokemon.selectedPokemonIds
-  );
-  const storedSelectedPokemonId = useAppSelector(
-    (state) => state.selectedPokemon.selectedPokemonId
-  );
+  const { selectedPokemonIds, selectedPokemonId: storedSelectedPokemonId } =
+    useSelectedPokemonState();
   const { currentPage, error, isLoading, loadPage, pokemons, totalPages } =
     usePokemonSearch();
   const selectedPokemonId = parsePositiveInteger(
@@ -164,22 +200,15 @@ function Home() {
     [dispatch]
   );
 
-  useEffect(() => {
-    loadCurrentPokemonPage(
-      loadPage,
-      searchParameters,
-      setSearchParameters,
-      storedSearchTerm
-    );
-  }, [loadPage, searchParameters, setSearchParameters, storedSearchTerm]);
-
-  useEffect(() => {
-    synchronizeSelectedPokemon(
-      dispatch,
-      selectedPokemonId,
-      storedSelectedPokemonId
-    );
-  }, [dispatch, selectedPokemonId, storedSelectedPokemonId]);
+  useHomeSynchronization({
+    dispatch,
+    loadPage,
+    searchParameters,
+    selectedPokemonId,
+    setSearchParameters,
+    storedSearchTerm,
+    storedSelectedPokemonId,
+  });
 
   return (
     <Layout>
@@ -189,17 +218,21 @@ function Home() {
           onSearch={handleSearch}
         />
         <PokemonResultsLayout
-          currentPage={currentPage}
-          error={error}
-          isLoading={isLoading}
           onCloseDetails={handleCloseDetails}
-          onPokemonSelectionChange={handlePokemonSelectionChange}
-          onPokemonSelect={handlePokemonSelect}
-          pokemons={pokemons}
           selectedPokemonId={selectedPokemonId}
-          selectedPokemonIds={selectedPokemonIds}
-          totalPages={totalPages}
-        />
+        >
+          <ResultsSection
+            currentPage={currentPage}
+            error={error}
+            isLoading={isLoading}
+            onPokemonSelectionChange={handlePokemonSelectionChange}
+            onPokemonSelect={handlePokemonSelect}
+            pokemons={pokemons}
+            selectedPokemonId={selectedPokemonId}
+            selectedPokemonIds={selectedPokemonIds}
+            totalPages={totalPages}
+          />
+        </PokemonResultsLayout>
         <ErrorTestButton />
         <Flyout />
       </main>

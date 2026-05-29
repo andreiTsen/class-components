@@ -1,49 +1,20 @@
-import type { ComponentProps } from 'react';
+import type { ReactNode } from 'react';
 import { Outlet } from 'react-router';
-import ResultsSection from '../ResultsSection/ResultsSection';
 
-type PokemonResultsLayoutProperties = Pick<
-  ComponentProps<typeof ResultsSection>,
-  | 'currentPage'
-  | 'error'
-  | 'isLoading'
-  | 'onPokemonSelectionChange'
-  | 'onPokemonSelect'
-  | 'pokemons'
-  | 'selectedPokemonId'
-  | 'selectedPokemonIds'
-  | 'totalPages'
-> & {
+type PokemonResultsLayoutProperties = {
+  children: ReactNode;
   onCloseDetails: () => void;
+  selectedPokemonId?: number | null;
 };
 
 function PokemonResultsLayout({
-  currentPage,
-  error,
-  isLoading,
+  children,
   onCloseDetails,
-  onPokemonSelectionChange,
-  onPokemonSelect,
-  pokemons,
   selectedPokemonId,
-  selectedPokemonIds,
-  totalPages,
 }: PokemonResultsLayoutProperties) {
   return (
     <div className="master-detail-layout">
-      <div className="master-pane">
-        <ResultsSection
-          currentPage={currentPage}
-          error={error}
-          isLoading={isLoading}
-          onPokemonSelectionChange={onPokemonSelectionChange}
-          onPokemonSelect={onPokemonSelect}
-          pokemons={pokemons}
-          selectedPokemonId={selectedPokemonId}
-          selectedPokemonIds={selectedPokemonIds}
-          totalPages={totalPages}
-        />
-      </div>
+      <div className="master-pane">{children}</div>
       {selectedPokemonId && <Outlet context={{ onClose: onCloseDetails }} />}
     </div>
   );

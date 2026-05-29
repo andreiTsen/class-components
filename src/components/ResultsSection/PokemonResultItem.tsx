@@ -1,21 +1,21 @@
 import type { KeyboardEvent, MouseEvent } from 'react';
 import type { Pokemon } from '../../types';
+import { useResultsSectionContext } from './ResultsSectionContext';
 
 type PokemonResultItemProperties = {
-  isChecked: boolean;
-  isSelected: boolean;
-  onPokemonSelectionChange: (pokemon: Pokemon, isSelected: boolean) => void;
-  onPokemonSelect: (pokemonId: number) => void;
   pokemon: Pokemon;
 };
 
-function PokemonResultItem({
-  isChecked,
-  isSelected,
-  onPokemonSelectionChange,
-  onPokemonSelect,
-  pokemon,
-}: PokemonResultItemProperties) {
+function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
+  const {
+    onPokemonSelectionChange,
+    onPokemonSelect,
+    selectedPokemonId,
+    selectedPokemonIds,
+  } = useResultsSectionContext();
+  const isChecked = selectedPokemonIds.includes(pokemon.id);
+  const isSelected = selectedPokemonId === pokemon.id;
+
   return (
     <article
       className="result-item"
