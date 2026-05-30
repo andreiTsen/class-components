@@ -1,13 +1,13 @@
-import { downloadSelectedPokemons } from '../../services/downloadSelectedPokemons';
+import { downloadSelectedItems } from '../../services/downloadSelectedItems';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { unselectAllPokemons } from '../../store/selectedPokemonSlice';
 
 function Flyout() {
   const dispatch = useAppDispatch();
-  const selectedPokemons = useAppSelector(
+  const selectedItems = useAppSelector(
     (state) => state.selectedPokemon.selectedPokemons
   );
-  const selectedCount = selectedPokemons.length;
+  const selectedCount = selectedItems.length;
 
   if (selectedCount === 0) {
     return null;
@@ -28,7 +28,7 @@ function Flyout() {
         <button
           type="button"
           onClick={(): void => {
-            downloadSelectedPokemons(selectedPokemons);
+            downloadSelectedItems(selectedItems);
           }}
         >
           Download
