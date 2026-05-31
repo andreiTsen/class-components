@@ -110,6 +110,13 @@ const renderResults = ({
   />
 );
 
+const renderSearchSection = (
+  storedSearchTerm: string,
+  handleSearch: (searchTerm: string) => void
+) => (
+  <SearchSection initialSearchTerm={storedSearchTerm} onSearch={handleSearch} />
+);
+
 function Home() {
   const [searchParameters, setSearchParameters] = useSearchParams();
   const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(
@@ -168,10 +175,7 @@ function Home() {
   return (
     <Layout>
       <main className="application-page">
-        <SearchSection
-          initialSearchTerm={storedSearchTerm}
-          onSearch={handleSearch}
-        />
+        {renderSearchSection(storedSearchTerm, handleSearch)}
         <PokemonResultsLayout
           onCloseDetails={handleCloseDetails}
           selectedPokemonId={selectedPokemonId}
