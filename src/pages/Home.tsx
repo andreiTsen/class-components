@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import {
   useMatch,
   useNavigate,
@@ -74,6 +74,42 @@ const getSelectedPokemonId = (pokemonId?: string): number | null => {
   return parsePositiveInteger(pokemonId);
 };
 
+type RenderResultsProperties = {
+  currentPage: number;
+  error: string;
+  handlePokemonSelect: (pokemonId: number) => void;
+  handlePokemonSelectionChange: (pokemon: Pokemon, isSelected: boolean) => void;
+  isLoading: boolean;
+  pokemons: Pokemon[];
+  selectedPokemonId: number | null;
+  selectedPokemonIds: number[];
+  totalPages: number;
+};
+
+const renderResults = ({
+  currentPage,
+  error,
+  handlePokemonSelect,
+  handlePokemonSelectionChange,
+  isLoading,
+  pokemons,
+  selectedPokemonId,
+  selectedPokemonIds,
+  totalPages,
+}: RenderResultsProperties) => (
+  <ResultsSection
+    currentPage={currentPage}
+    error={error}
+    isLoading={isLoading}
+    onPokemonSelectionChange={handlePokemonSelectionChange}
+    onPokemonSelect={handlePokemonSelect}
+    pokemons={pokemons}
+    selectedPokemonId={selectedPokemonId}
+    selectedPokemonIds={selectedPokemonIds}
+    totalPages={totalPages}
+  />
+);
+
 function Home() {
   const [searchParameters, setSearchParameters] = useSearchParams();
   const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(
@@ -88,9 +124,9 @@ function Home() {
   const selectedPokemonId = getSelectedPokemonId(
     useMatch('/details/:pokemonId')?.params.pokemonId
   );
-  const searchWithCurrentPage = useMemo(
-    () => getSearchWithCurrentPage(searchParameters, currentPage),
-    [currentPage, searchParameters]
+  const searchWithCurrentPage = getSearchWithCurrentPage(
+    searchParameters,
+    currentPage
   );
 
   const handleSearch = useCallback(
@@ -140,17 +176,17 @@ function Home() {
           onCloseDetails={handleCloseDetails}
           selectedPokemonId={selectedPokemonId}
         >
-          <ResultsSection
-            currentPage={currentPage}
-            error={error}
-            isLoading={isLoading}
-            onPokemonSelectionChange={handlePokemonSelectionChange}
-            onPokemonSelect={handlePokemonSelect}
-            pokemons={pokemons}
-            selectedPokemonId={selectedPokemonId}
-            selectedPokemonIds={selectedPokemonIds}
-            totalPages={totalPages}
-          />
+          {renderResults({
+            currentPage,
+            error,
+            handlePokemonSelect,
+            handlePokemonSelectionChange,
+            isLoading,
+            pokemons,
+            selectedPokemonId,
+            selectedPokemonIds,
+            totalPages,
+          })}
         </PokemonResultsLayout>
         <ErrorTestButton />
         <Flyout />
