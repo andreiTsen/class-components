@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   useMatch,
   useNavigate,
@@ -11,6 +11,7 @@ import Layout from '../components/Layout/Layout';
 import PokemonResultsLayout from '../components/PokemonResultsLayout/PokemonResultsLayout';
 import ResultsSection from '../components/ResultsSection/ResultsSection';
 import SearchSection from '../components/SearchSection/SearchSection';
+import useHomeSynchronization from '../hooks/useHomeSynchronization';
 import useLocalStorage from '../hooks/useLocalStorage';
 import usePokemonSearch from '../hooks/usePokemonSearch';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -25,16 +26,6 @@ import { parsePositiveInteger } from '../utils/parsePositiveInteger';
 import './Home.css';
 
 const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
-type SetSearchParameters = ReturnType<typeof useSearchParams>[1];
-type HomeSynchronizationProperties = {
-  dispatch: AppDispatch;
-  loadPage: (page: number, searchTerm: string) => Promise<void>;
-  searchParameters: URLSearchParams;
-  selectedPokemonId: number | null;
-  setSearchParameters: SetSearchParameters;
-  storedSearchTerm: string;
-  storedSelectedPokemonId: number | null;
-};
 
 const getFirstPageSearchParameters = (
   currentSearchParameters: URLSearchParams
@@ -79,79 +70,6 @@ const closePokemonDetails = (
   void navigate({ pathname: '/', search: searchWithCurrentPage });
 };
 
-const loadCurrentPokemonPage = (
-  loadPage: (page: number, searchTerm: string) => Promise<void>,
-  searchParameters: URLSearchParams,
-  setSearchParameters: SetSearchParameters,
-  storedSearchTerm: string
-): void => {
-  const currentPageFromUrl =
-    parsePositiveInteger(searchParameters.get('page')) ?? 1;
-
-  if (searchParameters.get('page') !== String(currentPageFromUrl)) {
-    setSearchParameters(
-      (currentSearchParameters) => {
-        const nextSearchParameters = new URLSearchParams(
-          currentSearchParameters
-        );
-        nextSearchParameters.set('page', String(currentPageFromUrl));
-        return nextSearchParameters;
-      },
-      { replace: true }
-    );
-    return;
-  }
-
-  void loadPage(currentPageFromUrl, storedSearchTerm);
-};
-
-const synchronizeSelectedPokemon = (
-  dispatch: AppDispatch,
-  selectedPokemonId: number | null,
-  storedSelectedPokemonId: number | null
-): void => {
-  if (selectedPokemonId === null) {
-    if (storedSelectedPokemonId !== null) {
-      dispatch(clearSelectedPokemon());
-    }
-    return;
-  }
-
-  if (storedSelectedPokemonId !== selectedPokemonId) {
-    dispatch(selectPokemon(selectedPokemonId));
-  }
-};
-
-function useHomeSynchronization({
-  dispatch,
-  loadPage,
-  searchParameters,
-  selectedPokemonId,
-  setSearchParameters,
-  storedSearchTerm,
-  storedSelectedPokemonId,
-}: HomeSynchronizationProperties) {
-  useEffect(() => {
-    loadCurrentPokemonPage(
-      loadPage,
-      searchParameters,
-      setSearchParameters,
-      storedSearchTerm
-    );
-  }, [loadPage, searchParameters, setSearchParameters, storedSearchTerm]);
-
-  useEffect(() => {
-    synchronizeSelectedPokemon(
-      dispatch,
-      selectedPokemonId,
-      storedSelectedPokemonId
-    );
-  }, [dispatch, selectedPokemonId, storedSelectedPokemonId]);
-}
-
-const useSelectedPokemonState = () =>
-  useAppSelector((state) => state.selectedPokemon);
-
 function Home() {
   const [searchParameters, setSearchParameters] = useSearchParams();
   const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(
@@ -160,7 +78,7 @@ function Home() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { selectedPokemonIds, selectedPokemonId: storedSelectedPokemonId } =
-    useSelectedPokemonState();
+    useAppSelector((state) => state.selectedPokemon);
   const { currentPage, error, isLoading, loadPage, pokemons, totalPages } =
     usePokemonSearch();
   const selectedPokemonId = parsePositiveInteger(
@@ -201,11 +119,8 @@ function Home() {
   );
 
   useHomeSynchronization({
-    dispatch,
     loadPage,
-    searchParameters,
     selectedPokemonId,
-    setSearchParameters,
     storedSearchTerm,
     storedSelectedPokemonId,
   });
