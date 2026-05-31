@@ -70,6 +70,10 @@ const closePokemonDetails = (
   void navigate({ pathname: '/', search: searchWithCurrentPage });
 };
 
+const getSelectedPokemonId = (pokemonId?: string): number | null => {
+  return parsePositiveInteger(pokemonId);
+};
+
 function Home() {
   const [searchParameters, setSearchParameters] = useSearchParams();
   const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(
@@ -81,7 +85,7 @@ function Home() {
     useAppSelector((state) => state.selectedPokemon);
   const { currentPage, error, isLoading, loadPage, pokemons, totalPages } =
     usePokemonSearch();
-  const selectedPokemonId = parsePositiveInteger(
+  const selectedPokemonId = getSelectedPokemonId(
     useMatch('/details/:pokemonId')?.params.pokemonId
   );
   const searchWithCurrentPage = useMemo(
