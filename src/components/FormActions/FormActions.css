@@ -1,0 +1,19 @@
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.form-actions__button {
+  cursor: pointer;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  padding: 10px 16px;
+  background: #ffffff;
+  color: var(--app-text);
+  font: inherit;
+}
+
+.form-actions__button:hover {
+  background: var(--app-hover-background);
+}

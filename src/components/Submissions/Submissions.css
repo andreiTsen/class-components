@@ -1,0 +1,10 @@
+.submissions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.submissions__title,
+.submissions__empty-message {
+  margin: 0;
+}
