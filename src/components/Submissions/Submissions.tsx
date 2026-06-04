@@ -1,17 +1,9 @@
 import './Submissions.css';
+import { useAppSelector } from '../../store/hooks';
 
-type SubmissionItem = {
-  email: string;
-  formType: 'uncontrolled' | 'hook-form';
-  id: string;
-  name: string;
-};
+function Submissions() {
+  const submissions = useAppSelector((state) => state.submissions.items);
 
-type SubmissionsProperties = {
-  submissions: SubmissionItem[];
-};
-
-function Submissions({ submissions }: SubmissionsProperties) {
   return (
     <section className="submissions">
       <h2 className="submissions__title">Submissions</h2>
@@ -19,9 +11,9 @@ function Submissions({ submissions }: SubmissionsProperties) {
         <ul className="submissions__list">
           {submissions.map((submission) => (
             <li className="submissions__item" key={submission.id}>
-              <span>{submission.name}</span>
-              <span>{submission.email}</span>
-              <span>{submission.formType}</span>
+              <span className="submissions__value">{submission.name}</span>
+              <span className="submissions__value">{submission.email}</span>
+              <span className="submissions__badge">{submission.formType}</span>
             </li>
           ))}
         </ul>

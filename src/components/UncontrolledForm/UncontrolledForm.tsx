@@ -1,6 +1,10 @@
 import { useRef } from 'react';
-import type { FormValues } from '../../types';
 import './UncontrolledForm.css';
+
+type FormValues = {
+  email: string;
+  name: string;
+};
 
 type UncontrolledFormProperties = {
   onSubmit: (values: FormValues) => void;
