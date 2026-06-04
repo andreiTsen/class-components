@@ -1,0 +1,39 @@
+.hook-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hook-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.hook-form__field input {
+  width: 100%;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: #ffffff;
+  color: var(--app-text);
+  font: inherit;
+}
+
+.hook-form__error {
+  color: #b42318;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.hook-form__submit {
+  align-self: flex-start;
+  cursor: pointer;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  padding: 10px 16px;
+  background: var(--app-text);
+  color: #ffffff;
+  font: inherit;
+}

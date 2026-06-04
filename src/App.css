@@ -1,9 +1,11 @@
-.app {
+:root {
   --app-background: #f8fafc;
   --app-border: #172033;
   --app-hover-background: #eef4f8;
   --app-text: #172033;
+}
 
+.app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;

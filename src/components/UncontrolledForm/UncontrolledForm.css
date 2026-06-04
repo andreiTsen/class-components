@@ -1,0 +1,33 @@
+.uncontrolled-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.uncontrolled-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.uncontrolled-form__field input {
+  width: 100%;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: #ffffff;
+  color: var(--app-text);
+  font: inherit;
+}
+
+.uncontrolled-form__submit {
+  align-self: flex-start;
+  cursor: pointer;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  padding: 10px 16px;
+  background: var(--app-text);
+  color: #ffffff;
+  font: inherit;
+}
