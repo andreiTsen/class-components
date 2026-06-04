@@ -7,13 +7,9 @@ import Submissions from './components/Submissions/Submissions';
 import UncontrolledForm from './components/UncontrolledForm/UncontrolledForm';
 import { useAppDispatch } from './store/hooks';
 import { addSubmission } from './store/submissionsSlice';
+import type { FormValues } from './validation/formSchema';
 
 type FormType = 'uncontrolled' | 'hook-form';
-
-type FormValues = {
-  email: string;
-  name: string;
-};
 
 const formTitles: Record<FormType, string> = {
   'hook-form': 'React Hook Form',

@@ -11,7 +11,8 @@
   font-weight: 700;
 }
 
-.uncontrolled-form__field input {
+.uncontrolled-form__field input,
+.uncontrolled-form__field select {
   width: 100%;
   border: 1px solid var(--app-border);
   border-radius: 6px;
@@ -19,6 +20,19 @@
   background: #ffffff;
   color: var(--app-text);
   font: inherit;
+}
+
+.uncontrolled-form__checkbox-field {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-weight: 700;
+}
+
+.uncontrolled-form__checkbox-field input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
 }
 
 .uncontrolled-form__submit {

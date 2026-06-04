@@ -97,12 +97,18 @@ describe('App', () => {
       screen.getByRole('button', { name: 'Open Uncontrolled Form' })
     );
     await user.type(screen.getByLabelText('Name'), 'Ada Lovelace');
+    await user.type(screen.getByLabelText('Age'), '36');
     await user.type(screen.getByLabelText('Email'), 'ada@example.com');
+    await user.selectOptions(screen.getByLabelText('Gender'), 'female');
+    await user.click(screen.getByLabelText('Accept Terms and Conditions'));
     await user.click(screen.getByRole('button', { name: 'Submit' }));
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+    expect(screen.getByText('Age: 36')).toBeInTheDocument();
     expect(screen.getByText('ada@example.com')).toBeInTheDocument();
+    expect(screen.getByText('Gender: female')).toBeInTheDocument();
+    expect(screen.getByText('Terms accepted: yes')).toBeInTheDocument();
     expect(screen.getByText('uncontrolled')).toBeInTheDocument();
   });
 
@@ -114,12 +120,18 @@ describe('App', () => {
       screen.getByRole('button', { name: 'Open React Hook Form' })
     );
     await user.type(screen.getByLabelText('Name'), 'Grace Hopper');
+    await user.type(screen.getByLabelText('Age'), '85');
     await user.type(screen.getByLabelText('Email'), 'grace@example.com');
+    await user.selectOptions(screen.getByLabelText('Gender'), 'female');
+    await user.click(screen.getByLabelText('Accept Terms and Conditions'));
     await user.click(screen.getByRole('button', { name: 'Submit' }));
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
+    expect(screen.getByText('Age: 85')).toBeInTheDocument();
     expect(screen.getByText('grace@example.com')).toBeInTheDocument();
+    expect(screen.getByText('Gender: female')).toBeInTheDocument();
+    expect(screen.getByText('Terms accepted: yes')).toBeInTheDocument();
     expect(screen.getByText('hook-form')).toBeInTheDocument();
   });
 });

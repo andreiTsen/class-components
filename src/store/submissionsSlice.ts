@@ -1,11 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { FormValues } from '../validation/formSchema';
 
 export type FormType = 'uncontrolled' | 'hook-form';
-
-export type FormValues = {
-  email: string;
-  name: string;
-};
 
 export type Submission = FormValues & {
   formType: FormType;

@@ -12,7 +12,14 @@ function Submissions() {
           {submissions.map((submission) => (
             <li className="submissions__item" key={submission.id}>
               <span className="submissions__value">{submission.name}</span>
+              <span className="submissions__value">Age: {submission.age}</span>
               <span className="submissions__value">{submission.email}</span>
+              <span className="submissions__value">
+                Gender: {submission.gender}
+              </span>
+              <span className="submissions__value">
+                Terms accepted: {submission.termsAccepted ? 'yes' : 'no'}
+              </span>
               <span className="submissions__badge">{submission.formType}</span>
             </li>
           ))}

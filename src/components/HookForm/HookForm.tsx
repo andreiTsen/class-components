@@ -1,19 +1,18 @@
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import './HookForm.css';
-
-type HookFormValues = {
-  email: string;
-  name: string;
-};
+import type { FormValues } from '../../validation/formSchema';
+import { yupResolver } from '../../validation/yupResolver';
 
 type HookFormProperties = {
-  onSubmit: (values: HookFormValues) => void;
+  onSubmit: (values: FormValues) => void;
 };
 
 function HookForm({ onSubmit }: HookFormProperties) {
-  const form = useForm<HookFormValues>();
+  const form = useForm<FormValues>({
+    resolver: yupResolver(),
+  });
 
-  const submitHandler: SubmitHandler<HookFormValues> = (values) => {
+  const submitHandler: SubmitHandler<FormValues> = (values) => {
     onSubmit(values);
   };
 
@@ -24,32 +23,57 @@ function HookForm({ onSubmit }: HookFormProperties) {
         void form.handleSubmit(submitHandler)(event);
       }}
     >
-      <label className="hook-form__field">
-        Name
+      <div className="hook-form__field">
+        <label htmlFor="hook-form-name">Name</label>
         <input
+          id="hook-form-name"
           {...form.register('name', { required: 'Name is required' })}
           aria-invalid={Boolean(form.formState.errors.name)}
           data-modal-autofocus
         />
-        {form.formState.errors.name ? (
-          <span className="hook-form__error">
-            {form.formState.errors.name.message}
-          </span>
-        ) : null}
-      </label>
-      <label className="hook-form__field">
-        Email
+      </div>
+      <div className="hook-form__field">
+        <label htmlFor="hook-form-age">Age</label>
         <input
+          id="hook-form-age"
+          min="1"
+          {...form.register('age', { required: 'Age is required' })}
+          aria-invalid={Boolean(form.formState.errors.age)}
+          type="number"
+        />
+      </div>
+      <div className="hook-form__field">
+        <label htmlFor="hook-form-email">Email</label>
+        <input
+          id="hook-form-email"
           {...form.register('email', { required: 'Email is required' })}
           aria-invalid={Boolean(form.formState.errors.email)}
           type="email"
         />
-        {form.formState.errors.email ? (
-          <span className="hook-form__error">
-            {form.formState.errors.email.message}
-          </span>
-        ) : null}
-      </label>
+      </div>
+      <div className="hook-form__field">
+        <label htmlFor="hook-form-gender">Gender</label>
+        <select
+          id="hook-form-gender"
+          {...form.register('gender', { required: 'Gender is required' })}
+          aria-invalid={Boolean(form.formState.errors.gender)}
+        >
+          <option value="">Select gender</option>
+          <option value="female">Female</option>
+          <option value="male">Male</option>
+        </select>
+      </div>
+      <div className="hook-form__checkbox-field">
+        <input
+          id="hook-form-terms"
+          {...form.register('termsAccepted', {
+            required: 'Terms must be accepted',
+          })}
+          aria-invalid={Boolean(form.formState.errors.termsAccepted)}
+          type="checkbox"
+        />
+        <label htmlFor="hook-form-terms">Accept Terms and Conditions</label>
+      </div>
       <button className="hook-form__submit" type="submit">
         Submit
       </button>
