@@ -1,8 +1,14 @@
 import { useState } from 'react';
+import { ValidationError } from 'yup';
 import UncontrolledAdvancedFields from './UncontrolledAdvancedFields';
 import UncontrolledBasicFields from './UncontrolledBasicFields';
+import FieldError from '../FieldError/FieldError';
 import { useAppSelector } from '../../store/hooks';
-import { formSchema, type FormValues } from '../../validation/formSchema';
+import {
+  createFormSchema,
+  type FormErrors,
+  type FormValues,
+} from '../../validation/formSchema';
 import './UncontrolledForm.css';
 
 type UncontrolledFormProperties = {
@@ -15,8 +21,8 @@ function getFormString(formData: FormData, fieldName: string): string {
   return typeof value === 'string' ? value : '';
 }
 
-async function validateFormData(formData: FormData): Promise<FormValues> {
-  return formSchema.validate({
+function getFormValues(formData: FormData): FormValues {
+  return {
     age: getFormString(formData, 'age'),
     avatarBase64: getFormString(formData, 'avatarBase64'),
     confirmPassword: getFormString(formData, 'confirmPassword'),
@@ -26,14 +32,32 @@ async function validateFormData(formData: FormData): Promise<FormValues> {
     name: getFormString(formData, 'name'),
     password: getFormString(formData, 'password'),
     termsAccepted: formData.has('termsAccepted'),
+  };
+}
+
+async function validateFormData(
+  formData: FormData,
+  countries: string[]
+): Promise<FormValues> {
+  return createFormSchema(countries).validate(getFormValues(formData), {
+    abortEarly: false,
   });
+}
+
+function getValidationErrors(error: ValidationError): FormErrors {
+  return Object.fromEntries(
+    error.inner.map((validationError) => [
+      validationError.path ?? '',
+      validationError.message,
+    ])
+  );
 }
 
 function UncontrolledForm({ onSubmit }: UncontrolledFormProperties) {
   const countries = useAppSelector((state) => state.countries.items);
-  const errorMessageState = useState<string | null>(null);
-  const errorMessage = errorMessageState[0];
-  const setErrorMessage = errorMessageState[1];
+  const errorsState = useState<FormErrors>({});
+  const errors = errorsState[0];
+  const setErrors = errorsState[1];
 
   return (
     <form
@@ -43,26 +67,33 @@ function UncontrolledForm({ onSubmit }: UncontrolledFormProperties) {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
 
-        void validateFormData(formData)
+        void validateFormData(formData, countries)
           .then((validatedValues) => {
-            setErrorMessage(null);
+            setErrors({});
             onSubmit(validatedValues);
           })
           .catch((error: unknown) => {
-            setErrorMessage(
-              error instanceof Error
-                ? error.message
-                : 'Please fill all fields correctly'
+            setErrors(
+              error instanceof ValidationError ? getValidationErrors(error) : {}
             );
           });
       }}
     >
-      <UncontrolledBasicFields />
+      <UncontrolledBasicFields errors={errors} />
       <UncontrolledAdvancedFields
         countries={countries}
-        onImageError={setErrorMessage}
+        errors={errors}
+        onImageError={(message) => {
+          setErrors((currentErrors) => ({
+            ...currentErrors,
+            avatarBase64: message,
+          }));
+        }}
         onImageReady={() => {
-          setErrorMessage(null);
+          setErrors((currentErrors) => ({
+            ...currentErrors,
+            avatarBase64: undefined,
+          }));
         }}
       />
       <div className="uncontrolled-form__checkbox-field">
@@ -74,9 +105,7 @@ function UncontrolledForm({ onSubmit }: UncontrolledFormProperties) {
         />
         <label htmlFor="uncontrolled-terms">Accept Terms and Conditions</label>
       </div>
-      {errorMessage ? (
-        <span className="uncontrolled-form__error">{errorMessage}</span>
-      ) : null}
+      <FieldError message={errors.termsAccepted} />
       <button className="uncontrolled-form__submit" type="submit">
         Submit
       </button>

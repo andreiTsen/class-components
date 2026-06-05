@@ -12,36 +12,85 @@ export type FormValues = {
   termsAccepted: boolean;
 };
 
-export const formSchema: yup.ObjectSchema<FormValues> = yup.object({
-  age: yup
-    .string()
-    .required('Age is required')
-    .test('positive-age', 'Age must be greater than 0', (value) => {
-      const age = Number(value);
+export type FormErrors = Partial<Record<keyof FormValues, string>>;
 
-      return Number.isFinite(age) && age > 0;
-    }),
-  avatarBase64: yup.string().required('Profile image is required'),
-  confirmPassword: yup
+const ageSchema = yup
+  .string()
+  .required('Age is required')
+  .test('valid-age', 'Age must be a non-negative number', (value) => {
+    const age = Number(value);
+
+    return Number.isFinite(age) && age >= 0;
+  });
+const passwordSchema = yup
+  .string()
+  .required('Password is required')
+  .matches(/\d/, 'Password must include 1 digit')
+  .matches(/[A-Z]/, 'Password must include 1 uppercase letter')
+  .matches(/[a-z]/, 'Password must include 1 lowercase letter')
+  .matches(/[^A-Za-z0-9]/, 'Password must include 1 special character');
+
+function isValidEmail(value: string | undefined): boolean {
+  if (!value) {
+    return false;
+  }
+
+  const parts = value.split('@');
+  const localPart = parts[0];
+  const domain = parts[1];
+
+  return (
+    parts.length === 2 &&
+    Boolean(localPart) &&
+    Boolean(domain) &&
+    domain.includes('.') &&
+    !domain.startsWith('.') &&
+    !domain.endsWith('.')
+  );
+}
+
+function createNameSchema(): yup.StringSchema<string> {
+  return yup
     .string()
-    .oneOf([yup.ref('password')], 'Passwords must match')
-    .required('Confirm password is required'),
-  country: yup.string().required('Country is required'),
-  email: yup
-    .string()
-    .email('Enter a valid email')
-    .required('Email is required'),
-  gender: yup.string().required('Gender is required'),
-  name: yup.string().trim().required('Name is required'),
-  password: yup
-    .string()
-    .required('Password is required')
-    .matches(/\d/, 'Password must include 1 digit')
-    .matches(/[A-Z]/, 'Password must include 1 uppercase letter')
-    .matches(/[a-z]/, 'Password must include 1 lowercase letter')
-    .matches(/[^A-Za-z0-9]/, 'Password must include 1 special character'),
-  termsAccepted: yup
-    .boolean()
-    .oneOf([true], 'Terms must be accepted')
-    .required('Terms must be accepted'),
-});
+    .trim()
+    .required('Name is required')
+    .test(
+      'capitalized-name',
+      'Name must start with a capital letter',
+      (value) => {
+        if (typeof value !== 'string' || value.length === 0) {
+          return false;
+        }
+
+        return value.startsWith(value.charAt(0).toUpperCase());
+      }
+    );
+}
+
+export function createFormSchema(
+  countries: string[]
+): yup.ObjectSchema<FormValues> {
+  return yup.object({
+    age: ageSchema,
+    avatarBase64: yup.string().required('Profile image is required'),
+    confirmPassword: yup
+      .string()
+      .oneOf([yup.ref('password')], 'Passwords must match')
+      .required('Confirm password is required'),
+    country: yup
+      .string()
+      .oneOf(countries, 'Country must be selected from the list')
+      .required('Country is required'),
+    email: yup
+      .string()
+      .test('valid-email', 'Enter a valid email', isValidEmail)
+      .required('Email is required'),
+    gender: yup.string().required('Gender is required'),
+    name: createNameSchema(),
+    password: passwordSchema,
+    termsAccepted: yup
+      .boolean()
+      .oneOf([true], 'Terms must be accepted')
+      .required('Terms must be accepted'),
+  });
+}

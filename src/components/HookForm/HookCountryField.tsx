@@ -1,4 +1,5 @@
 import type { UseFormReturn } from 'react-hook-form';
+import FieldError from '../FieldError/FieldError';
 import type { FormValues } from '../../validation/formSchema';
 
 type HookCountryFieldProperties = {
@@ -21,6 +22,7 @@ function HookCountryField({ countries, form }: HookCountryFieldProperties) {
           <option key={country} value={country} />
         ))}
       </datalist>
+      <FieldError message={form.formState.errors.country?.message} />
     </div>
   );
 }

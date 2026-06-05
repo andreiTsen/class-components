@@ -1,16 +1,20 @@
 import { useState, type ChangeEvent } from 'react';
 import UncontrolledCountryField from './UncontrolledCountryField';
+import FieldError from '../FieldError/FieldError';
 import PasswordStrength from '../PasswordStrength/PasswordStrength';
 import { imageFileToBase64 } from '../../utils/imageFile';
+import type { FormErrors } from '../../validation/formSchema';
 
 type UncontrolledAdvancedFieldsProperties = {
   countries: string[];
+  errors: FormErrors;
   onImageError: (message: string) => void;
   onImageReady: () => void;
 };
 
 function UncontrolledAdvancedFields({
   countries,
+  errors,
   onImageError,
   onImageReady,
 }: UncontrolledAdvancedFieldsProperties) {
@@ -62,6 +66,7 @@ function UncontrolledAdvancedFields({
           value={avatarBase64}
           readOnly
         />
+        <FieldError message={errors.avatarBase64} />
       </div>
       <div className="uncontrolled-form__field">
         <label htmlFor="uncontrolled-password">Password</label>
@@ -73,6 +78,7 @@ function UncontrolledAdvancedFields({
           type="password"
         />
         <PasswordStrength password={password} />
+        <FieldError message={errors.password} />
       </div>
       <div className="uncontrolled-form__field">
         <label htmlFor="uncontrolled-confirm-password">Confirm password</label>
@@ -82,8 +88,9 @@ function UncontrolledAdvancedFields({
           required
           type="password"
         />
+        <FieldError message={errors.confirmPassword} />
       </div>
-      <UncontrolledCountryField countries={countries} />
+      <UncontrolledCountryField countries={countries} error={errors.country} />
     </>
   );
 }

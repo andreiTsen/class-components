@@ -1,5 +1,7 @@
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import HookAdvancedFields from './HookAdvancedFields';
+import HookTermsSubmit from './HookTermsSubmit';
+import FieldError from '../FieldError/FieldError';
 import { useAppSelector } from '../../store/hooks';
 import './HookForm.css';
 import type { FormValues } from '../../validation/formSchema';
@@ -12,7 +14,8 @@ type HookFormProperties = {
 function HookForm({ onSubmit }: HookFormProperties) {
   const countries = useAppSelector((state) => state.countries.items);
   const form = useForm<FormValues>({
-    resolver: yupResolver(),
+    mode: 'onChange',
+    resolver: yupResolver(countries),
   });
 
   const submitHandler: SubmitHandler<FormValues> = (values) => {
@@ -35,6 +38,7 @@ function HookForm({ onSubmit }: HookFormProperties) {
           aria-invalid={Boolean(form.formState.errors.name)}
           data-modal-autofocus
         />
+        <FieldError message={form.formState.errors.name?.message} />
       </div>
       <div className="hook-form__field">
         <label htmlFor="hook-form-age">Age</label>
@@ -45,6 +49,7 @@ function HookForm({ onSubmit }: HookFormProperties) {
           aria-invalid={Boolean(form.formState.errors.age)}
           type="number"
         />
+        <FieldError message={form.formState.errors.age?.message} />
       </div>
       <div className="hook-form__field">
         <label htmlFor="hook-form-email">Email</label>
@@ -54,6 +59,7 @@ function HookForm({ onSubmit }: HookFormProperties) {
           aria-invalid={Boolean(form.formState.errors.email)}
           type="email"
         />
+        <FieldError message={form.formState.errors.email?.message} />
       </div>
       <div className="hook-form__field">
         <label htmlFor="hook-form-gender">Gender</label>
@@ -66,22 +72,10 @@ function HookForm({ onSubmit }: HookFormProperties) {
           <option value="female">Female</option>
           <option value="male">Male</option>
         </select>
+        <FieldError message={form.formState.errors.gender?.message} />
       </div>
       <HookAdvancedFields countries={countries} form={form} />
-      <div className="hook-form__checkbox-field">
-        <input
-          id="hook-form-terms"
-          {...form.register('termsAccepted', {
-            required: 'Terms must be accepted',
-          })}
-          aria-invalid={Boolean(form.formState.errors.termsAccepted)}
-          type="checkbox"
-        />
-        <label htmlFor="hook-form-terms">Accept Terms and Conditions</label>
-      </div>
-      <button className="hook-form__submit" type="submit">
-        Submit
-      </button>
+      <HookTermsSubmit form={form} />
     </form>
   );
 }

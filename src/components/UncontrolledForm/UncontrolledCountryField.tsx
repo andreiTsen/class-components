@@ -1,9 +1,13 @@
+import FieldError from '../FieldError/FieldError';
+
 type UncontrolledCountryFieldProperties = {
   countries: string[];
+  error?: string;
 };
 
 function UncontrolledCountryField({
   countries,
+  error,
 }: UncontrolledCountryFieldProperties) {
   return (
     <div className="uncontrolled-form__field">
@@ -19,6 +23,7 @@ function UncontrolledCountryField({
           <option key={country} value={country} />
         ))}
       </datalist>
+      <FieldError message={error} />
     </div>
   );
 }

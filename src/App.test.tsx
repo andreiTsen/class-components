@@ -91,6 +91,7 @@ describe('App', () => {
       screen.getByRole('dialog', { name: 'React Hook Form' })
     ).toBeInTheDocument();
     expect(screen.getByLabelText('Name')).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled();
   });
 
   it('stores uncontrolled form submissions in Redux history', async () => {

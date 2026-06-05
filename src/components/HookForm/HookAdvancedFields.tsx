@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import HookCountryField from './HookCountryField';
+import FieldError from '../FieldError/FieldError';
 import PasswordStrength from '../PasswordStrength/PasswordStrength';
 import { imageFileToBase64 } from '../../utils/imageFile';
 import type { FormValues } from '../../validation/formSchema';
@@ -54,6 +55,7 @@ function HookAdvancedFields({ countries, form }: HookAdvancedFieldsProperties) {
           type="file"
         />
         <input type="hidden" {...form.register('avatarBase64')} />
+        <FieldError message={form.formState.errors.avatarBase64?.message} />
       </div>
       <div className="hook-form__field">
         <label htmlFor="hook-form-password">Password</label>
@@ -65,6 +67,7 @@ function HookAdvancedFields({ countries, form }: HookAdvancedFieldsProperties) {
           type="password"
         />
         <PasswordStrength password={password} />
+        <FieldError message={form.formState.errors.password?.message} />
       </div>
       <div className="hook-form__field">
         <label htmlFor="hook-form-confirm-password">Confirm password</label>
@@ -76,6 +79,7 @@ function HookAdvancedFields({ countries, form }: HookAdvancedFieldsProperties) {
           aria-invalid={Boolean(form.formState.errors.confirmPassword)}
           type="password"
         />
+        <FieldError message={form.formState.errors.confirmPassword?.message} />
       </div>
       <HookCountryField countries={countries} form={form} />
     </>
