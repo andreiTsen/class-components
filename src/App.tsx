@@ -6,7 +6,10 @@ import Modal from './components/Modal/Modal';
 import Submissions from './components/Submissions/Submissions';
 import UncontrolledForm from './components/UncontrolledForm/UncontrolledForm';
 import { useAppDispatch } from './store/hooks';
-import { addSubmission } from './store/submissionsSlice';
+import {
+  addSubmission,
+  clearSubmissionHighlight,
+} from './store/submissionsSlice';
 import type { FormValues } from './validation/formSchema';
 
 type FormType = 'uncontrolled' | 'hook-form';
@@ -15,6 +18,7 @@ const formTitles: Record<FormType, string> = {
   'hook-form': 'React Hook Form',
   uncontrolled: 'Uncontrolled Form',
 };
+const highlightDurationMs = 3000;
 
 function App() {
   const dispatch = useAppDispatch();
@@ -29,6 +33,9 @@ function App() {
 
     dispatch(addSubmission({ ...values, formType: activeForm }));
     setActiveForm(null);
+    globalThis.setTimeout(() => {
+      dispatch(clearSubmissionHighlight());
+    }, highlightDurationMs);
   };
 
   return (

@@ -10,10 +10,12 @@ export type Submission = FormValues & {
 
 type SubmissionsState = {
   items: Submission[];
+  lastSubmittedId: string | null;
 };
 
 const initialState: SubmissionsState = {
   items: [],
+  lastSubmittedId: null,
 };
 
 const submissionsSlice = createSlice({
@@ -24,13 +26,20 @@ const submissionsSlice = createSlice({
       state,
       action: PayloadAction<FormValues & { formType: FormType }>
     ) => {
+      const id = `${action.payload.formType}-${Date.now().toString()}`;
+
       state.items.push({
         ...action.payload,
-        id: `${action.payload.formType}-${Date.now().toString()}`,
+        id,
       });
+      state.lastSubmittedId = id;
+    },
+    clearSubmissionHighlight: (state) => {
+      state.lastSubmittedId = null;
     },
   },
 });
 
-export const { addSubmission } = submissionsSlice.actions;
+export const { addSubmission, clearSubmissionHighlight } =
+  submissionsSlice.actions;
 export default submissionsSlice.reducer;

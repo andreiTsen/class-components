@@ -67,6 +67,24 @@ function createNameSchema(): yup.StringSchema<string> {
     );
 }
 
+function normalizeCountry(country: string): string {
+  return country.trim().toLowerCase();
+}
+
+function createCountrySchema(countries: string[]): yup.StringSchema<string> {
+  const normalizedCountries = new Set(
+    countries.map((country) => normalizeCountry(country))
+  );
+
+  return yup
+    .string()
+    .trim()
+    .required('Country is required')
+    .test('listed-country', 'Country must be selected from the list', (value) =>
+      Boolean(value && normalizedCountries.has(normalizeCountry(value)))
+    );
+}
+
 export function createFormSchema(
   countries: string[]
 ): yup.ObjectSchema<FormValues> {
@@ -77,10 +95,7 @@ export function createFormSchema(
       .string()
       .oneOf([yup.ref('password')], 'Passwords must match')
       .required('Confirm password is required'),
-    country: yup
-      .string()
-      .oneOf(countries, 'Country must be selected from the list')
-      .required('Country is required'),
+    country: createCountrySchema(countries),
     email: yup
       .string()
       .test('valid-email', 'Enter a valid email', isValidEmail)

@@ -122,6 +122,9 @@ describe('App', () => {
     expect(screen.getByText('Terms accepted: yes')).toBeInTheDocument();
     expect(screen.getByText('Country: Poland')).toBeInTheDocument();
     expect(screen.getByAltText('Ada Lovelace profile')).toBeInTheDocument();
+    expect(screen.getByText('Ada Lovelace').closest('li')).toHaveClass(
+      'submissions__item--new'
+    );
     expect(screen.getByText('uncontrolled')).toBeInTheDocument();
   });
 
@@ -156,6 +159,9 @@ describe('App', () => {
     expect(screen.getByText('Terms accepted: yes')).toBeInTheDocument();
     expect(screen.getByText('Country: Ukraine')).toBeInTheDocument();
     expect(screen.getByAltText('Grace Hopper profile')).toBeInTheDocument();
+    expect(screen.getByText('Grace Hopper').closest('li')).toHaveClass(
+      'submissions__item--new'
+    );
     expect(screen.getByText('hook-form')).toBeInTheDocument();
   });
 });

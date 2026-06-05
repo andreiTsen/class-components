@@ -71,6 +71,7 @@ function UncontrolledForm({ onSubmit }: UncontrolledFormProperties) {
           .then((validatedValues) => {
             setErrors({});
             onSubmit(validatedValues);
+            event.currentTarget.reset();
           })
           .catch((error: unknown) => {
             setErrors(

@@ -20,6 +20,7 @@ function HookForm({ onSubmit }: HookFormProperties) {
 
   const submitHandler: SubmitHandler<FormValues> = (values) => {
     onSubmit(values);
+    form.reset();
   };
 
   return (

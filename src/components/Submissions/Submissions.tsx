@@ -3,6 +3,9 @@ import { useAppSelector } from '../../store/hooks';
 
 function Submissions() {
   const submissions = useAppSelector((state) => state.submissions.items);
+  const lastSubmittedId = useAppSelector(
+    (state) => state.submissions.lastSubmittedId
+  );
 
   return (
     <section className="submissions">
@@ -10,7 +13,14 @@ function Submissions() {
       {submissions.length > 0 ? (
         <ul className="submissions__list">
           {submissions.map((submission) => (
-            <li className="submissions__item" key={submission.id}>
+            <li
+              className={
+                submission.id === lastSubmittedId
+                  ? 'submissions__item submissions__item--new'
+                  : 'submissions__item'
+              }
+              key={submission.id}
+            >
               <img
                 alt={`${submission.name} profile`}
                 className="submissions__avatar"
