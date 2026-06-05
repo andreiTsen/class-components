@@ -1,14 +1,18 @@
-import { render, screen } from '@testing-library/react';
+import { configureStore } from '@reduxjs/toolkit';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { describe, expect, it } from 'vitest';
 import App from './App';
+import countriesReducer from './store/countriesSlice';
 import submissionsReducer from './store/submissionsSlice';
-import { configureStore } from '@reduxjs/toolkit';
+
+const testAvatar = new File(['avatar'], 'avatar.png', { type: 'image/png' });
 
 function renderApp() {
   const store = configureStore({
     reducer: {
+      countries: countriesReducer,
       submissions: submissionsReducer,
     },
   });
@@ -100,15 +104,23 @@ describe('App', () => {
     await user.type(screen.getByLabelText('Age'), '36');
     await user.type(screen.getByLabelText('Email'), 'ada@example.com');
     await user.selectOptions(screen.getByLabelText('Gender'), 'female');
+    await user.upload(screen.getByLabelText('Profile image'), testAvatar);
+    await user.type(screen.getByLabelText('Password'), 'Password1!');
+    await user.type(screen.getByLabelText('Confirm password'), 'Password1!');
+    await user.type(screen.getByLabelText('Country'), 'Poland');
     await user.click(screen.getByLabelText('Accept Terms and Conditions'));
     await user.click(screen.getByRole('button', { name: 'Submit' }));
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
     expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
     expect(screen.getByText('Age: 36')).toBeInTheDocument();
     expect(screen.getByText('ada@example.com')).toBeInTheDocument();
     expect(screen.getByText('Gender: female')).toBeInTheDocument();
     expect(screen.getByText('Terms accepted: yes')).toBeInTheDocument();
+    expect(screen.getByText('Country: Poland')).toBeInTheDocument();
+    expect(screen.getByAltText('Ada Lovelace profile')).toBeInTheDocument();
     expect(screen.getByText('uncontrolled')).toBeInTheDocument();
   });
 
@@ -123,15 +135,26 @@ describe('App', () => {
     await user.type(screen.getByLabelText('Age'), '85');
     await user.type(screen.getByLabelText('Email'), 'grace@example.com');
     await user.selectOptions(screen.getByLabelText('Gender'), 'female');
+    await user.upload(screen.getByLabelText('Profile image'), testAvatar);
+    await waitFor(() => {
+      expect(screen.getByLabelText('Password')).toBeInTheDocument();
+    });
+    await user.type(screen.getByLabelText('Password'), 'Password1!');
+    await user.type(screen.getByLabelText('Confirm password'), 'Password1!');
+    await user.type(screen.getByLabelText('Country'), 'Ukraine');
     await user.click(screen.getByLabelText('Accept Terms and Conditions'));
     await user.click(screen.getByRole('button', { name: 'Submit' }));
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
     expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
     expect(screen.getByText('Age: 85')).toBeInTheDocument();
     expect(screen.getByText('grace@example.com')).toBeInTheDocument();
     expect(screen.getByText('Gender: female')).toBeInTheDocument();
     expect(screen.getByText('Terms accepted: yes')).toBeInTheDocument();
+    expect(screen.getByText('Country: Ukraine')).toBeInTheDocument();
+    expect(screen.getByAltText('Grace Hopper profile')).toBeInTheDocument();
     expect(screen.getByText('hook-form')).toBeInTheDocument();
   });
 });

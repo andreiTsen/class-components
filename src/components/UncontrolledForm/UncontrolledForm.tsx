@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import UncontrolledAdvancedFields from './UncontrolledAdvancedFields';
+import UncontrolledBasicFields from './UncontrolledBasicFields';
+import { useAppSelector } from '../../store/hooks';
 import { formSchema, type FormValues } from '../../validation/formSchema';
 import './UncontrolledForm.css';
 
@@ -15,14 +18,19 @@ function getFormString(formData: FormData, fieldName: string): string {
 async function validateFormData(formData: FormData): Promise<FormValues> {
   return formSchema.validate({
     age: getFormString(formData, 'age'),
+    avatarBase64: getFormString(formData, 'avatarBase64'),
+    confirmPassword: getFormString(formData, 'confirmPassword'),
+    country: getFormString(formData, 'country'),
     email: getFormString(formData, 'email'),
     gender: getFormString(formData, 'gender'),
     name: getFormString(formData, 'name'),
+    password: getFormString(formData, 'password'),
     termsAccepted: formData.has('termsAccepted'),
   });
 }
 
 function UncontrolledForm({ onSubmit }: UncontrolledFormProperties) {
+  const countries = useAppSelector((state) => state.countries.items);
   const errorMessageState = useState<string | null>(null);
   const errorMessage = errorMessageState[0];
   const setErrorMessage = errorMessageState[1];
@@ -30,6 +38,7 @@ function UncontrolledForm({ onSubmit }: UncontrolledFormProperties) {
   return (
     <form
       className="uncontrolled-form"
+      noValidate
       onSubmit={(event) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
@@ -39,42 +48,23 @@ function UncontrolledForm({ onSubmit }: UncontrolledFormProperties) {
             setErrorMessage(null);
             onSubmit(validatedValues);
           })
-          .catch(() => {
-            setErrorMessage('Please fill all fields correctly');
+          .catch((error: unknown) => {
+            setErrorMessage(
+              error instanceof Error
+                ? error.message
+                : 'Please fill all fields correctly'
+            );
           });
       }}
     >
-      <div className="uncontrolled-form__field">
-        <label htmlFor="uncontrolled-name">Name</label>
-        <input
-          data-modal-autofocus
-          id="uncontrolled-name"
-          name="name"
-          required
-        />
-      </div>
-      <div className="uncontrolled-form__field">
-        <label htmlFor="uncontrolled-age">Age</label>
-        <input
-          id="uncontrolled-age"
-          min="1"
-          name="age"
-          required
-          type="number"
-        />
-      </div>
-      <div className="uncontrolled-form__field">
-        <label htmlFor="uncontrolled-email">Email</label>
-        <input id="uncontrolled-email" name="email" required type="email" />
-      </div>
-      <div className="uncontrolled-form__field">
-        <label htmlFor="uncontrolled-gender">Gender</label>
-        <select id="uncontrolled-gender" name="gender" required>
-          <option value="">Select gender</option>
-          <option value="female">Female</option>
-          <option value="male">Male</option>
-        </select>
-      </div>
+      <UncontrolledBasicFields />
+      <UncontrolledAdvancedFields
+        countries={countries}
+        onImageError={setErrorMessage}
+        onImageReady={() => {
+          setErrorMessage(null);
+        }}
+      />
       <div className="uncontrolled-form__checkbox-field">
         <input
           id="uncontrolled-terms"

@@ -29,6 +29,13 @@
   background: #ffffff;
 }
 
+.submissions__avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
 .submissions__value {
   overflow-wrap: anywhere;
 }

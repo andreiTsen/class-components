@@ -35,6 +35,12 @@
   margin: 0;
 }
 
+.uncontrolled-form__error {
+  color: #b42318;
+  font-size: 14px;
+  font-weight: 400;
+}
+
 .uncontrolled-form__submit {
   align-self: flex-start;
   cursor: pointer;

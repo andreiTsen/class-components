@@ -11,6 +11,11 @@ function Submissions() {
         <ul className="submissions__list">
           {submissions.map((submission) => (
             <li className="submissions__item" key={submission.id}>
+              <img
+                alt={`${submission.name} profile`}
+                className="submissions__avatar"
+                src={submission.avatarBase64}
+              />
               <span className="submissions__value">{submission.name}</span>
               <span className="submissions__value">Age: {submission.age}</span>
               <span className="submissions__value">{submission.email}</span>
@@ -19,6 +24,9 @@ function Submissions() {
               </span>
               <span className="submissions__value">
                 Terms accepted: {submission.termsAccepted ? 'yes' : 'no'}
+              </span>
+              <span className="submissions__value">
+                Country: {submission.country}
               </span>
               <span className="submissions__badge">{submission.formType}</span>
             </li>

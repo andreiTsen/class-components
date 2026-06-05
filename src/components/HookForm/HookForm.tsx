@@ -1,4 +1,6 @@
 import { useForm, type SubmitHandler } from 'react-hook-form';
+import HookAdvancedFields from './HookAdvancedFields';
+import { useAppSelector } from '../../store/hooks';
 import './HookForm.css';
 import type { FormValues } from '../../validation/formSchema';
 import { yupResolver } from '../../validation/yupResolver';
@@ -8,6 +10,7 @@ type HookFormProperties = {
 };
 
 function HookForm({ onSubmit }: HookFormProperties) {
+  const countries = useAppSelector((state) => state.countries.items);
   const form = useForm<FormValues>({
     resolver: yupResolver(),
   });
@@ -19,6 +22,7 @@ function HookForm({ onSubmit }: HookFormProperties) {
   return (
     <form
       className="hook-form"
+      noValidate
       onSubmit={(event) => {
         void form.handleSubmit(submitHandler)(event);
       }}
@@ -63,6 +67,7 @@ function HookForm({ onSubmit }: HookFormProperties) {
           <option value="male">Male</option>
         </select>
       </div>
+      <HookAdvancedFields countries={countries} form={form} />
       <div className="hook-form__checkbox-field">
         <input
           id="hook-form-terms"
