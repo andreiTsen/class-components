@@ -8,6 +8,7 @@ import countriesReducer from '../store/countriesSlice';
 import submissionsReducer from '../store/submissionsSlice';
 
 const testAvatar = new File(['avatar'], 'avatar.png', { type: 'image/png' });
+const oversizedAvatar = `${'a'.repeat(1_000_000)}a`;
 
 function renderApp() {
   const store = configureStore({
@@ -49,10 +50,9 @@ describe('App', () => {
     );
 
     const dialog = screen.getByRole('dialog', { name: 'Uncontrolled Form' });
-    const nameInput = screen.getByLabelText('Name');
 
     expect(dialog).toBeInTheDocument();
-    expect(nameInput).toHaveFocus();
+    expect(screen.getByLabelText('Name')).toHaveFocus();
   });
 
   it('closes modal with Escape', async () => {
@@ -74,9 +74,21 @@ describe('App', () => {
     await user.click(
       screen.getByRole('button', { name: 'Open Uncontrolled Form' })
     );
-    await user.click(screen.getByRole('dialog').parentElement ?? document.body);
+    await user.click(screen.getByRole('dialog'));
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('keeps focus inside the modal with Tab navigation', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(
+      screen.getByRole('button', { name: 'Open Uncontrolled Form' })
+    );
+
+    await user.tab();
+    expect(screen.getByLabelText('Age')).toHaveFocus();
   });
 
   it('renders react hook form in the same modal component', async () => {
@@ -145,6 +157,29 @@ describe('App', () => {
 
     expect(
       await screen.findByText('Name must start with a capital letter')
+    ).toBeInTheDocument();
+  });
+
+  it('shows uncontrolled image validation errors after invalid upload', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(
+      screen.getByRole('button', { name: 'Open Uncontrolled Form' })
+    );
+    await user.upload(
+      screen.getByLabelText('Profile image'),
+      new File([oversizedAvatar], 'avatar.png', { type: 'image/png' })
+    );
+
+    expect(
+      screen.queryByText('Image must be 1MB or smaller')
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+    expect(
+      await screen.findByText('Image must be 1MB or smaller')
     ).toBeInTheDocument();
   });
 

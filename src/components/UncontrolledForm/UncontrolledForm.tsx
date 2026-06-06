@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ValidationError } from 'yup';
 import UncontrolledAdvancedFields from './UncontrolledAdvancedFields';
 import UncontrolledBasicFields from './UncontrolledBasicFields';
@@ -21,10 +21,10 @@ function getFormString(formData: FormData, fieldName: string): string {
   return typeof value === 'string' ? value : '';
 }
 
-function getFormValues(formData: FormData): FormValues {
+function getFormValues(formData: FormData, avatarBase64: string): FormValues {
   return {
     age: getFormString(formData, 'age'),
-    avatarBase64: getFormString(formData, 'avatarBase64'),
+    avatarBase64,
     confirmPassword: getFormString(formData, 'confirmPassword'),
     country: getFormString(formData, 'country'),
     email: getFormString(formData, 'email'),
@@ -37,11 +37,15 @@ function getFormValues(formData: FormData): FormValues {
 
 async function validateFormData(
   formData: FormData,
+  avatarBase64: string,
   countries: string[]
 ): Promise<FormValues> {
-  return createFormSchema(countries).validate(getFormValues(formData), {
-    abortEarly: false,
-  });
+  return createFormSchema(countries).validate(
+    getFormValues(formData, avatarBase64),
+    {
+      abortEarly: false,
+    }
+  );
 }
 
 function getValidationErrors(error: ValidationError): FormErrors {
@@ -55,6 +59,8 @@ function getValidationErrors(error: ValidationError): FormErrors {
 
 function UncontrolledForm({ onSubmit }: UncontrolledFormProperties) {
   const countries = useAppSelector((state) => state.countries.items);
+  const avatarBase64Reference = useRef('');
+  const avatarErrorReference = useRef('');
   const errorsState = useState<FormErrors>({});
   const errors = errorsState[0];
   const setErrors = errorsState[1];
@@ -67,16 +73,34 @@ function UncontrolledForm({ onSubmit }: UncontrolledFormProperties) {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
 
-        void validateFormData(formData, countries)
+        void validateFormData(
+          formData,
+          avatarBase64Reference.current,
+          countries
+        )
           .then((validatedValues) => {
+            if (avatarErrorReference.current) {
+              setErrors({ avatarBase64: avatarErrorReference.current });
+              return;
+            }
+
             setErrors({});
             onSubmit(validatedValues);
+            avatarBase64Reference.current = '';
+            avatarErrorReference.current = '';
             event.currentTarget.reset();
           })
           .catch((error: unknown) => {
-            setErrors(
-              error instanceof ValidationError ? getValidationErrors(error) : {}
-            );
+            const nextErrors =
+              error instanceof ValidationError
+                ? getValidationErrors(error)
+                : {};
+
+            setErrors({
+              ...nextErrors,
+              avatarBase64:
+                avatarErrorReference.current || nextErrors.avatarBase64,
+            });
           });
       }}
     >
@@ -85,12 +109,12 @@ function UncontrolledForm({ onSubmit }: UncontrolledFormProperties) {
         countries={countries}
         errors={errors}
         onImageError={(message) => {
-          setErrors((currentErrors) => ({
-            ...currentErrors,
-            avatarBase64: message,
-          }));
+          avatarBase64Reference.current = '';
+          avatarErrorReference.current = message;
         }}
-        onImageReady={() => {
+        onImageReady={(avatarBase64) => {
+          avatarBase64Reference.current = avatarBase64;
+          avatarErrorReference.current = '';
           setErrors((currentErrors) => ({
             ...currentErrors,
             avatarBase64: undefined,

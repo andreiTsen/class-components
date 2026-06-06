@@ -9,7 +9,7 @@ type UncontrolledAdvancedFieldsProperties = {
   countries: string[];
   errors: FormErrors;
   onImageError: (message: string) => void;
-  onImageReady: () => void;
+  onImageReady: (avatarBase64: string) => void;
 };
 
 function UncontrolledAdvancedFields({
@@ -18,27 +18,22 @@ function UncontrolledAdvancedFields({
   onImageError,
   onImageReady,
 }: UncontrolledAdvancedFieldsProperties) {
-  const avatarBase64State = useState('');
   const passwordState = useState('');
-  const avatarBase64 = avatarBase64State[0];
-  const setAvatarBase64 = avatarBase64State[1];
   const password = passwordState[0];
   const setPassword = passwordState[1];
   const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
     const avatar = event.currentTarget.files?.item(0);
 
     if (!avatar) {
-      setAvatarBase64('');
+      onImageError('Profile image is required');
       return;
     }
 
     void imageFileToBase64(avatar)
       .then((nextAvatarBase64) => {
-        setAvatarBase64(nextAvatarBase64);
-        onImageReady();
+        onImageReady(nextAvatarBase64);
       })
       .catch((error: unknown) => {
-        setAvatarBase64('');
         onImageError(
           error instanceof Error ? error.message : 'Image could not be read'
         );
@@ -59,12 +54,6 @@ function UncontrolledAdvancedFields({
           onChange={handleAvatarChange}
           required
           type="file"
-        />
-        <input
-          name="avatarBase64"
-          type="hidden"
-          value={avatarBase64}
-          readOnly
         />
         <FieldError message={errors.avatarBase64} />
       </div>

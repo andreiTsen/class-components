@@ -22,13 +22,7 @@ const ageSchema = yup
 
     return Number.isFinite(age) && age >= 0;
   });
-const passwordSchema = yup
-  .string()
-  .required('Password is required')
-  .matches(/\d/, 'Password must include 1 digit')
-  .matches(/[A-Z]/, 'Password must include 1 uppercase letter')
-  .matches(/[a-z]/, 'Password must include 1 lowercase letter')
-  .matches(/[^A-Za-z0-9]/, 'Password must include 1 special character');
+const passwordSchema = yup.string().required('Password is required');
 
 function isValidEmail(value: string | undefined): boolean {
   if (!value) {

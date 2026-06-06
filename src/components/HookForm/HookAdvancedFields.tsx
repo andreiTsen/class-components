@@ -29,6 +29,9 @@ function HookAdvancedFields({ countries, form }: HookAdvancedFieldsProperties) {
         });
       })
       .catch((error: unknown) => {
+        form.setValue('avatarBase64', '', {
+          shouldValidate: true,
+        });
         form.setError('avatarBase64', {
           message:
             error instanceof Error ? error.message : 'Image could not be read',

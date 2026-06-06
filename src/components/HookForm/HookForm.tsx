@@ -45,7 +45,7 @@ function HookForm({ onSubmit }: HookFormProperties) {
         <label htmlFor="hook-form-age">Age</label>
         <input
           id="hook-form-age"
-          min="1"
+          min="0"
           {...form.register('age', { required: 'Age is required' })}
           aria-invalid={Boolean(form.formState.errors.age)}
           type="number"

@@ -5,7 +5,11 @@ type FieldErrorProperties = {
 };
 
 function FieldError({ message }: FieldErrorProperties) {
-  return message ? <span className="field-error">{message}</span> : null;
+  return (
+    <span aria-live="polite" className="field-error">
+      {message ?? ''}
+    </span>
+  );
 }
 
 export default FieldError;

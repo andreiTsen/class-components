@@ -24,7 +24,7 @@ function UncontrolledBasicFields({
         <label htmlFor="uncontrolled-age">Age</label>
         <input
           id="uncontrolled-age"
-          min="1"
+          min="0"
           name="age"
           required
           type="number"

@@ -12,7 +12,7 @@ function hasAllowedImageExtension(fileName: string): boolean {
 
 export async function imageFileToBase64(file: File): Promise<string> {
   if (
-    !allowedImageTypes.has(file.type) &&
+    !allowedImageTypes.has(file.type) ||
     !hasAllowedImageExtension(file.name)
   ) {
     throw new Error('Image must be a PNG or JPEG file');
