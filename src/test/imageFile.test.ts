@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { imageFileToBase64 } from './imageFile';
+import { imageFileToBase64 } from '../utils/imageFile';
 
 describe('imageFileToBase64', () => {
   it('converts a png file to base64', async () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import countriesReducer from './countriesSlice';
+import countriesReducer from '../store/countriesSlice';
 
 describe('countriesSlice', () => {
   it('stores country options for autocomplete', () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getPasswordStrengthChecks } from './passwordStrength';
+import { getPasswordStrengthChecks } from '../utils/passwordStrength';
 
 describe('getPasswordStrengthChecks', () => {
   it('reports all strength rules for a strong password', () => {

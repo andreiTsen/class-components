@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import submissionsReducer, {
   addSubmission,
   clearSubmissionHighlight,
-} from './submissionsSlice';
+} from '../store/submissionsSlice';
 
 const submissionPayload = {
   age: '36',

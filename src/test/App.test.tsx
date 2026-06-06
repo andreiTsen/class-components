@@ -3,9 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { describe, expect, it } from 'vitest';
-import App from './App';
-import countriesReducer from './store/countriesSlice';
-import submissionsReducer from './store/submissionsSlice';
+import App from '../App';
+import countriesReducer from '../store/countriesSlice';
+import submissionsReducer from '../store/submissionsSlice';
 
 const testAvatar = new File(['avatar'], 'avatar.png', { type: 'image/png' });
 

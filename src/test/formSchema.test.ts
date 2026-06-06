@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ValidationError } from 'yup';
-import { createFormSchema } from './formSchema';
+import { createFormSchema } from '../validation/formSchema';
 
 const countries = ['Poland', 'Ukraine'];
 const validValues = {
