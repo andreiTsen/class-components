@@ -128,6 +128,26 @@ describe('App', () => {
     expect(screen.getByText('uncontrolled')).toBeInTheDocument();
   });
 
+  it('shows uncontrolled validation errors only after submit', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(
+      screen.getByRole('button', { name: 'Open Uncontrolled Form' })
+    );
+
+    expect(
+      screen.queryByText('Name must start with a capital letter')
+    ).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('Name'), 'ada Lovelace');
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+
+    expect(
+      await screen.findByText('Name must start with a capital letter')
+    ).toBeInTheDocument();
+  });
+
   it('stores react hook form submissions in Redux history', async () => {
     const user = userEvent.setup();
     renderApp();
@@ -163,5 +183,21 @@ describe('App', () => {
       'submissions__item--new'
     );
     expect(screen.getByText('hook-form')).toBeInTheDocument();
+  });
+
+  it('shows react hook form validation errors in real time', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(
+      screen.getByRole('button', { name: 'Open React Hook Form' })
+    );
+    await user.type(screen.getByLabelText('Name'), 'ada Lovelace');
+    await user.tab();
+
+    expect(
+      await screen.findByText('Name must start with a capital letter')
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled();
   });
 });
