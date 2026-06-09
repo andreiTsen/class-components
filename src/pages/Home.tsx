@@ -14,13 +14,6 @@ import SearchSection from '../components/SearchSection/SearchSection';
 import useHomeSynchronization from '../hooks/useHomeSynchronization';
 import useLocalStorage from '../hooks/useLocalStorage';
 import usePokemonSearch from '../hooks/usePokemonSearch';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import {
-  clearSelectedPokemon,
-  selectPokemon,
-  setPokemonSelection,
-} from '../store/selectedPokemonSlice';
-import type { AppDispatch } from '../store/store';
 import type { Pokemon } from '../types';
 import { parsePositiveInteger } from '../utils/parsePositiveInteger';
 import './Home.css';
@@ -44,29 +37,10 @@ const getSearchWithCurrentPage = (
   return `?${nextSearchParameters.toString()}`;
 };
 
-const openPokemonDetails = (
-  dispatch: AppDispatch,
-  navigate: NavigateFunction,
-  pokemonId: number,
-  searchWithCurrentPage: string,
-  storedSelectedPokemonId: number | null
-): void => {
-  if (storedSelectedPokemonId !== pokemonId) {
-    dispatch(selectPokemon(pokemonId));
-  }
-
-  void navigate({
-    pathname: `/details/${String(pokemonId)}`,
-    search: searchWithCurrentPage,
-  });
-};
-
 const closePokemonDetails = (
-  dispatch: AppDispatch,
   navigate: NavigateFunction,
   searchWithCurrentPage: string
 ): void => {
-  dispatch(clearSelectedPokemon());
   void navigate({ pathname: '/', search: searchWithCurrentPage });
 };
 
@@ -77,35 +51,23 @@ const getSelectedPokemonId = (pokemonId?: string): number | null => {
 type RenderResultsProperties = {
   currentPage: number;
   error: string;
-  handlePokemonSelect: (pokemonId: number) => void;
-  handlePokemonSelectionChange: (pokemon: Pokemon, isSelected: boolean) => void;
   isLoading: boolean;
   pokemons: Pokemon[];
-  selectedPokemonId: number | null;
-  selectedPokemonIds: number[];
   totalPages: number;
 };
 
 const renderResults = ({
   currentPage,
   error,
-  handlePokemonSelect,
-  handlePokemonSelectionChange,
   isLoading,
   pokemons,
-  selectedPokemonId,
-  selectedPokemonIds,
   totalPages,
 }: RenderResultsProperties) => (
   <ResultsSection
     currentPage={currentPage}
     error={error}
     isLoading={isLoading}
-    onPokemonSelectionChange={handlePokemonSelectionChange}
-    onPokemonSelect={handlePokemonSelect}
     pokemons={pokemons}
-    selectedPokemonId={selectedPokemonId}
-    selectedPokemonIds={selectedPokemonIds}
     totalPages={totalPages}
   />
 );
@@ -123,9 +85,6 @@ function Home() {
     SEARCH_TERM_STORAGE_KEY
   );
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const { selectedPokemonIds, selectedPokemonId: storedSelectedPokemonId } =
-    useAppSelector((state) => state.selectedPokemon);
   const { currentPage, error, isLoading, loadPage, pokemons, totalPages } =
     usePokemonSearch();
   const selectedPokemonId = getSelectedPokemonId(
@@ -143,33 +102,13 @@ function Home() {
     },
     [setSearchParameters, setStoredSearchTerm]
   );
-  const handlePokemonSelect = useCallback(
-    (pokemonId: number): void => {
-      openPokemonDetails(
-        dispatch,
-        navigate,
-        pokemonId,
-        searchWithCurrentPage,
-        storedSelectedPokemonId
-      );
-    },
-    [dispatch, navigate, searchWithCurrentPage, storedSelectedPokemonId]
-  );
   const handleCloseDetails = useCallback((): void => {
-    closePokemonDetails(dispatch, navigate, searchWithCurrentPage);
-  }, [dispatch, navigate, searchWithCurrentPage]);
-  const handlePokemonSelectionChange = useCallback(
-    (pokemon: Pokemon, isSelected: boolean): void => {
-      dispatch(setPokemonSelection({ isSelected, pokemon }));
-    },
-    [dispatch]
-  );
+    closePokemonDetails(navigate, searchWithCurrentPage);
+  }, [navigate, searchWithCurrentPage]);
 
   useHomeSynchronization({
     loadPage,
-    selectedPokemonId,
     storedSearchTerm,
-    storedSelectedPokemonId,
   });
 
   return (
@@ -183,12 +122,8 @@ function Home() {
           {renderResults({
             currentPage,
             error,
-            handlePokemonSelect,
-            handlePokemonSelectionChange,
             isLoading,
             pokemons,
-            selectedPokemonId,
-            selectedPokemonIds,
             totalPages,
           })}
         </PokemonResultsLayout>

@@ -1,20 +1,33 @@
 import type { KeyboardEvent, MouseEvent } from 'react';
+import { useMatch, useNavigate, useSearchParams } from 'react-router';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { setPokemonSelection } from '../../store/selectedPokemonSlice';
 import type { Pokemon } from '../../types';
-import { useResultsSectionContext } from './ResultsSectionContext';
+import { parsePositiveInteger } from '../../utils/parsePositiveInteger';
 
 type PokemonResultItemProperties = {
   pokemon: Pokemon;
 };
 
 function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
-  const {
-    onPokemonSelectionChange,
-    onPokemonSelect,
-    selectedPokemonId,
-    selectedPokemonIds,
-  } = useResultsSectionContext();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const [searchParameters] = useSearchParams();
+  const selectedPokemonId = parsePositiveInteger(
+    useMatch('/details/:pokemonId')?.params.pokemonId
+  );
+  const selectedPokemonIds = useAppSelector(
+    (state) => state.selectedPokemon.selectedPokemonIds
+  );
   const isChecked = selectedPokemonIds.includes(pokemon.id);
   const isSelected = selectedPokemonId === pokemon.id;
+
+  const openPokemonDetails = (): void => {
+    void navigate({
+      pathname: `/details/${String(pokemon.id)}`,
+      search: `?${searchParameters.toString()}`,
+    });
+  };
 
   return (
     <article
@@ -24,7 +37,7 @@ function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
       aria-label={pokemon.name}
       onClick={(event: MouseEvent<HTMLElement>): void => {
         event.stopPropagation();
-        onPokemonSelect(pokemon.id);
+        openPokemonDetails();
       }}
       onKeyDown={(event: KeyboardEvent<HTMLElement>): void => {
         if (event.target !== event.currentTarget) {
@@ -33,7 +46,7 @@ function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
 
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          onPokemonSelect(pokemon.id);
+          openPokemonDetails();
         }
       }}
     >
@@ -48,7 +61,12 @@ function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
           aria-label={`Select ${pokemon.name}`}
           checked={isChecked}
           onChange={(event): void => {
-            onPokemonSelectionChange(pokemon, event.target.checked);
+            dispatch(
+              setPokemonSelection({
+                isSelected: event.target.checked,
+                pokemon,
+              })
+            );
           }}
           onKeyDown={(event): void => {
             event.stopPropagation();

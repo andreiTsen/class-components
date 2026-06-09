@@ -1,13 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router';
 import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
 import { getPokemonById } from '../../services/pokemonService';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import {
-  loadSelectedPokemonFailure,
-  loadSelectedPokemonStart,
-  loadSelectedPokemonSuccess,
-} from '../../store/selectedPokemonSlice';
+import type { Pokemon } from '../../types';
 import '../StatusMessage.css';
 import './PokemonDetails.css';
 
@@ -18,20 +13,21 @@ type DetailsOutletContext = {
 function PokemonDetails() {
   const { pokemonId } = useParams();
   const { onClose } = useOutletContext<DetailsOutletContext>();
-  const dispatch = useAppDispatch();
-  const { error, isLoading, pokemon } = useAppSelector(
-    (state) => state.selectedPokemon
-  );
-  const shouldShowLoader = isLoading || (!pokemon && !error);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [pokemon, setPokemon] = useState<Pokemon | null>(null);
 
   useEffect(() => {
     let ignore = false;
 
     const loadPokemonDetails = async (): Promise<void> => {
-      dispatch(loadSelectedPokemonStart());
+      setError('');
+      setIsLoading(true);
+      setPokemon(null);
 
       if (!pokemonId) {
-        dispatch(loadSelectedPokemonFailure('Failed to load Pokemon data.'));
+        setError('Failed to load Pokemon data.');
+        setIsLoading(false);
         return;
       }
 
@@ -39,11 +35,13 @@ function PokemonDetails() {
         const pokemonDetails = await getPokemonById(pokemonId);
 
         if (!ignore) {
-          dispatch(loadSelectedPokemonSuccess(pokemonDetails));
+          setPokemon(pokemonDetails);
+          setIsLoading(false);
         }
       } catch {
         if (!ignore) {
-          dispatch(loadSelectedPokemonFailure('Failed to load Pokemon data.'));
+          setError('Failed to load Pokemon data.');
+          setIsLoading(false);
         }
       }
     };
@@ -53,7 +51,7 @@ function PokemonDetails() {
     return (): void => {
       ignore = true;
     };
-  }, [dispatch, pokemonId]);
+  }, [pokemonId]);
 
   return (
     <aside className="details-pane" aria-label="Pokemon details">
@@ -61,11 +59,11 @@ function PokemonDetails() {
         Close
       </button>
 
-      {shouldShowLoader && <LoadingIndicator label="Loading details..." />}
+      {isLoading && <LoadingIndicator label="Loading details..." />}
 
       {error && <p className="status-message status-message-error">{error}</p>}
 
-      {pokemon && !shouldShowLoader && !error && (
+      {pokemon && !isLoading && !error && (
         <div className="details-content">
           {pokemon.imageUrl && (
             <img src={pokemon.imageUrl} alt={pokemon.name} />
