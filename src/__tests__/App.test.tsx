@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent, waitFor } from './test-utils';
 import { bulbasaur, pokemonList } from './test-utils/mockData';
 import App from '../App';
+import AppRoutes from '../AppRoutes';
 import { getPokemonById, getPokemons } from '../services/pokemonService';
 import { localStorageMock } from '../setupTests';
 
@@ -182,6 +183,193 @@ describe('App', () => {
     expect(globalThis.location.search).toBe('?page=1');
   });
 
+  it('keeps loaded details visible when clicking the already opened item again', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+    getPokemonByIdMock.mockResolvedValue(bulbasaur);
+
+    render(<AppRoutes />);
+
+    const bulbasaurItem = await screen.findByRole('article', {
+      name: /bulbasaur/i,
+    });
+
+    await user.click(bulbasaurItem);
+
+    expect(
+      await screen.findByRole('complementary', { name: 'Pokemon details' })
+    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('Loading details...')).not.toBeInTheDocument();
+    });
+
+    await user.click(bulbasaurItem);
+
+    expect(screen.queryByText('Loading details...')).not.toBeInTheDocument();
+    expect(getPokemonByIdMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('selects an item with a checkbox without opening details', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+
+    render(<AppRoutes />);
+
+    const bulbasaurCheckbox = await screen.findByRole('checkbox', {
+      name: 'Select bulbasaur',
+    });
+
+    await user.click(bulbasaurCheckbox);
+
+    expect(bulbasaurCheckbox).toBeChecked();
+    expect(
+      screen.queryByRole('complementary', { name: 'Pokemon details' })
+    ).not.toBeInTheDocument();
+    expect(getPokemonByIdMock).not.toHaveBeenCalled();
+    expect(globalThis.location.pathname).toBe('/');
+  });
+
+  it('shows a fixed actions menu with the selected item count', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+
+    render(<AppRoutes />);
+
+    expect(
+      screen.queryByRole('complementary', {
+        name: 'Selected Pokemon actions',
+      })
+    ).not.toBeInTheDocument();
+
+    await user.click(
+      await screen.findByRole('checkbox', { name: 'Select bulbasaur' })
+    );
+
+    expect(
+      screen.getByRole('complementary', { name: 'Selected Pokemon actions' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('1 selected')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Unselect all' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Download' })
+    ).toBeInTheDocument();
+  });
+
+  it('unselects all checked items from the actions menu', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+
+    render(<AppRoutes />);
+
+    const bulbasaurCheckbox = await screen.findByRole('checkbox', {
+      name: 'Select bulbasaur',
+    });
+    const charmanderCheckbox = screen.getByRole('checkbox', {
+      name: 'Select charmander',
+    });
+
+    await user.click(bulbasaurCheckbox);
+    await user.click(charmanderCheckbox);
+    expect(screen.getByText('2 selected')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Unselect all' }));
+
+    expect(bulbasaurCheckbox).not.toBeChecked();
+    expect(charmanderCheckbox).not.toBeChecked();
+    expect(
+      screen.queryByRole('complementary', {
+        name: 'Selected Pokemon actions',
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it('downloads selected items as a CSV file', async () => {
+    const user = userEvent.setup();
+
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: vi.fn(),
+    });
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: vi.fn(),
+    });
+    const createObjectUrlMock = vi
+      .spyOn(URL, 'createObjectURL')
+      .mockReturnValue('blob:selected-pokemons');
+    const revokeObjectUrlMock = vi.spyOn(URL, 'revokeObjectURL');
+    const clickMock = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+
+    render(<AppRoutes />);
+
+    await user.click(
+      await screen.findByRole('checkbox', { name: 'Select bulbasaur' })
+    );
+    await user.click(screen.getByRole('button', { name: 'Download' }));
+
+    expect(createObjectUrlMock).toHaveBeenCalledWith(expect.any(Blob));
+    const downloadedBlob = createObjectUrlMock.mock.calls[0]?.[0];
+
+    if (!(downloadedBlob instanceof Blob)) {
+      throw new TypeError('Downloaded content must be a Blob.');
+    }
+
+    await expect(downloadedBlob.text()).resolves.toContain(
+      'id,name,description,imageUrl,detailsUrl'
+    );
+    await expect(downloadedBlob.text()).resolves.toContain(
+      '1,bulbasaur,likes eating bulb.,https://example.com/bulbasaur.png,http://localhost:3000/details/1'
+    );
+    expect(clickMock).toHaveBeenCalled();
+    expect(revokeObjectUrlMock).toHaveBeenCalledWith('blob:selected-pokemons');
+
+    clickMock.mockRestore();
+    createObjectUrlMock.mockRestore();
+    revokeObjectUrlMock.mockRestore();
+  });
+
+  it('keeps checked items selected when navigating between result pages', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+
+    render(<AppRoutes />);
+
+    await user.click(
+      await screen.findByRole('checkbox', { name: 'Select bulbasaur' })
+    );
+    await user.click(screen.getByRole('link', { name: 'Next' }));
+
+    await waitFor(() => {
+      expect(globalThis.location.search).toBe('?page=2');
+    });
+    expect(
+      screen.getByRole('checkbox', { name: 'Select bulbasaur' })
+    ).toBeChecked();
+  });
+
+  it('removes an item from selected state when its checkbox is unchecked', async () => {
+    const user = userEvent.setup();
+    getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
+
+    render(<AppRoutes />);
+
+    const bulbasaurCheckbox = await screen.findByRole('checkbox', {
+      name: 'Select bulbasaur',
+    });
+
+    await user.click(bulbasaurCheckbox);
+    expect(bulbasaurCheckbox).toBeChecked();
+
+    await user.click(bulbasaurCheckbox);
+    expect(bulbasaurCheckbox).not.toBeChecked();
+  });
+
   it('closes the details panel with the close button', async () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
@@ -216,7 +404,7 @@ describe('App', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Loading details...');
   });
 
-  it('closes the details panel by clicking the main panel', async () => {
+  it('keeps the details panel open when clicking the main panel', async () => {
     const user = userEvent.setup();
     getPokemonsMock.mockResolvedValue({ pokemons: pokemonList, totalPages: 2 });
     getPokemonByIdMock.mockResolvedValue(bulbasaur);
@@ -227,13 +415,13 @@ describe('App', () => {
       await screen.findByRole('article', { name: /bulbasaur/i })
     );
     await screen.findByRole('button', { name: 'Close' });
-    await user.click(screen.getByRole('heading', { name: 'Pokemons Results' }));
+    await user.click(screen.getByRole('heading', { name: 'Pokemon Results' }));
 
-    await waitFor(() => {
-      expect(globalThis.location.pathname).toBe('/');
-      expect(globalThis.location.search).toBe('?page=1');
-      expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
-    });
+    expect(globalThis.location.pathname).toBe('/details/1');
+    expect(globalThis.location.search).toBe('?page=1');
+    expect(
+      screen.getByRole('complementary', { name: 'Pokemon details' })
+    ).toBeInTheDocument();
   });
 
   it('keeps the details panel closed before choosing a Pokemon', async () => {
@@ -241,7 +429,7 @@ describe('App', () => {
 
     render(<App />);
 
-    await screen.findByRole('heading', { name: 'Pokemons Results' });
+    await screen.findByRole('heading', { name: 'Pokemon Results' });
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     expect(globalThis.location.pathname).toBe('/');
   });

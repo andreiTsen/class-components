@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react';
 import Footer from '../Footer/Footer';
 import Header from '../Header/Header';
-import './PageLayout.css';
+import './Layout.css';
 
-type PageLayoutProperties = {
+type LayoutProperties = {
   children: ReactNode;
 };
 
-function PageLayout({ children }: PageLayoutProperties) {
+function Layout({ children }: LayoutProperties) {
   return (
     <div className="page">
       <Header />
@@ -17,4 +17,4 @@ function PageLayout({ children }: PageLayoutProperties) {
   );
 }
 
-export default PageLayout;
+export default Layout;

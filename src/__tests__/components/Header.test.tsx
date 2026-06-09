@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { render, screen } from '../test-utils';
+import { render, screen, userEvent } from '../test-utils';
 import Header from '../../components/Header/Header';
 
 describe('Header', () => {
@@ -18,5 +18,20 @@ describe('Header', () => {
       'href',
       '/about'
     );
+  });
+
+  it('toggles the application theme', async () => {
+    const user = userEvent.setup();
+
+    render(<Header />);
+
+    await user.click(
+      screen.getByRole('button', { name: 'Switch to dark theme' })
+    );
+
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(
+      screen.getByRole('button', { name: 'Switch to light theme' })
+    ).toBeInTheDocument();
   });
 });

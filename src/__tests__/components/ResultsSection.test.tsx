@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ComponentProps } from 'react';
-import { render, screen } from '../test-utils';
+import { render, screen, userEvent } from '../test-utils';
 import { pokemonList } from '../test-utils/mockData';
 import ResultsSection from '../../components/ResultsSection/ResultsSection';
 
@@ -12,7 +12,6 @@ const renderResultsSection = (
       currentPage={1}
       error=""
       isLoading={false}
-      onPokemonSelect={() => undefined}
       pokemons={[]}
       totalPages={1}
       {...properties}
@@ -52,6 +51,34 @@ describe('ResultsSection', () => {
     expect(
       screen.getByRole('heading', { name: 'charmander' })
     ).toBeInTheDocument();
+  });
+
+  it('renders a checkbox for each Pokemon', () => {
+    renderResultsSection({ pokemons: pokemonList });
+
+    expect(
+      screen.getByRole('checkbox', { name: 'Select bulbasaur' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('checkbox', { name: 'Select charmander' })
+    ).toBeInTheDocument();
+  });
+
+  it('changes checkbox selection without opening details', async () => {
+    const user = userEvent.setup();
+
+    renderResultsSection({
+      pokemons: pokemonList,
+    });
+
+    await user.click(
+      screen.getByRole('checkbox', { name: 'Select bulbasaur' })
+    );
+
+    expect(
+      screen.getByRole('checkbox', { name: 'Select bulbasaur' })
+    ).toBeChecked();
+    expect(globalThis.location.pathname).toBe('/');
   });
 
   it('renders pagination after loading multiple pages', () => {

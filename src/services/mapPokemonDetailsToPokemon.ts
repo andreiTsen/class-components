@@ -1,6 +1,6 @@
 import type { Pokemon, PokemonDetailsResponse } from '../types';
 
-export const normalizePokemon = (
+export const mapPokemonDetailsToPokemon = (
   pokemon: PokemonDetailsResponse,
   description: string
 ): Pokemon => ({

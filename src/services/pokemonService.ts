@@ -6,13 +6,13 @@ import type {
   PokemonPage,
   PokemonSpeciesResponse,
 } from '../types';
-import { parseParameter } from '../utils/parameters';
+import { parsePositiveInteger } from '../utils/parsePositiveInteger';
 import {
   fetchPokemonDetails,
   fetchPokemonList,
   fetchPokemonSpecies,
 } from './api';
-import { normalizePokemon } from './mappers';
+import { mapPokemonDetailsToPokemon } from './mapPokemonDetailsToPokemon';
 
 type PokemonFlavorTextEntry =
   PokemonSpeciesResponse['flavor_text_entries'][number];
@@ -38,7 +38,7 @@ const loadPokemon = async (nameOrId: string | number): Promise<Pokemon> => {
   );
   const description: string = rawDescription.replaceAll(/\s+/g, ' ');
 
-  return normalizePokemon(pokemon, description);
+  return mapPokemonDetailsToPokemon(pokemon, description);
 };
 
 export const getPokemons = async (
@@ -72,7 +72,7 @@ export const getPokemons = async (
 };
 
 export const getPokemonById = async (id: string | number): Promise<Pokemon> => {
-  const pokemonId: number | null = parseParameter(id);
+  const pokemonId: number | null = parsePositiveInteger(id);
 
   if (pokemonId === null) {
     throw new Error('Invalid Pokemon id.');

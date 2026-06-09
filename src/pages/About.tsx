@@ -1,9 +1,9 @@
-import PageLayout from '../components/PageLayout/PageLayout';
-import './AboutPage.css';
+import Layout from '../components/Layout/Layout';
+import './About.css';
 
-function AboutPage() {
+function About() {
   return (
-    <PageLayout>
+    <Layout>
       <main className="about-page">
         <section className="about-section" aria-labelledby="about-title">
           <h2 id="about-title">About this app</h2>
@@ -25,8 +25,8 @@ function AboutPage() {
           </a>
         </section>
       </main>
-    </PageLayout>
+    </Layout>
   );
 }
 
-export default AboutPage;
+export default About;

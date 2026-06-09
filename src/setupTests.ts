@@ -1,10 +1,12 @@
 import '@testing-library/jest-dom/vitest';
 import { beforeEach, vi } from 'vitest';
 
-type LocalStorageMock = Pick<
-  Storage,
-  'clear' | 'getItem' | 'removeItem' | 'setItem'
->;
+type LocalStorageMock = {
+  clear: () => void;
+  getItem: (key: string) => string | null;
+  removeItem: (key: string) => void;
+  setItem: (key: string, value: string) => void;
+};
 
 export const localStorageMock = ((): LocalStorageMock => {
   let store: Record<string, string> = {};

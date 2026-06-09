@@ -1,8 +1,8 @@
-type Validator<T> = (value: unknown) => value is T;
+type TypeGuard<T> = (value: unknown) => value is T;
 
-export const fetchValidated = async <T>(
+export const fetchValidatedResponse = async <T>(
   url: string,
-  validator: Validator<T>,
+  isExpectedResponse: TypeGuard<T>,
   errorMessage: string
 ): Promise<T> => {
   try {
@@ -14,7 +14,7 @@ export const fetchValidated = async <T>(
 
     const data: unknown = await response.json();
 
-    if (!validator(data)) {
+    if (!isExpectedResponse(data)) {
       throw new Error(errorMessage);
     }
 
