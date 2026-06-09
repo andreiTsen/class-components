@@ -3,19 +3,17 @@ import { Outlet } from 'react-router';
 
 type PokemonResultsLayoutProperties = {
   children: ReactNode;
-  onCloseDetails: () => void;
   selectedPokemonId?: number | null;
 };
 
 function PokemonResultsLayout({
   children,
-  onCloseDetails,
   selectedPokemonId,
 }: PokemonResultsLayoutProperties) {
   return (
     <div className="master-detail-layout">
       <div className="master-pane">{children}</div>
-      {selectedPokemonId && <Outlet context={{ onClose: onCloseDetails }} />}
+      {selectedPokemonId && <Outlet />}
     </div>
   );
 }

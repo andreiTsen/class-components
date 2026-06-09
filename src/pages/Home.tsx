@@ -1,17 +1,11 @@
-import { useCallback } from 'react';
-import {
-  useMatch,
-  useNavigate,
-  useSearchParams,
-  type NavigateFunction,
-} from 'react-router';
+import { useCallback, useEffect } from 'react';
+import { useMatch, useSearchParams } from 'react-router';
 import ErrorTestButton from '../components/ErrorTestButton/ErrorTestButton';
 import Flyout from '../components/Flyout/Flyout';
 import Layout from '../components/Layout/Layout';
 import PokemonResultsLayout from '../components/PokemonResultsLayout/PokemonResultsLayout';
 import ResultsSection from '../components/ResultsSection/ResultsSection';
 import SearchSection from '../components/SearchSection/SearchSection';
-import useHomeSynchronization from '../hooks/useHomeSynchronization';
 import useLocalStorage from '../hooks/useLocalStorage';
 import usePokemonSearch from '../hooks/usePokemonSearch';
 import type { Pokemon } from '../types';
@@ -26,22 +20,6 @@ const getFirstPageSearchParameters = (
   const nextSearchParameters = new URLSearchParams(currentSearchParameters);
   nextSearchParameters.set('page', '1');
   return nextSearchParameters;
-};
-
-const getSearchWithCurrentPage = (
-  searchParameters: URLSearchParams,
-  currentPage: number
-): string => {
-  const nextSearchParameters = new URLSearchParams(searchParameters);
-  nextSearchParameters.set('page', String(currentPage));
-  return `?${nextSearchParameters.toString()}`;
-};
-
-const closePokemonDetails = (
-  navigate: NavigateFunction,
-  searchWithCurrentPage: string
-): void => {
-  void navigate({ pathname: '/', search: searchWithCurrentPage });
 };
 
 const getSelectedPokemonId = (pokemonId?: string): number | null => {
@@ -72,27 +50,15 @@ const renderResults = ({
   />
 );
 
-const renderSearchSection = (
-  storedSearchTerm: string,
-  handleSearch: (searchTerm: string) => void
-) => (
-  <SearchSection initialSearchTerm={storedSearchTerm} onSearch={handleSearch} />
-);
-
 function Home() {
   const [searchParameters, setSearchParameters] = useSearchParams();
   const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(
     SEARCH_TERM_STORAGE_KEY
   );
-  const navigate = useNavigate();
   const { currentPage, error, isLoading, loadPage, pokemons, totalPages } =
     usePokemonSearch();
   const selectedPokemonId = getSelectedPokemonId(
     useMatch('/details/:pokemonId')?.params.pokemonId
-  );
-  const searchWithCurrentPage = getSearchWithCurrentPage(
-    searchParameters,
-    currentPage
   );
 
   const handleSearch = useCallback(
@@ -102,23 +68,36 @@ function Home() {
     },
     [setSearchParameters, setStoredSearchTerm]
   );
-  const handleCloseDetails = useCallback((): void => {
-    closePokemonDetails(navigate, searchWithCurrentPage);
-  }, [navigate, searchWithCurrentPage]);
 
-  useHomeSynchronization({
-    loadPage,
-    storedSearchTerm,
-  });
+  useEffect(() => {
+    const currentPageFromUrl =
+      parsePositiveInteger(searchParameters.get('page')) ?? 1;
+
+    if (searchParameters.get('page') !== String(currentPageFromUrl)) {
+      setSearchParameters(
+        (currentSearchParameters) => {
+          const nextSearchParameters = new URLSearchParams(
+            currentSearchParameters
+          );
+          nextSearchParameters.set('page', String(currentPageFromUrl));
+          return nextSearchParameters;
+        },
+        { replace: true }
+      );
+      return;
+    }
+
+    void loadPage(currentPageFromUrl, storedSearchTerm);
+  }, [loadPage, searchParameters, setSearchParameters, storedSearchTerm]);
 
   return (
     <Layout>
       <main className="application-page">
-        {renderSearchSection(storedSearchTerm, handleSearch)}
-        <PokemonResultsLayout
-          onCloseDetails={handleCloseDetails}
-          selectedPokemonId={selectedPokemonId}
-        >
+        <SearchSection
+          handleSearch={handleSearch}
+          storedSearchTerm={storedSearchTerm}
+        />
+        <PokemonResultsLayout selectedPokemonId={selectedPokemonId}>
           {renderResults({
             currentPage,
             error,

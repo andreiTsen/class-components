@@ -1,21 +1,27 @@
 import { useEffect, useState } from 'react';
-import { useOutletContext, useParams } from 'react-router';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
 import { getPokemonById } from '../../services/pokemonService';
 import type { Pokemon } from '../../types';
 import '../StatusMessage.css';
 import './PokemonDetails.css';
 
-type DetailsOutletContext = {
-  onClose: () => void;
-};
-
 function PokemonDetails() {
   const { pokemonId } = useParams();
-  const { onClose } = useOutletContext<DetailsOutletContext>();
+  const navigate = useNavigate();
+  const [searchParameters] = useSearchParams();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
+
+  const handleCloseDetails = (): void => {
+    const search = searchParameters.toString();
+
+    void navigate({
+      pathname: '/',
+      search: search ? `?${search}` : '',
+    });
+  };
 
   useEffect(() => {
     let ignore = false;
@@ -55,7 +61,11 @@ function PokemonDetails() {
 
   return (
     <aside className="details-pane" aria-label="Pokemon details">
-      <button className="details-close-button" type="button" onClick={onClose}>
+      <button
+        className="details-close-button"
+        type="button"
+        onClick={handleCloseDetails}
+      >
         Close
       </button>
 
