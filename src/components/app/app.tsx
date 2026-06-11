@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useCo2Data } from '../../hooks/useCo2Data';
 import { LoadingSpinner } from '../loading-spinner/loading-spinner';
 import { SearchBar } from '../search-bar/search-bar';
@@ -32,40 +32,43 @@ export const App = () => {
     isColumnModalOpen: false,
   });
 
-  const years = data ? getAvailableYears(data) : [];
-  const availableColumns = getAvailableColumns();
+  const years = useMemo(() => (data ? getAvailableYears(data) : []), [data]);
+  const availableColumns = useMemo(() => getAvailableColumns(), []);
 
-  const handleSearch = (value: string) => {
-    setState({ ...state, searchQuery: value });
-  };
+  const handleSearch = useCallback((value: string) => {
+    setState((currentState) => ({ ...currentState, searchQuery: value }));
+  }, []);
 
-  const handleYearChange = (year: number) => {
-    setState({ ...state, selectedYear: year });
-  };
+  const handleYearChange = useCallback((year: number) => {
+    setState((currentState) => ({ ...currentState, selectedYear: year }));
+  }, []);
 
-  const handleSortFieldChange = (field: 'name' | 'population') => {
-    setState({ ...state, sortField: field });
-  };
+  const handleSortFieldChange = useCallback((field: 'name' | 'population') => {
+    setState((currentState) => ({ ...currentState, sortField: field }));
+  }, []);
 
-  const handleSortOrderToggle = () => {
-    setState({
-      ...state,
-      sortOrder: state.sortOrder === 'asc' ? 'desc' : 'asc',
-    });
-  };
+  const handleSortOrderToggle = useCallback(() => {
+    setState((currentState) => ({
+      ...currentState,
+      sortOrder: currentState.sortOrder === 'asc' ? 'desc' : 'asc',
+    }));
+  }, []);
 
-  const handleColumnToggle = (column: string) => {
-    setState({
-      ...state,
-      selectedColumns: state.selectedColumns.includes(column)
-        ? state.selectedColumns.filter((c) => c !== column)
-        : [...state.selectedColumns, column],
-    });
-  };
+  const handleColumnToggle = useCallback((column: string) => {
+    setState((currentState) => ({
+      ...currentState,
+      selectedColumns: currentState.selectedColumns.includes(column)
+        ? currentState.selectedColumns.filter((c) => c !== column)
+        : [...currentState.selectedColumns, column],
+    }));
+  }, []);
 
-  const handleModalToggle = () => {
-    setState({ ...state, isColumnModalOpen: !state.isColumnModalOpen });
-  };
+  const handleModalToggle = useCallback(() => {
+    setState((currentState) => ({
+      ...currentState,
+      isColumnModalOpen: !currentState.isColumnModalOpen,
+    }));
+  }, []);
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -120,7 +123,6 @@ export const App = () => {
         selectedYear={state.selectedYear}
         sortField={state.sortField}
         sortOrder={state.sortOrder}
-        onYearChange={handleYearChange}
       />
 
       {/* Column Modal */}
