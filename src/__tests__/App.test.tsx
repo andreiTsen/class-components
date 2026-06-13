@@ -469,7 +469,9 @@ describe('App', () => {
     expect(
       screen.getByRole('button', { name: 'Unselect all' })
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Download' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Download' })
+    ).toBeInTheDocument();
   });
 
   it('unselects all checked items from the actions menu', async () => {
@@ -503,6 +505,22 @@ describe('App', () => {
   it('downloads selected items as a CSV file', async () => {
     const user = userEvent.setup();
 
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: vi.fn(),
+    });
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: vi.fn(),
+    });
+    const createObjectUrlMock = vi
+      .spyOn(URL, 'createObjectURL')
+      .mockReturnValue('blob:selected-pokemons');
+    const revokeObjectUrlMock = vi.spyOn(URL, 'revokeObjectURL');
+    const clickMock = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+
     setupPokemonApiMock();
 
     render(<AppRoutes />);
@@ -510,18 +528,27 @@ describe('App', () => {
     await user.click(
       await screen.findByRole('checkbox', { name: 'Select bulbasaur' })
     );
-    const downloadLink = screen.getByRole('link', { name: 'Download' });
-    const href = downloadLink.getAttribute('href') ?? '';
-    const csv = decodeURIComponent(
-      href.replace('data:text/csv;charset=utf-8,', '')
-    );
+    await user.click(screen.getByRole('button', { name: 'Download' }));
 
-    expect(downloadLink).toHaveAttribute('download', '1_items.csv');
-    expect(href).toMatch(/^data:text\/csv;charset=utf-8,/);
-    expect(csv).toContain('id,name,description,imageUrl,detailsUrl');
-    expect(csv).toContain(
+    expect(createObjectUrlMock).toHaveBeenCalledWith(expect.any(Blob));
+    const downloadedBlob = createObjectUrlMock.mock.calls[0]?.[0];
+
+    if (!(downloadedBlob instanceof Blob)) {
+      throw new TypeError('Downloaded content must be a Blob.');
+    }
+
+    await expect(downloadedBlob.text()).resolves.toContain(
+      'id,name,description,imageUrl,detailsUrl'
+    );
+    await expect(downloadedBlob.text()).resolves.toContain(
       '1,bulbasaur,likes eating bulb.,https://example.com/bulbasaur.png,http://localhost:3000/details/1'
     );
+    expect(clickMock).toHaveBeenCalled();
+    expect(revokeObjectUrlMock).toHaveBeenCalledWith('blob:selected-pokemons');
+
+    clickMock.mockRestore();
+    createObjectUrlMock.mockRestore();
+    revokeObjectUrlMock.mockRestore();
   });
 
   it('keeps checked items selected when navigating between result pages', async () => {
@@ -626,7 +653,7 @@ describe('App', () => {
     ).toBeInTheDocument();
   });
 
-  it('closes the details panel by clicking the main panel', async () => {
+  it('keeps the details panel open when clicking the main panel', async () => {
     const user = userEvent.setup();
     setupPokemonApiMock();
 
@@ -636,13 +663,13 @@ describe('App', () => {
       await screen.findByRole('article', { name: /bulbasaur/i })
     );
     await screen.findByRole('button', { name: 'Close' });
-    await user.click(screen.getByRole('heading', { name: 'Pokemons Results' }));
+    await user.click(screen.getByRole('heading', { name: 'Pokemon Results' }));
 
-    await waitFor(() => {
-      expect(globalThis.location.pathname).toBe('/');
-      expect(globalThis.location.search).toBe('?page=1');
-      expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
-    });
+    expect(globalThis.location.pathname).toBe('/details/1');
+    expect(globalThis.location.search).toBe('?page=1');
+    expect(
+      screen.getByRole('complementary', { name: 'Pokemon details' })
+    ).toBeInTheDocument();
   });
 
   it('keeps the details panel closed before choosing a Pokemon', async () => {
@@ -650,7 +677,7 @@ describe('App', () => {
 
     render(<App />);
 
-    await screen.findByRole('heading', { name: 'Pokemons Results' });
+    await screen.findByRole('heading', { name: 'Pokemon Results' });
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     expect(globalThis.location.pathname).toBe('/');
   });

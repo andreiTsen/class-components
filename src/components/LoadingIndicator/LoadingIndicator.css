@@ -3,10 +3,10 @@
   align-items: center;
   gap: 14px;
   padding: 14px 16px;
-  border: 1px solid #d7e4f7;
+  border: 1px solid var(--color-loader-border);
   border-radius: 4px;
-  background: #f7fbff;
-  color: #1f2933;
+  background: var(--color-loader-bg);
+  color: var(--color-text);
 }
 
 .loading-indicator img {

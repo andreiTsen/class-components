@@ -1,24 +1,43 @@
-import { useOutletContext, useParams } from 'react-router';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
 import { pokemonApi, useGetPokemonByIdQuery } from '../../services/pokemonApi';
 import { useAppDispatch } from '../../store/hooks';
 import '../StatusMessage.css';
 import './PokemonDetails.css';
 
-type DetailsOutletContext = {
-  onClose: () => void;
-};
-
 function PokemonDetails() {
   const { pokemonId } = useParams();
-  const { onClose } = useOutletContext<DetailsOutletContext>();
+  const navigate = useNavigate();
+  const [searchParameters] = useSearchParams();
   const dispatch = useAppDispatch();
   const {
     data: pokemon,
     isError,
     isFetching,
   } = useGetPokemonByIdQuery(pokemonId ?? '', { skip: !pokemonId });
-  const shouldShowLoader = isFetching || (!pokemon && !isError);
+  const [isLoading, setIsLoading] = useState(isFetching && !pokemon);
+  const shouldShowLoader = !pokemon && (isLoading || !isError);
+
+  useEffect(() => {
+    const timeoutId = globalThis.setTimeout(() => {
+      setIsLoading(isFetching && !pokemon);
+    }, 0);
+
+    return (): void => {
+      globalThis.clearTimeout(timeoutId);
+    };
+  }, [isFetching, pokemon]);
+
+  const handleCloseDetails = (): void => {
+    const search = searchParameters.toString();
+
+    void navigate({
+      pathname: '/',
+      search: search ? `?${search}` : '',
+    });
+  };
+
   const handleRefresh = (): void => {
     if (!pokemonId) {
       return;
@@ -33,7 +52,11 @@ function PokemonDetails() {
 
   return (
     <aside className="details-pane" aria-label="Pokemon details">
-      <button className="details-close-button" type="button" onClick={onClose}>
+      <button
+        className="details-close-button"
+        type="button"
+        onClick={handleCloseDetails}
+      >
         Close
       </button>
       <button type="button" onClick={handleRefresh} disabled={isFetching}>

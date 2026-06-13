@@ -3,9 +3,9 @@
   max-width: 960px;
   margin: 32px auto;
   padding: 28px 20px;
-  border: 1px solid #f1b8b8;
+  border: 1px solid var(--color-error-border);
   border-radius: 6px;
-  background: #fffafa;
+  background: var(--color-error-bg);
 }
 
 .error-boundary h2 {
@@ -15,15 +15,15 @@
 
 .error-boundary p {
   margin: 0 0 18px;
-  color: #667085;
+  color: var(--color-text-muted);
 }
 
 .error-boundary button {
   align-self: flex-start;
   padding: 10px 16px;
-  border: 1px solid #1f2933;
+  border: 1px solid var(--color-primary);
   border-radius: 4px;
-  background: #ffffff;
-  color: #1f2933;
+  background: var(--color-surface);
+  color: var(--color-text);
   cursor: pointer;
 }

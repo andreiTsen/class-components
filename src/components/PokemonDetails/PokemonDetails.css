@@ -11,19 +11,19 @@
   min-height: 360px;
   overflow: auto;
   padding: 24px;
-  border: 1px solid #d9dee5;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: #ffffff;
-  box-shadow: 0 18px 40px rgb(31 41 51 / 14%);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-details);
 }
 
 .details-close-button {
   align-self: flex-end;
   padding: 8px 12px;
-  border: 1px solid #1f2933;
+  border: 1px solid var(--color-primary);
   border-radius: 4px;
-  background: #ffffff;
-  color: #1f2933;
+  background: var(--color-surface);
+  color: var(--color-text);
   cursor: pointer;
 }
 
@@ -47,7 +47,7 @@
 
 .details-content p {
   margin: 0;
-  color: #667085;
+  color: var(--color-text-muted);
   line-height: 1.5;
 }
 

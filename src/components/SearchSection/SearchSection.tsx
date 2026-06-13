@@ -2,15 +2,15 @@ import { useState, type ChangeEvent, type SyntheticEvent } from 'react';
 import './SearchSection.css';
 
 type SearchSectionProperties = {
-  initialSearchTerm?: string;
-  onSearch: (searchTerm: string) => void;
+  handleSearch: (searchTerm: string) => void;
+  storedSearchTerm?: string;
 };
 
 function SearchSection({
-  initialSearchTerm = '',
-  onSearch,
+  handleSearch,
+  storedSearchTerm = '',
 }: SearchSectionProperties) {
-  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
+  const [searchTerm, setSearchTerm] = useState(storedSearchTerm);
 
   const handleSearchTermChange = (
     event: ChangeEvent<HTMLInputElement>
@@ -23,7 +23,7 @@ function SearchSection({
     const normalizedSearchTerm: string = searchTerm.trim();
 
     setSearchTerm(normalizedSearchTerm);
-    onSearch(normalizedSearchTerm);
+    handleSearch(normalizedSearchTerm);
   };
 
   return (

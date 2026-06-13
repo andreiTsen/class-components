@@ -11,6 +11,13 @@
   font-weight: 700;
 }
 
+.page-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 .main-nav {
   display: flex;
   gap: 14px;
@@ -18,13 +25,23 @@
 }
 
 .main-nav a {
-  color: #1f2933;
+  color: var(--color-text);
   font-weight: 600;
   text-decoration: none;
 }
 
 .main-nav a:hover {
   text-decoration: underline;
+}
+
+.theme-toggle {
+  align-self: flex-start;
+  padding: 10px 16px;
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
 }
 
 @media (max-width: 600px) {
@@ -34,5 +51,10 @@
 
   .page-header h1 {
     font-size: 24px;
+  }
+
+  .page-header-top {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

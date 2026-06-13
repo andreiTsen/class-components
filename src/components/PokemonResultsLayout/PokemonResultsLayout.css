@@ -1,0 +1,7 @@
+.master-detail-layout {
+  display: block;
+}
+
+.master-pane {
+  min-width: 0;
+}

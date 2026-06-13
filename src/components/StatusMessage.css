@@ -1,11 +1,11 @@
 .status-message {
   padding: 14px 16px;
-  border: 1px solid #e2e6ea;
+  border: 1px solid var(--color-border-subtle);
   border-radius: 4px;
-  background: #fafafa;
+  background: var(--color-surface-muted);
 }
 
 .status-message-error {
-  border-color: #f1b8b8;
-  color: #b42318;
+  border-color: var(--color-error-border);
+  color: var(--color-error-text);
 }
