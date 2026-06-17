@@ -1,7 +1,8 @@
-import { Link } from 'react-router';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-const getPageSearch = (page: number): string => {
-  return `?page=${String(page)}`;
+const getPageHref = (pathname: string, page: number): string => {
+  return `${pathname}?page=${String(page)}`;
 };
 
 type PaginationProperties = {
@@ -15,6 +16,7 @@ function Pagination({
   isLoading,
   totalPages,
 }: PaginationProperties) {
+  const pathname = usePathname();
   const isPreviousDisabled: boolean = isLoading || currentPage === 1;
   const isNextDisabled: boolean = isLoading || currentPage === totalPages;
 
@@ -27,7 +29,7 @@ function Pagination({
       ) : (
         <Link
           className="pagination-link"
-          to={{ search: getPageSearch(currentPage - 1) }}
+          href={getPageHref(pathname, currentPage - 1)}
         >
           Previous
         </Link>
@@ -40,7 +42,7 @@ function Pagination({
       ) : (
         <Link
           className="pagination-link"
-          to={{ search: getPageSearch(currentPage + 1) }}
+          href={getPageHref(pathname, currentPage + 1)}
         >
           Next
         </Link>

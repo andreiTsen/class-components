@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useGetPokemonsQuery } from '../../services/pokemonApi';
 import type { Pokemon } from '../../types';
 import { parsePositiveInteger } from '../../utils/parsePositiveInteger';
@@ -10,7 +10,6 @@ import PokemonResultItem from './PokemonResultItem';
 import './ResultsSection.css';
 
 const EMPTY_POKEMONS: Pokemon[] = [];
-type SetSearchParameters = ReturnType<typeof useSearchParams>[1];
 
 const getPageFromSearchParameters = (
   searchParameters: URLSearchParams
@@ -19,8 +18,9 @@ const getPageFromSearchParameters = (
 };
 
 const usePageParameterNormalization = (
-  searchParameters: URLSearchParams,
-  setSearchParameters: SetSearchParameters
+  pathname: string,
+  router: ReturnType<typeof useRouter>,
+  searchParameters: URLSearchParams
 ): number => {
   const currentPage = getPageFromSearchParameters(searchParameters);
 
@@ -29,17 +29,11 @@ const usePageParameterNormalization = (
       return;
     }
 
-    setSearchParameters(
-      (currentSearchParameters) => {
-        const nextSearchParameters = new URLSearchParams(
-          currentSearchParameters
-        );
-        nextSearchParameters.set('page', String(currentPage));
-        return nextSearchParameters;
-      },
-      { replace: true }
-    );
-  }, [currentPage, searchParameters, setSearchParameters]);
+    const nextSearchParameters = new URLSearchParams(searchParameters);
+    nextSearchParameters.set('page', String(currentPage));
+
+    router.replace(`${pathname}?${nextSearchParameters.toString()}`);
+  }, [currentPage, pathname, router, searchParameters]);
 
   return currentPage;
 };
@@ -53,10 +47,14 @@ function ResultsSection({
   handleRefresh,
   searchTerm,
 }: ResultsSectionProperties) {
-  const [searchParameters, setSearchParameters] = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParameters = useSearchParams();
+  const search = searchParameters.toString();
   const currentPage = usePageParameterNormalization(
-    searchParameters,
-    setSearchParameters
+    pathname,
+    router,
+    new URLSearchParams(search)
   );
   const { data, isError, isFetching } = useGetPokemonsQuery({
     page: currentPage,

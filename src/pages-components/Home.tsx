@@ -1,5 +1,8 @@
+'use client';
+
+import type { ReactNode } from 'react';
 import { useCallback } from 'react';
-import { useSearchParams } from 'react-router';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import ErrorTestButton from '../components/ErrorTestButton/ErrorTestButton';
 import Flyout from '../components/Flyout/Flyout';
 import Layout from '../components/Layout/Layout';
@@ -21,8 +24,15 @@ const getFirstPageSearchParameters = (
   return nextSearchParameters;
 };
 
-function Home() {
-  const [, setSearchParameters] = useSearchParams();
+type HomeProperties = {
+  details?: ReactNode;
+};
+
+function Home({ details }: HomeProperties) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParameters = useSearchParams();
+  const search = searchParameters.toString();
   const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(
     SEARCH_TERM_STORAGE_KEY
   );
@@ -31,9 +41,13 @@ function Home() {
   const handleSearch = useCallback(
     (searchTerm: string): void => {
       setStoredSearchTerm(searchTerm);
-      setSearchParameters(getFirstPageSearchParameters);
+      const nextSearchParameters = getFirstPageSearchParameters(
+        new URLSearchParams(search)
+      );
+
+      router.push(`${pathname}?${nextSearchParameters.toString()}`);
     },
-    [setSearchParameters, setStoredSearchTerm]
+    [pathname, router, search, setStoredSearchTerm]
   );
 
   const handleRefreshResults = useCallback((): void => {
@@ -49,7 +63,7 @@ function Home() {
           handleSearch={handleSearch}
           storedSearchTerm={storedSearchTerm}
         />
-        <PokemonResultsLayout>
+        <PokemonResultsLayout details={details}>
           <ResultsSection
             handleRefresh={handleRefreshResults}
             searchTerm={storedSearchTerm}

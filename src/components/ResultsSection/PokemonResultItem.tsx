@@ -1,5 +1,5 @@
 import type { KeyboardEvent, MouseEvent } from 'react';
-import { useMatch, useNavigate, useSearchParams } from 'react-router';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setPokemonSelection } from '../../store/selectedPokemonSlice';
 import type { Pokemon } from '../../types';
@@ -11,10 +11,12 @@ type PokemonResultItemProperties = {
 
 function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const [searchParameters] = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParameters = useSearchParams();
+  const search = searchParameters.toString();
   const selectedPokemonId = parsePositiveInteger(
-    useMatch('/details/:pokemonId')?.params.pokemonId
+    /^\/details\/(\d+)$/.exec(pathname)?.[1]
   );
   const selectedPokemonIds = useAppSelector(
     (state) => state.selectedPokemon.selectedPokemonIds
@@ -23,10 +25,7 @@ function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
   const isSelected = selectedPokemonId === pokemon.id;
 
   const openPokemonDetails = (): void => {
-    void navigate({
-      pathname: `/details/${String(pokemon.id)}`,
-      search: `?${searchParameters.toString()}`,
-    });
+    router.push(`/details/${String(pokemon.id)}?${search}`);
   };
 
   return (

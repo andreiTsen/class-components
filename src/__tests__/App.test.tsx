@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent, waitFor } from './test-utils';
 import { bulbasaur, pokemonList } from './test-utils/mockData';
 import App from '../App';
-import AppRoutes from '../AppRoutes';
 import { localStorageMock } from '../setupTests';
 
 const HTTP_STATUS_OK = 200;
@@ -403,7 +402,7 @@ describe('App', () => {
     const user = userEvent.setup();
     const fetchMock = setupPokemonApiMock();
 
-    render(<AppRoutes />);
+    render(<App />);
 
     const bulbasaurItem = await screen.findByRole('article', {
       name: /bulbasaur/i,
@@ -430,7 +429,7 @@ describe('App', () => {
     const user = userEvent.setup();
     const fetchMock = setupPokemonApiMock();
 
-    render(<AppRoutes />);
+    render(<App />);
 
     const bulbasaurCheckbox = await screen.findByRole('checkbox', {
       name: 'Select bulbasaur',
@@ -450,7 +449,7 @@ describe('App', () => {
     const user = userEvent.setup();
     setupPokemonApiMock();
 
-    render(<AppRoutes />);
+    render(<App />);
 
     expect(
       screen.queryByRole('complementary', {
@@ -478,7 +477,7 @@ describe('App', () => {
     const user = userEvent.setup();
     setupPokemonApiMock();
 
-    render(<AppRoutes />);
+    render(<App />);
 
     const bulbasaurCheckbox = await screen.findByRole('checkbox', {
       name: 'Select bulbasaur',
@@ -523,7 +522,7 @@ describe('App', () => {
 
     setupPokemonApiMock();
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await user.click(
       await screen.findByRole('checkbox', { name: 'Select bulbasaur' })
@@ -555,7 +554,7 @@ describe('App', () => {
     const user = userEvent.setup();
     setupPokemonApiMock();
 
-    render(<AppRoutes />);
+    render(<App />);
 
     await user.click(
       await screen.findByRole('checkbox', { name: 'Select bulbasaur' })
@@ -574,7 +573,7 @@ describe('App', () => {
     const user = userEvent.setup();
     setupPokemonApiMock();
 
-    render(<AppRoutes />);
+    render(<App />);
 
     const bulbasaurCheckbox = await screen.findByRole('checkbox', {
       name: 'Select bulbasaur',

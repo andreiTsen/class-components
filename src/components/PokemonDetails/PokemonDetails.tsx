@@ -1,21 +1,26 @@
+'use client';
+
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router';
+import { useRouter, useSearchParams } from 'next/navigation';
 import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
 import { pokemonApi, useGetPokemonByIdQuery } from '../../services/pokemonApi';
 import { useAppDispatch } from '../../store/hooks';
 import '../StatusMessage.css';
 import './PokemonDetails.css';
 
-function PokemonDetails() {
-  const { pokemonId } = useParams();
-  const navigate = useNavigate();
-  const [searchParameters] = useSearchParams();
+type PokemonDetailsProperties = {
+  pokemonId: string;
+};
+
+function PokemonDetails({ pokemonId }: PokemonDetailsProperties) {
+  const router = useRouter();
+  const searchParameters = useSearchParams();
   const dispatch = useAppDispatch();
   const {
     data: pokemon,
     isError,
     isFetching,
-  } = useGetPokemonByIdQuery(pokemonId ?? '', { skip: !pokemonId });
+  } = useGetPokemonByIdQuery(pokemonId, { skip: !pokemonId });
   const [isLoading, setIsLoading] = useState(isFetching && !pokemon);
   const shouldShowLoader = !pokemon && (isLoading || !isError);
 
@@ -32,10 +37,7 @@ function PokemonDetails() {
   const handleCloseDetails = (): void => {
     const search = searchParameters.toString();
 
-    void navigate({
-      pathname: '/',
-      search: search ? `?${search}` : '',
-    });
+    router.push(search ? `/?${search}` : '/');
   };
 
   const handleRefresh = (): void => {

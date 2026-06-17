@@ -1,4 +1,6 @@
-import { Link } from 'react-router';
+'use client';
+
+import Link from 'next/link';
 import { useTheme } from '../../context/useTheme';
 import './Header.css';
 
@@ -20,8 +22,8 @@ function Header() {
         </button>
       </div>
       <nav className="main-nav" aria-label="Main navigation">
-        <Link to="/">Home</Link>
-        <Link to="/about">About</Link>
+        <Link href="/">Home</Link>
+        <Link href="/about">About</Link>
       </nav>
     </header>
   );

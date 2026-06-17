@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import Link from 'next/link';
 import './Page404.css';
 
 function Page404() {
@@ -8,7 +8,7 @@ function Page404() {
         <span>404</span>
         <h1 id="not-found-title">Page not found</h1>
         <p>The page you are looking for does not exist.</p>
-        <Link to="/">Back to app</Link>
+        <Link href="/">Back to app</Link>
       </section>
     </main>
   );

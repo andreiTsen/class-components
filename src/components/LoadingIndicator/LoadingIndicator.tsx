@@ -10,7 +10,7 @@ function LoadingIndicator({
 }: LoadingIndicatorProperties) {
   return (
     <div className="loading-indicator" role="status" aria-live="polite">
-      <img src={loadingImage} alt="" />
+      <img src={loadingImage.src} alt="" />
       <span>{label}</span>
     </div>
   );
