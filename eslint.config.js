@@ -165,4 +165,16 @@ export default defineConfig([
       'max-lines-per-function': 'off',
     },
   },
+  {
+    files: ['src/app/**/*.{ts,tsx}'],
+    rules: {
+      'unicorn/prevent-abbreviations': 'off',
+    },
+  },
+  {
+    files: ['src/proxy.ts'],
+    rules: {
+      'unicorn/prefer-string-raw': 'off',
+    },
+  },
 ]);

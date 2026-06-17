@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useGetPokemonsQuery } from '../../services/pokemonApi';
 import type { Pokemon } from '../../types';
@@ -49,6 +50,7 @@ function ResultsSection({
 }: ResultsSectionProperties) {
   const pathname = usePathname();
   const router = useRouter();
+  const t = useTranslations('Results');
   const searchParameters = useSearchParams();
   const search = searchParameters.toString();
   const currentPage = usePageParameterNormalization(
@@ -61,7 +63,7 @@ function ResultsSection({
     searchTerm: searchTerm.trim(),
   });
   const [isLoading, setIsLoading] = useState(isFetching && !data);
-  const error = isError ? 'Failed to load data' : '';
+  const error = isError ? t('error') : '';
   const pokemons = data?.pokemons ?? EMPTY_POKEMONS;
   const totalPages = data?.totalPages ?? 0;
   const shouldShowLoader = isLoading && !data;
@@ -80,21 +82,21 @@ function ResultsSection({
   return (
     <section className="results-section" aria-labelledby="results-title">
       <div>
-        <h2 id="results-title">Pokemon Results</h2>
-        <p>Submitted Pokemon</p>
+        <h2 id="results-title">{t('title')}</h2>
+        <p>{t('subtitle')}</p>
         <button
           type="button"
           onClick={handleRefresh}
           disabled={shouldShowLoader}
         >
-          Refresh results
+          {t('refresh')}
         </button>
       </div>
 
       {shouldShowLoader && <LoadingIndicator />}
       {error && <p className="status-message status-message-error">{error}</p>}
       {!shouldShowLoader && !error && pokemons.length === 0 && (
-        <p className="status-message">No pokemons found.</p>
+        <p className="status-message">{t('noResults')}</p>
       )}
 
       <div className="result-list">

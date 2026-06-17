@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type SyntheticEvent } from 'react';
+import { useTranslations } from 'next-intl';
 import './SearchSection.css';
 
 type SearchSectionProperties = {
@@ -11,6 +12,7 @@ function SearchSection({
   storedSearchTerm = '',
 }: SearchSectionProperties) {
   const [searchTerm, setSearchTerm] = useState(storedSearchTerm);
+  const t = useTranslations('Search');
 
   const handleSearchTermChange = (
     event: ChangeEvent<HTMLInputElement>
@@ -28,15 +30,15 @@ function SearchSection({
 
   return (
     <section className="search-section" aria-labelledby="search-title">
-      <h1 id="search-title">Pokemon Search</h1>
+      <h1 id="search-title">{t('title')}</h1>
       <form className="search-form" onSubmit={handleSubmit}>
         <input
           type="search"
-          placeholder="Search pokemons"
+          placeholder={t('placeholder')}
           value={searchTerm}
           onChange={handleSearchTermChange}
         />
-        <button type="submit">Search</button>
+        <button type="submit">{t('submit')}</button>
       </form>
     </section>
   );

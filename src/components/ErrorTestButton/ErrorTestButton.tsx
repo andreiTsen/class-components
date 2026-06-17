@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import './ErrorTestButton.css';
 
 function ErrorTestButton() {
   const [shouldThrowError, setShouldThrowError] = useState(false);
+  const t = useTranslations('TestError');
 
   const handleClick = (): void => {
     setShouldThrowError(true);
@@ -14,7 +16,7 @@ function ErrorTestButton() {
 
   return (
     <button className="error-test-button" type="button" onClick={handleClick}>
-      Test Error
+      {t('button')}
     </button>
   );
 }

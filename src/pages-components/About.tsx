@@ -1,27 +1,30 @@
+import { useTranslations } from 'next-intl';
 import Layout from '../components/Layout/Layout';
 import './About.css';
 
 function About() {
+  const t = useTranslations('About');
+
   return (
     <Layout>
       <main className="about-page">
         <section className="about-section" aria-labelledby="about-title">
-          <h2 id="about-title">About this app</h2>
-          <p>Pokemons are my love</p>
-          <p>Author: andreiTsen. This is a crazy project</p>
+          <h2 id="about-title">{t('title')}</h2>
+          <p>{t('intro')}</p>
+          <p>{t('author')}</p>
           <a
             href="https://github.com/andreiTsen"
             target="_blank"
             rel="noreferrer"
           >
-            My name is Andrei, My GitHub
+            {t('githubLink')}
           </a>
           <a
             href="https://rs.school/courses/reactjs"
             target="_blank"
             rel="noreferrer"
           >
-            RS School React course
+            {t('rsSchoolLink')}
           </a>
         </section>
       </main>

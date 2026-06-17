@@ -1,9 +1,12 @@
+import { useTranslations } from 'next-intl';
 import './Footer.css';
 
 function Footer() {
+  const t = useTranslations('Footer');
+
   return (
     <footer className="page-footer">
-      <span>Pokemon application by andreiTsen</span>
+      <span>{t('text')}</span>
     </footer>
   );
 }

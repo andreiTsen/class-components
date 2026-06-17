@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { getAppLocale, getLocalizedPathname } from '../../i18n/pathname';
 import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
 import { pokemonApi, useGetPokemonByIdQuery } from '../../services/pokemonApi';
 import { useAppDispatch } from '../../store/hooks';
@@ -14,6 +16,9 @@ type PokemonDetailsProperties = {
 
 function PokemonDetails({ pokemonId }: PokemonDetailsProperties) {
   const router = useRouter();
+  const locale = getAppLocale(useLocale());
+  const t = useTranslations('PokemonDetails');
+  const loadingT = useTranslations('Loading');
   const searchParameters = useSearchParams();
   const dispatch = useAppDispatch();
   const {
@@ -36,8 +41,9 @@ function PokemonDetails({ pokemonId }: PokemonDetailsProperties) {
 
   const handleCloseDetails = (): void => {
     const search = searchParameters.toString();
+    const homePathname = getLocalizedPathname('/', locale);
 
-    router.push(search ? `/?${search}` : '/');
+    router.push(search ? `${homePathname}?${search}` : homePathname);
   };
 
   const handleRefresh = (): void => {
@@ -53,24 +59,22 @@ function PokemonDetails({ pokemonId }: PokemonDetailsProperties) {
   };
 
   return (
-    <aside className="details-pane" aria-label="Pokemon details">
+    <aside className="details-pane" aria-label={t('title')}>
       <button
         className="details-close-button"
         type="button"
         onClick={handleCloseDetails}
       >
-        Close
+        {t('close')}
       </button>
       <button type="button" onClick={handleRefresh} disabled={isFetching}>
-        Refresh details
+        {t('refresh')}
       </button>
 
-      {shouldShowLoader && <LoadingIndicator label="Loading details..." />}
+      {shouldShowLoader && <LoadingIndicator label={loadingT('details')} />}
 
       {isError && (
-        <p className="status-message status-message-error">
-          Failed to load Pokemon data.
-        </p>
+        <p className="status-message status-message-error">{t('error')}</p>
       )}
 
       {pokemon && !shouldShowLoader && !isError && (

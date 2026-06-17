@@ -394,7 +394,7 @@ describe('App', () => {
         getRequestUrl(input).endsWith('/pokemon/1')
       )
     ).toBe(true);
-    expect(globalThis.location.pathname).toBe('/details/1');
+    expect(globalThis.location.pathname).toBe('/en/details/1');
     expect(globalThis.location.search).toBe('?page=1');
   });
 
@@ -599,7 +599,7 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Close' }));
 
     await waitFor(() => {
-      expect(globalThis.location.pathname).toBe('/');
+      expect(globalThis.location.pathname).toBe('/en');
       expect(globalThis.location.search).toBe('?page=1');
       expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     });
@@ -664,7 +664,7 @@ describe('App', () => {
     await screen.findByRole('button', { name: 'Close' });
     await user.click(screen.getByRole('heading', { name: 'Pokemon Results' }));
 
-    expect(globalThis.location.pathname).toBe('/details/1');
+    expect(globalThis.location.pathname).toBe('/en/details/1');
     expect(globalThis.location.search).toBe('?page=1');
     expect(
       screen.getByRole('complementary', { name: 'Pokemon details' })

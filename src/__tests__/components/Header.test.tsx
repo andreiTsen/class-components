@@ -16,7 +16,7 @@ describe('Header', () => {
 
     expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute(
       'href',
-      '/about'
+      '/en/about'
     );
   });
 
@@ -37,5 +37,18 @@ describe('Header', () => {
     expect(
       screen.getByRole('button', { name: 'Switch to light theme' })
     ).toBeInTheDocument();
+  });
+
+  it('changes the locale from the language switcher', async () => {
+    const user = userEvent.setup();
+
+    render(<Header />);
+
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: 'Language' }),
+      'ru'
+    );
+
+    expect(globalThis.location.pathname).toBe('/ru');
   });
 });

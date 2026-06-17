@@ -16,7 +16,7 @@ describe('Page404', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Back to app' })).toHaveAttribute(
       'href',
-      '/'
+      '/en'
     );
   });
 });

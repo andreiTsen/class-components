@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import PokemonDetails from './components/PokemonDetails/PokemonDetails';
+import { getPathnameWithoutLocale } from './i18n/pathname';
 import { parsePositiveInteger } from './utils/parsePositiveInteger';
 import About from './pages-components/About';
 import Home from './pages-components/Home';
@@ -9,13 +10,16 @@ import Page404 from './pages-components/Page404';
 
 function App() {
   const pathname = usePathname();
-  const selectedPokemonId = /^\/details\/(\d+)$/.exec(pathname)?.[1];
+  const pathnameWithoutLocale = getPathnameWithoutLocale(pathname);
+  const selectedPokemonId = /^\/details\/(\d+)$/.exec(
+    pathnameWithoutLocale
+  )?.[1];
 
-  if (pathname === '/') {
+  if (pathnameWithoutLocale === '/') {
     return <Home />;
   }
 
-  if (pathname === '/about') {
+  if (pathnameWithoutLocale === '/about') {
     return <About />;
   }
 

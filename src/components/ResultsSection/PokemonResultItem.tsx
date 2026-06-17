@@ -1,5 +1,11 @@
 import type { KeyboardEvent, MouseEvent } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import {
+  getAppLocale,
+  getLocalizedPathname,
+  getPathnameWithoutLocale,
+} from '../../i18n/pathname';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setPokemonSelection } from '../../store/selectedPokemonSlice';
 import type { Pokemon } from '../../types';
@@ -11,12 +17,14 @@ type PokemonResultItemProperties = {
 
 function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
   const dispatch = useAppDispatch();
+  const locale = getAppLocale(useLocale());
   const pathname = usePathname();
   const router = useRouter();
+  const t = useTranslations('Results');
   const searchParameters = useSearchParams();
   const search = searchParameters.toString();
   const selectedPokemonId = parsePositiveInteger(
-    /^\/details\/(\d+)$/.exec(pathname)?.[1]
+    /^\/details\/(\d+)$/.exec(getPathnameWithoutLocale(pathname))?.[1]
   );
   const selectedPokemonIds = useAppSelector(
     (state) => state.selectedPokemon.selectedPokemonIds
@@ -25,7 +33,12 @@ function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
   const isSelected = selectedPokemonId === pokemon.id;
 
   const openPokemonDetails = (): void => {
-    router.push(`/details/${String(pokemon.id)}?${search}`);
+    const detailsPathname = getLocalizedPathname(
+      `/details/${String(pokemon.id)}`,
+      locale
+    );
+
+    router.push(search ? `${detailsPathname}?${search}` : detailsPathname);
   };
 
   return (
@@ -57,7 +70,7 @@ function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
       >
         <input
           type="checkbox"
-          aria-label={`Select ${pokemon.name}`}
+          aria-label={t('selectPokemon', { name: pokemon.name })}
           checked={isChecked}
           onChange={(event): void => {
             dispatch(

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { downloadSelectedItems } from '../../services/downloadSelectedItems';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { unselectAllPokemons } from '../../store/selectedPokemonSlice';
@@ -5,6 +6,8 @@ import './Flyout.css';
 
 function Flyout() {
   const dispatch = useAppDispatch();
+  const t = useTranslations('SelectedActions');
+  const resultsT = useTranslations('Results');
   const selectedItems = useAppSelector(
     (state) => state.selectedPokemon.selectedPokemons
   );
@@ -15,8 +18,8 @@ function Flyout() {
   }
 
   return (
-    <aside className="flyout" aria-label="Selected Pokemon actions">
-      <strong>{selectedCount} selected</strong>
+    <aside className="flyout" aria-label={t('label')}>
+      <strong>{resultsT('selected', { count: selectedCount })}</strong>
       <div className="flyout-controls">
         <button
           type="button"
@@ -24,7 +27,7 @@ function Flyout() {
             dispatch(unselectAllPokemons());
           }}
         >
-          Unselect all
+          {t('unselectAll')}
         </button>
         <button
           type="button"
@@ -32,7 +35,7 @@ function Flyout() {
             downloadSelectedItems(selectedItems);
           }}
         >
-          Download
+          {t('download')}
         </button>
       </div>
     </aside>
