@@ -15,9 +15,10 @@ function PokemonDetails() {
     data: pokemon,
     isError,
     isFetching,
+    isLoading,
+    refetch,
   } = useGetPokemonByIdQuery(pokemonId ?? '', { skip: !pokemonId });
-  const [isLoading, setIsLoading] = useState(isFetching && !pokemon);
-  const shouldShowLoader = !pokemon && (isLoading || !isError);
+  const shouldShowLoader = isLoading || isFetching);
 
   useEffect(() => {
     const timeoutId = globalThis.setTimeout(() => {
