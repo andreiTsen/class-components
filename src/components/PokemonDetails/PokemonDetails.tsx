@@ -44,11 +44,7 @@ function PokemonDetails() {
       return;
     }
 
-    dispatch(
-      pokemonApi.util.invalidateTags([
-        { type: 'PokemonDetails', id: pokemon?.id ?? pokemonId },
-      ])
-    );
+    void refetch();
   };
 
   return (
