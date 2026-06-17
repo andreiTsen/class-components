@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useSearchParams } from 'react-router';
 import ErrorTestButton from '../components/ErrorTestButton/ErrorTestButton';
 import Flyout from '../components/Flyout/Flyout';
@@ -7,26 +7,54 @@ import PokemonResultsLayout from '../components/PokemonResultsLayout/PokemonResu
 import ResultsSection from '../components/ResultsSection/ResultsSection';
 import SearchSection from '../components/SearchSection/SearchSection';
 import useLocalStorage from '../hooks/useLocalStorage';
-import { pokemonApi } from '../services/pokemonApi';
-import { useAppDispatch } from '../store/hooks';
+import { parsePositiveInteger } from '../utils/parsePositiveInteger';
 import './Home.css';
 
 const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
 
-const getFirstPageSearchParameters = (
-  currentSearchParameters: URLSearchParams
+const getPageFromSearchParameters = (
+  searchParameters: URLSearchParams
+): number => {
+  return parsePositiveInteger(searchParameters.get('page')) ?? 1;
+};
+
+const getSearchParametersWithPage = (
+  currentSearchParameters: URLSearchParams,
+  page: number
 ): URLSearchParams => {
   const nextSearchParameters = new URLSearchParams(currentSearchParameters);
-  nextSearchParameters.set('page', '1');
+  nextSearchParameters.set('page', String(page));
   return nextSearchParameters;
 };
 
+const getFirstPageSearchParameters = (
+  currentSearchParameters: URLSearchParams
+): URLSearchParams => {
+  return getSearchParametersWithPage(currentSearchParameters, 1);
+};
+
 function Home() {
-  const [, setSearchParameters] = useSearchParams();
+  const [searchParameters, setSearchParameters] = useSearchParams();
   const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(
     SEARCH_TERM_STORAGE_KEY
   );
-  const dispatch = useAppDispatch();
+  const currentPage = getPageFromSearchParameters(searchParameters);
+
+  useEffect(() => {
+    if (searchParameters.get('page') === String(currentPage)) {
+      return;
+    }
+
+    setSearchParameters(
+      (currentSearchParameters) => {
+        return getSearchParametersWithPage(
+          currentSearchParameters,
+          currentPage
+        );
+      },
+      { replace: true }
+    );
+  }, [currentPage, searchParameters, setSearchParameters]);
 
   const handleSearch = useCallback(
     (searchTerm: string): void => {
@@ -35,12 +63,6 @@ function Home() {
     },
     [setSearchParameters, setStoredSearchTerm]
   );
-
-  const handleRefreshResults = useCallback((): void => {
-    dispatch(
-      pokemonApi.util.invalidateTags([{ type: 'PokemonList', id: 'LIST' }])
-    );
-  }, [dispatch]);
 
   return (
     <Layout>
@@ -51,7 +73,7 @@ function Home() {
         />
         <PokemonResultsLayout>
           <ResultsSection
-            handleRefresh={handleRefreshResults}
+            currentPage={currentPage}
             searchTerm={storedSearchTerm}
           />
         </PokemonResultsLayout>
