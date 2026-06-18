@@ -1,12 +1,9 @@
 import type { KeyboardEvent, MouseEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import {
-  getAppLocale,
-  getLocalizedPathname,
-  getPathnameWithoutLocale,
-} from '../../i18n/pathname';
+import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from '../../i18n/navigation';
+import { getAppLocale, getPathnameWithoutLocale } from '../../i18n/pathname';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setPokemonSelection } from '../../store/selectedPokemonSlice';
 import type { Pokemon } from '../../types';
@@ -48,12 +45,11 @@ function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
   const isSelected = selectedPokemonId === pokemon.id;
 
   const openPokemonDetails = (): void => {
-    const detailsPathname = getLocalizedPathname(
-      `/details/${String(pokemon.id)}`,
-      locale
-    );
+    const detailsPathname = `/details/${String(pokemon.id)}`;
 
-    router.push(search ? `${detailsPathname}?${search}` : detailsPathname);
+    router.push(search ? `${detailsPathname}?${search}` : detailsPathname, {
+      locale,
+    });
   };
 
   return (

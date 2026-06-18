@@ -1,6 +1,5 @@
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { usePathname } from 'next/navigation';
+import { Link, usePathname } from '../../i18n/navigation';
 
 const getPageHref = (pathname: string, page: number): string => {
   return `${pathname}?page=${String(page)}`;

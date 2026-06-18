@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from '../../i18n/navigation';
 import { useGetPokemonsQuery } from '../../services/pokemonApi';
 import type { Pokemon } from '../../types';
 import { parsePositiveInteger } from '../../utils/parsePositiveInteger';

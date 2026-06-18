@@ -1,9 +1,10 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from '../../i18n/navigation';
 import { routing, type AppLocale } from '../../i18n/routing';
-import { getAppLocale, getLocalizedPathname } from '../../i18n/pathname';
+import { getAppLocale } from '../../i18n/pathname';
 import './LanguageSwitcher.css';
 
 function LanguageSwitcher() {
@@ -15,9 +16,9 @@ function LanguageSwitcher() {
 
   const handleLocaleChange = (nextLocale: AppLocale): void => {
     const search = searchParameters.toString();
-    const localizedPathname = getLocalizedPathname(pathname, nextLocale);
+    const href = search ? `${pathname}?${search}` : pathname;
 
-    router.push(search ? `${localizedPathname}?${search}` : localizedPathname);
+    router.push(href, { locale: nextLocale });
   };
 
   return (

@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
-import { getAppLocale, getLocalizedPathname } from '../i18n/pathname';
+import { Link } from '../i18n/navigation';
+import { getAppLocale } from '../i18n/pathname';
 import Layout from '../components/Layout/Layout';
 import './Page404.css';
 
@@ -18,7 +18,9 @@ function Page404() {
           <span>404</span>
           <h1 id="not-found-title">{t('title')}</h1>
           <p>{t('description')}</p>
-          <Link href={getLocalizedPathname('/', locale)}>{t('back')}</Link>
+          <Link href="/" locale={locale}>
+            {t('back')}
+          </Link>
         </section>
       </main>
     </Layout>

@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useCallback } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import ErrorTestButton from '../components/ErrorTestButton/ErrorTestButton';
 import Flyout from '../components/Flyout/Flyout';
 import Layout from '../components/Layout/Layout';
@@ -10,6 +10,7 @@ import PokemonResultsLayout from '../components/PokemonResultsLayout/PokemonResu
 import ResultsSection from '../components/ResultsSection/ResultsSection';
 import SearchSection from '../components/SearchSection/SearchSection';
 import useLocalStorage from '../hooks/useLocalStorage';
+import { usePathname, useRouter } from '../i18n/navigation';
 import { pokemonApi } from '../services/pokemonApi';
 import { useAppDispatch } from '../store/hooks';
 import './Home.css';

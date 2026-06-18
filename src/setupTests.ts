@@ -67,9 +67,9 @@ type MockRouter = {
   back: () => void;
   forward: () => void;
   prefetch: ReturnType<typeof vi.fn>;
-  push: (href: string) => void;
+  push: (href: string, options?: { locale?: string }) => void;
   refresh: ReturnType<typeof vi.fn>;
-  replace: (href: string) => void;
+  replace: (href: string, options?: { locale?: string }) => void;
 };
 
 type MockNavigationModule = {
@@ -123,41 +123,110 @@ type MockLinkProperties = Omit<
 > & {
   children: ReactNode;
   href: string;
+  locale?: string;
 };
 
 type MockLinkModule = {
   default: (properties: MockLinkProperties) => React.ReactElement;
 };
 
+type MockI18nNavigationModule = {
+  Link: (properties: MockLinkProperties) => React.ReactElement;
+  redirect: ReturnType<typeof vi.fn>;
+  usePathname: () => string;
+  useRouter: () => MockRouter;
+};
+
+const getHrefWithLocale = (href: string, locale?: string): string => {
+  if (locale === undefined) {
+    return href;
+  }
+
+  const [pathname = '/', search = ''] = href.split('?');
+  const localizedPathname =
+    pathname === '/' ? `/${locale}` : `/${locale}${pathname}`;
+
+  return search ? `${localizedPathname}?${search}` : localizedPathname;
+};
+
+const renderMockLink = ({
+  children,
+  href,
+  locale,
+  onClick,
+  ...properties
+}: MockLinkProperties): React.ReactElement => {
+  const localizedHref = getHrefWithLocale(href, locale);
+
+  return React.createElement(
+    'a',
+    {
+      href: localizedHref,
+      onClick: (event: React.MouseEvent<HTMLAnchorElement>): void => {
+        onClick?.(event);
+
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+        updateHistory('pushState', localizedHref);
+      },
+      ...properties,
+    },
+    children
+  );
+};
+
+const getPathnameWithoutLocaleSnapshot = (): string => {
+  return getPathnameSnapshot().replace(/^\/(en|ru)(?=\/|$)/, '') || '/';
+};
+
+const getMockI18nRouter = (): MockRouter => ({
+  back: (): void => {
+    globalThis.history.back();
+    notifyNavigationListeners();
+  },
+  forward: (): void => {
+    globalThis.history.forward();
+    notifyNavigationListeners();
+  },
+  prefetch: vi.fn(),
+  push: (href: string, options?: { locale?: string }): void => {
+    updateHistory('pushState', getHrefWithLocale(href, options?.locale));
+  },
+  refresh: vi.fn(),
+  replace: (href: string, options?: { locale?: string }): void => {
+    updateHistory('replaceState', getHrefWithLocale(href, options?.locale));
+  },
+});
+
 vi.mock(
   'next/link',
   (): MockLinkModule => ({
-    default: ({ children, href, onClick, ...properties }: MockLinkProperties) =>
-      React.createElement(
-        'a',
-        {
-          href,
-          onClick: (event: React.MouseEvent<HTMLAnchorElement>): void => {
-            onClick?.(event);
+    default: renderMockLink,
+  })
+);
 
-            if (
-              event.defaultPrevented ||
-              event.button !== 0 ||
-              event.metaKey ||
-              event.ctrlKey ||
-              event.shiftKey ||
-              event.altKey
-            ) {
-              return;
-            }
-
-            event.preventDefault();
-            updateHistory('pushState', href);
-          },
-          ...properties,
-        },
-        children
+vi.mock(
+  './i18n/navigation',
+  (): MockI18nNavigationModule => ({
+    Link: renderMockLink,
+    redirect: vi.fn(),
+    usePathname: (): string =>
+      useSyncExternalStore(
+        subscribeToNavigation,
+        getPathnameWithoutLocaleSnapshot,
+        getPathnameWithoutLocaleSnapshot
       ),
+    useRouter: getMockI18nRouter,
   })
 );
 

@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { getAppLocale, getLocalizedPathname } from '../../i18n/pathname';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from '../../i18n/navigation';
+import { getAppLocale } from '../../i18n/pathname';
 import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
 import { pokemonApi, useGetPokemonByIdQuery } from '../../services/pokemonApi';
 import { useAppDispatch } from '../../store/hooks';
@@ -42,9 +43,8 @@ function PokemonDetails({ pokemonId }: PokemonDetailsProperties) {
 
   const handleCloseDetails = (): void => {
     const search = searchParameters.toString();
-    const homePathname = getLocalizedPathname('/', locale);
 
-    router.push(search ? `${homePathname}?${search}` : homePathname);
+    router.push(search ? `/?${search}` : '/', { locale });
   };
 
   const handleRefresh = (): void => {

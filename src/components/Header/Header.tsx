@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { useTheme } from '../../context/useTheme';
-import { getAppLocale, getLocalizedPathname } from '../../i18n/pathname';
+import { Link } from '../../i18n/navigation';
+import { getAppLocale } from '../../i18n/pathname';
 import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
 import './Header.css';
 
@@ -32,8 +32,12 @@ function Header() {
         </div>
       </div>
       <nav className="main-nav" aria-label={t('mainNavigation')}>
-        <Link href={getLocalizedPathname('/', locale)}>{t('home')}</Link>
-        <Link href={getLocalizedPathname('/about', locale)}>{t('about')}</Link>
+        <Link href="/" locale={locale}>
+          {t('home')}
+        </Link>
+        <Link href="/about" locale={locale}>
+          {t('about')}
+        </Link>
       </nav>
     </header>
   );
