@@ -1,32 +1,54 @@
-import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
+import { useSearchParams } from 'react-router';
+import { useGetPokemonsQuery } from '../../services/pokemonApi';
 import type { Pokemon } from '../../types';
+import useLocalStorage from '../../hooks/useLocalStorage';
+import {
+  getPageFromSearchParameters,
+  getSearchTermFromSearchParameters,
+} from '../../utils/pokemonSearchParameters';
+import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
+import '../StatusMessage.css';
 import Pagination from './Pagination';
 import PokemonResultItem from './PokemonResultItem';
-import '../StatusMessage.css';
 import './ResultsSection.css';
 
-type ResultsSectionProperties = {
-  currentPage: number;
-  error: string;
-  isLoading: boolean;
-  pokemons: Pokemon[];
-  totalPages: number;
-};
+const EMPTY_POKEMONS: Pokemon[] = [];
+const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
 
-function ResultsSection({
-  currentPage,
-  error,
-  isLoading,
-  pokemons,
-  totalPages,
-}: ResultsSectionProperties) {
+function ResultsSection() {
+  const [searchParameters] = useSearchParams();
+  const [storedSearchTerm] = useLocalStorage(SEARCH_TERM_STORAGE_KEY);
+  const currentPage = getPageFromSearchParameters(searchParameters);
+  const searchTerm = getSearchTermFromSearchParameters(
+    searchParameters,
+    storedSearchTerm
+  );
+  const { data, isError, isLoading, refetch } = useGetPokemonsQuery(
+    {
+      page: currentPage,
+      searchTerm: searchTerm.trim(),
+    },
+    {
+      refetchOnFocus: false,
+      refetchOnReconnect: false,
+    }
+  );
+  const error = isError ? 'Failed to load data' : '';
+  const pokemons = data?.pokemons ?? EMPTY_POKEMONS;
+  const totalPages = data?.totalPages ?? 0;
   const showPagination: boolean = !error && totalPages > 1;
+  const handleRefresh = (): void => {
+    void refetch();
+  };
 
   return (
     <section className="results-section" aria-labelledby="results-title">
       <div>
         <h2 id="results-title">Pokemon Results</h2>
         <p>Submitted Pokemon</p>
+        <button type="button" onClick={handleRefresh} disabled={isLoading}>
+          Refresh results
+        </button>
       </div>
 
       {isLoading && <LoadingIndicator />}

@@ -4,17 +4,25 @@ import type { Pokemon } from '../types';
 type SelectedPokemonState = {
   selectedPokemons: Pokemon[];
   selectedPokemonIds: number[];
+  selectedPokemonId: number | null;
 };
 
 const initialState: SelectedPokemonState = {
   selectedPokemons: [],
   selectedPokemonIds: [],
+  selectedPokemonId: null,
 };
 
 const selectedPokemonSlice = createSlice({
   name: 'selectedPokemon',
   initialState,
   reducers: {
+    clearSelectedPokemon: (state) => {
+      state.selectedPokemonId = null;
+    },
+    selectPokemon: (state, action: PayloadAction<number>) => {
+      state.selectedPokemonId = action.payload;
+    },
     setPokemonSelection: (
       state,
       action: PayloadAction<{ isSelected: boolean; pokemon: Pokemon }>
@@ -42,7 +50,11 @@ const selectedPokemonSlice = createSlice({
   },
 });
 
-export const { setPokemonSelection, unselectAllPokemons } =
-  selectedPokemonSlice.actions;
+export const {
+  clearSelectedPokemon,
+  selectPokemon,
+  setPokemonSelection,
+  unselectAllPokemons,
+} = selectedPokemonSlice.actions;
 
 export default selectedPokemonSlice.reducer;

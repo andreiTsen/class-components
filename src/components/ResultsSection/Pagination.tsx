@@ -1,7 +1,13 @@
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 
-const getPageSearch = (page: number): string => {
-  return `?page=${String(page)}`;
+const getPageSearch = (
+  currentSearchParameters: URLSearchParams,
+  page: number
+): string => {
+  const nextSearchParameters = new URLSearchParams(currentSearchParameters);
+  nextSearchParameters.set('page', String(page));
+
+  return `?${nextSearchParameters.toString()}`;
 };
 
 type PaginationProperties = {
@@ -15,6 +21,7 @@ function Pagination({
   isLoading,
   totalPages,
 }: PaginationProperties) {
+  const [searchParameters] = useSearchParams();
   const isPreviousDisabled: boolean = isLoading || currentPage === 1;
   const isNextDisabled: boolean = isLoading || currentPage === totalPages;
 
@@ -27,7 +34,7 @@ function Pagination({
       ) : (
         <Link
           className="pagination-link"
-          to={{ search: getPageSearch(currentPage - 1) }}
+          to={{ search: getPageSearch(searchParameters, currentPage - 1) }}
         >
           Previous
         </Link>
@@ -40,7 +47,7 @@ function Pagination({
       ) : (
         <Link
           className="pagination-link"
-          to={{ search: getPageSearch(currentPage + 1) }}
+          to={{ search: getPageSearch(searchParameters, currentPage + 1) }}
         >
           Next
         </Link>

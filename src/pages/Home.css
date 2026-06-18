@@ -9,14 +9,6 @@
   padding: 32px 20px;
 }
 
-.master-detail-layout {
-  display: block;
-}
-
-.master-pane {
-  min-width: 0;
-}
-
 @media (max-width: 600px) {
   .application-page {
     padding: 20px 12px;

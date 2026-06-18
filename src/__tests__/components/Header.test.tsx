@@ -29,7 +29,11 @@ describe('Header', () => {
       screen.getByRole('button', { name: 'Switch to dark theme' })
     );
 
-    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(
+      screen
+        .getByRole('banner', { name: 'Page header' })
+        .closest('[data-theme="dark"]')
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'Switch to light theme' })
     ).toBeInTheDocument();

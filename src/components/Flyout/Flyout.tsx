@@ -1,6 +1,7 @@
 import { downloadSelectedItems } from '../../services/downloadSelectedItems';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { unselectAllPokemons } from '../../store/selectedPokemonSlice';
+import './Flyout.css';
 
 function Flyout() {
   const dispatch = useAppDispatch();

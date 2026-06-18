@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
 import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
-import { getPokemonById } from '../../services/pokemonService';
-import type { Pokemon } from '../../types';
+import { useGetPokemonByIdQuery } from '../../services/pokemonApi';
 import '../StatusMessage.css';
 import './PokemonDetails.css';
 
@@ -10,9 +8,14 @@ function PokemonDetails() {
   const { pokemonId } = useParams();
   const navigate = useNavigate();
   const [searchParameters] = useSearchParams();
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [pokemon, setPokemon] = useState<Pokemon | null>(null);
+  const {
+    data: pokemon,
+    isError,
+    isFetching,
+    isLoading,
+    refetch,
+  } = useGetPokemonByIdQuery(pokemonId ?? '', { skip: !pokemonId });
+  const shouldShowLoader = isLoading || isFetching;
 
   const handleCloseDetails = (): void => {
     const search = searchParameters.toString();
@@ -23,41 +26,13 @@ function PokemonDetails() {
     });
   };
 
-  useEffect(() => {
-    let ignore = false;
+  const handleRefresh = (): void => {
+    if (!pokemonId) {
+      return;
+    }
 
-    const loadPokemonDetails = async (): Promise<void> => {
-      setError('');
-      setIsLoading(true);
-      setPokemon(null);
-
-      if (!pokemonId) {
-        setError('Failed to load Pokemon data.');
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const pokemonDetails = await getPokemonById(pokemonId);
-
-        if (!ignore) {
-          setPokemon(pokemonDetails);
-          setIsLoading(false);
-        }
-      } catch {
-        if (!ignore) {
-          setError('Failed to load Pokemon data.');
-          setIsLoading(false);
-        }
-      }
-    };
-
-    void loadPokemonDetails();
-
-    return (): void => {
-      ignore = true;
-    };
-  }, [pokemonId]);
+    void refetch();
+  };
 
   return (
     <aside className="details-pane" aria-label="Pokemon details">
@@ -68,12 +43,19 @@ function PokemonDetails() {
       >
         Close
       </button>
+      <button type="button" onClick={handleRefresh} disabled={isFetching}>
+        Refresh details
+      </button>
 
-      {isLoading && <LoadingIndicator label="Loading details..." />}
+      {shouldShowLoader && <LoadingIndicator label="Loading details..." />}
 
-      {error && <p className="status-message status-message-error">{error}</p>}
+      {isError && (
+        <p className="status-message status-message-error">
+          Failed to load Pokemon data.
+        </p>
+      )}
 
-      {pokemon && !isLoading && !error && (
+      {pokemon && !shouldShowLoader && (
         <div className="details-content">
           {pokemon.imageUrl && (
             <img src={pokemon.imageUrl} alt={pokemon.name} />

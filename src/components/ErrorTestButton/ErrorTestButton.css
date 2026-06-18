@@ -1,9 +1,9 @@
 .error-test-button {
   align-self: flex-start;
   padding: 10px 16px;
-  border: 1px solid #1f2933;
+  border: 1px solid var(--color-primary);
   border-radius: 4px;
-  background: #ffffff;
-  color: #1f2933;
+  background: var(--color-surface);
+  color: var(--color-text);
   cursor: pointer;
 }

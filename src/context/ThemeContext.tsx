@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { ThemeContext, type Theme } from './themeContextValue';
 
 type ThemeProviderProperties = {
@@ -7,10 +7,6 @@ type ThemeProviderProperties = {
 
 export function ThemeProvider({ children }: ThemeProviderProperties) {
   const [theme, setTheme] = useState<Theme>('light');
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
 
   const value = useMemo(
     () => ({
@@ -25,6 +21,10 @@ export function ThemeProvider({ children }: ThemeProviderProperties) {
   );
 
   return (
-    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>
+      <div className="theme-root" data-theme={theme}>
+        {children}
+      </div>
+    </ThemeContext.Provider>
   );
 }

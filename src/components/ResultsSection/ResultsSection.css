@@ -4,9 +4,9 @@
   gap: 20px;
   min-height: 360px;
   padding: 28px;
-  border: 1px solid #d9dee5;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .results-section h2 {
@@ -17,7 +17,7 @@
 
 .results-section p {
   margin: 0;
-  color: #667085;
+  color: var(--color-text-muted);
 }
 
 .result-list {
@@ -32,17 +32,33 @@
   gap: 16px;
   width: 100%;
   padding: 14px 16px;
-  border: 1px solid #e2e6ea;
+  border: 1px solid var(--color-border-subtle);
   border-radius: 4px;
-  background: #fafafa;
+  background: var(--color-surface-muted);
   color: inherit;
   cursor: pointer;
   text-align: left;
 }
 
 .result-item[aria-current='true'] {
-  outline: 2px solid #1f2933;
+  outline: 2px solid var(--color-primary);
   outline-offset: -2px;
+}
+
+.result-checkbox {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.result-checkbox input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
 }
 
 .result-item strong {
@@ -71,7 +87,7 @@
 .pokemon-info p {
   max-width: 640px;
   margin: 0;
-  color: #667085;
+  color: var(--color-text-muted);
   line-height: 1.5;
 }
 
@@ -86,24 +102,24 @@
 .pagination-link {
   min-width: 96px;
   padding: 8px 12px;
-  border: 1px solid #1f2933;
+  border: 1px solid var(--color-primary);
   border-radius: 4px;
-  background: #ffffff;
-  color: #1f2933;
+  background: var(--color-surface);
+  color: var(--color-text);
   cursor: pointer;
   text-align: center;
   text-decoration: none;
 }
 
 .pagination-link-disabled {
-  border-color: #c9d0d8;
-  color: #98a2b3;
+  border-color: var(--color-input-border);
+  color: var(--color-disabled);
   cursor: not-allowed;
 }
 
 .pagination-current {
   min-width: 104px;
-  color: #1f2933;
+  color: var(--color-text);
   font-weight: 600;
   text-align: center;
 }
