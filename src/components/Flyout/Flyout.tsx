@@ -32,7 +32,7 @@ function Flyout() {
         <button
           type="button"
           onClick={(): void => {
-            downloadSelectedItems(selectedItems);
+            void downloadSelectedItems(selectedItems);
           }}
         >
           {t('download')}

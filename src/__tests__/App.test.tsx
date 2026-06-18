@@ -66,6 +66,18 @@ const getPokemonSpeciesResponse = (pokemon: (typeof pokemonList)[number]) => ({
   ],
 });
 
+const getExportCsvResponse = (): Response =>
+  new Response(
+    [
+      'id,name,description,imageUrl,detailsUrl',
+      '1,bulbasaur,likes eating bulb.,https://example.com/bulbasaur.png,http://localhost:3000/details/1',
+    ].join('\n'),
+    {
+      headers: { 'Content-Type': 'text/csv;charset=utf-8' },
+      status: HTTP_STATUS_OK,
+    }
+  );
+
 const setupPokemonApiMock = ({
   failDetails = false,
   failList = false,
@@ -75,6 +87,10 @@ const setupPokemonApiMock = ({
 }: PokemonApiMockOptions = {}) => {
   const fetchMock: FetchMock = vi.fn((input: RequestInfo | URL) => {
     const url = getRequestUrl(input);
+
+    if (url.includes('/api/export-csv')) {
+      return Promise.resolve(getExportCsvResponse());
+    }
 
     if (url.includes('/pokemon?')) {
       return Promise.resolve(
@@ -512,15 +528,22 @@ describe('App', () => {
       configurable: true,
       value: vi.fn(),
     });
+    let downloadedBlob = new Blob();
     const createObjectUrlMock = vi
       .spyOn(URL, 'createObjectURL')
-      .mockReturnValue('blob:selected-pokemons');
+      .mockImplementation((blob: Blob | MediaSource) => {
+        if (blob instanceof Blob) {
+          downloadedBlob = blob;
+        }
+
+        return 'blob:selected-pokemons';
+      });
     const revokeObjectUrlMock = vi.spyOn(URL, 'revokeObjectURL');
     const clickMock = vi
       .spyOn(HTMLAnchorElement.prototype, 'click')
       .mockImplementation(() => undefined);
 
-    setupPokemonApiMock();
+    const fetchMock = setupPokemonApiMock();
 
     render(<App />);
 
@@ -529,18 +552,32 @@ describe('App', () => {
     );
     await user.click(screen.getByRole('button', { name: 'Download' }));
 
-    expect(createObjectUrlMock).toHaveBeenCalledWith(expect.any(Blob));
-    const downloadedBlob = createObjectUrlMock.mock.calls[0]?.[0];
+    await waitFor(() => {
+      expect(createObjectUrlMock).toHaveBeenCalledWith(expect.any(Blob));
+    });
 
-    if (!(downloadedBlob instanceof Blob)) {
-      throw new TypeError('Downloaded content must be a Blob.');
+    const exportCsvCall = fetchMock.mock.calls.find((call) => {
+      return getRequestUrl(call[0]).includes('/api/export-csv');
+    });
+    expect(exportCsvCall?.[1]?.method).toBe('POST');
+    const exportCsvBody = exportCsvCall?.[1]?.body;
+
+    if (typeof exportCsvBody !== 'string') {
+      throw new TypeError('Export CSV request body must be a JSON string.');
     }
+
+    expect(exportCsvBody).toContain('"id":1');
+    expect(exportCsvBody).toContain('"name":"bulbasaur"');
 
     await expect(downloadedBlob.text()).resolves.toContain(
       'id,name,description,imageUrl,detailsUrl'
     );
     await expect(downloadedBlob.text()).resolves.toContain(
-      '1,bulbasaur,likes eating bulb.,https://example.com/bulbasaur.png,http://localhost:3000/details/1'
+      [
+        '1,bulbasaur,likes eating bulb.',
+        'https://example.com/bulbasaur.png',
+        'http://localhost:3000/details/1',
+      ].join(',')
     );
     expect(clickMock).toHaveBeenCalled();
     expect(revokeObjectUrlMock).toHaveBeenCalledWith('blob:selected-pokemons');
