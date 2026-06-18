@@ -1,5 +1,6 @@
 import type { KeyboardEvent, MouseEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   getAppLocale,
@@ -14,6 +15,20 @@ import { parsePositiveInteger } from '../../utils/parsePositiveInteger';
 type PokemonResultItemProperties = {
   pokemon: Pokemon;
 };
+
+type PokemonImageProperties = {
+  pokemon: Pokemon;
+};
+
+function PokemonImage({ pokemon }: PokemonImageProperties) {
+  if (!pokemon.imageUrl) {
+    return null;
+  }
+
+  return (
+    <Image src={pokemon.imageUrl} alt={pokemon.name} width={40} height={40} />
+  );
+}
 
 function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
   const dispatch = useAppDispatch();
@@ -86,7 +101,7 @@ function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
         />
       </label>
       <div className="pokemon-info">
-        {pokemon.imageUrl && <img src={pokemon.imageUrl} alt={pokemon.name} />}
+        <PokemonImage pokemon={pokemon} />
         <div>
           <h3>{pokemon.name}</h3>
           <p>{pokemon.description}</p>

@@ -111,9 +111,9 @@ describe('ResultsSection', () => {
       screen.getByRole('heading', { name: 'bulbasaur' })
     ).toBeInTheDocument();
     expect(screen.getByText('#1')).toBeInTheDocument();
-    expect(screen.getByAltText('bulbasaur')).toHaveAttribute(
-      'src',
-      pokemonList[0].imageUrl
+    expect(screen.getByAltText('bulbasaur')).toHaveAttribute('src');
+    expect(screen.getByAltText('bulbasaur').getAttribute('src')).toContain(
+      encodeURIComponent(pokemonList[0].imageUrl)
     );
     expect(
       screen.getByRole('heading', { name: 'charmander' })

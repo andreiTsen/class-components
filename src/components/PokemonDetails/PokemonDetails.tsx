@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getAppLocale, getLocalizedPathname } from '../../i18n/pathname';
 import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
@@ -80,7 +81,12 @@ function PokemonDetails({ pokemonId }: PokemonDetailsProperties) {
       {pokemon && !shouldShowLoader && !isError && (
         <div className="details-content">
           {pokemon.imageUrl && (
-            <img src={pokemon.imageUrl} alt={pokemon.name} />
+            <Image
+              src={pokemon.imageUrl}
+              alt={pokemon.name}
+              width={96}
+              height={96}
+            />
           )}
           <div>
             <h2>{pokemon.name}</h2>

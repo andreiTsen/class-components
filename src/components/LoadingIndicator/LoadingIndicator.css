@@ -10,6 +10,7 @@
 }
 
 .loading-indicator img {
+  flex: 0 0 auto;
   width: 42px;
   height: 42px;
   border-radius: 50%;

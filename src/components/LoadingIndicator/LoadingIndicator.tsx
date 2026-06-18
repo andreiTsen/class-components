@@ -1,4 +1,5 @@
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import type { StaticImageData } from 'next/image';
 import loadingImage from '../../assets/loading_circles_blue_gradient.jpg';
 import './LoadingIndicator.css';
@@ -14,7 +15,7 @@ function LoadingIndicator({ label }: LoadingIndicatorProperties) {
 
   return (
     <div className="loading-indicator" role="status" aria-live="polite">
-      <img src={loadingImageData.src} alt="" />
+      <Image src={loadingImageData} alt="" width={42} height={42} />
       <span>{label ?? t('default')}</span>
     </div>
   );
