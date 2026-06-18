@@ -257,7 +257,7 @@ describe('App', () => {
         'mew'
       );
       expect(getPokemonListFetchCalls(fetchMock)).toHaveLength(2);
-      expect(globalThis.location.search).toBe('?page=1');
+      expect(globalThis.location.search).toBe('?page=1&search=mew');
     });
   });
 
@@ -367,7 +367,7 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
     await waitFor(() => {
-      expect(globalThis.location.search).toBe('?page=1');
+      expect(globalThis.location.search).toBe('?page=1&search=mew');
       const lastListCall = getPokemonListFetchCalls(fetchMock).at(-1);
 
       expect(lastListCall).toBeDefined();

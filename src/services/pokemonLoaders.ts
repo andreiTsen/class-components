@@ -16,8 +16,8 @@ import { mapPokemonDetailsToPokemon } from './mapPokemonDetailsToPokemon';
 import type { FetchWithBaseQuery } from './pokemonBaseQuery';
 import {
   getPagedPokemonList,
-  getPokemonPage,
   getPokemonPageRequest,
+  PAGE_SIZE,
 } from './pokemonPageMapper';
 import {
   getQueryError,
@@ -125,7 +125,7 @@ export const loadPokemonPage = async (
 
   return isQueryError(pokemons)
     ? pokemons
-    : getPokemonPage(pokemons, totalItems);
+    : { pokemons, totalPages: Math.ceil(totalItems / PAGE_SIZE) };
 };
 
 export const loadPokemonById = async (

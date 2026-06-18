@@ -1,5 +1,11 @@
+import { useSearchParams } from 'react-router';
 import { useGetPokemonsQuery } from '../../services/pokemonApi';
 import type { Pokemon } from '../../types';
+import useLocalStorage from '../../hooks/useLocalStorage';
+import {
+  getPageFromSearchParameters,
+  getSearchTermFromSearchParameters,
+} from '../../utils/pokemonSearchParameters';
 import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
 import '../StatusMessage.css';
 import Pagination from './Pagination';
@@ -7,13 +13,16 @@ import PokemonResultItem from './PokemonResultItem';
 import './ResultsSection.css';
 
 const EMPTY_POKEMONS: Pokemon[] = [];
+const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
 
-type ResultsSectionProperties = {
-  currentPage: number;
-  searchTerm: string;
-};
-
-function ResultsSection({ currentPage, searchTerm }: ResultsSectionProperties) {
+function ResultsSection() {
+  const [searchParameters] = useSearchParams();
+  const [storedSearchTerm] = useLocalStorage(SEARCH_TERM_STORAGE_KEY);
+  const currentPage = getPageFromSearchParameters(searchParameters);
+  const searchTerm = getSearchTermFromSearchParameters(
+    searchParameters,
+    storedSearchTerm
+  );
   const { data, isError, isLoading, refetch } = useGetPokemonsQuery(
     {
       page: currentPage,

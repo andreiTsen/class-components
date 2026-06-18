@@ -7,59 +7,45 @@ import PokemonResultsLayout from '../components/PokemonResultsLayout/PokemonResu
 import ResultsSection from '../components/ResultsSection/ResultsSection';
 import SearchSection from '../components/SearchSection/SearchSection';
 import useLocalStorage from '../hooks/useLocalStorage';
-import { parsePositiveInteger } from '../utils/parsePositiveInteger';
+import {
+  getNormalizedSearchParameters,
+  getSearchParametersWithSearchTerm,
+  getSearchTermFromSearchParameters,
+} from '../utils/pokemonSearchParameters';
 import './Home.css';
 
 const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
-
-const getPageFromSearchParameters = (
-  searchParameters: URLSearchParams
-): number => {
-  return parsePositiveInteger(searchParameters.get('page')) ?? 1;
-};
-
-const getSearchParametersWithPage = (
-  currentSearchParameters: URLSearchParams,
-  page: number
-): URLSearchParams => {
-  const nextSearchParameters = new URLSearchParams(currentSearchParameters);
-  nextSearchParameters.set('page', String(page));
-  return nextSearchParameters;
-};
-
-const getFirstPageSearchParameters = (
-  currentSearchParameters: URLSearchParams
-): URLSearchParams => {
-  return getSearchParametersWithPage(currentSearchParameters, 1);
-};
 
 function Home() {
   const [searchParameters, setSearchParameters] = useSearchParams();
   const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(
     SEARCH_TERM_STORAGE_KEY
   );
-  const currentPage = getPageFromSearchParameters(searchParameters);
+  const currentSearchTerm = getSearchTermFromSearchParameters(
+    searchParameters,
+    storedSearchTerm
+  );
 
   useEffect(() => {
-    if (searchParameters.get('page') === String(currentPage)) {
+    const normalizedSearchParameters =
+      getNormalizedSearchParameters(searchParameters);
+
+    if (!normalizedSearchParameters) {
       return;
     }
 
-    setSearchParameters(
-      (currentSearchParameters) => {
-        return getSearchParametersWithPage(
-          currentSearchParameters,
-          currentPage
-        );
-      },
-      { replace: true }
-    );
-  }, [currentPage, searchParameters, setSearchParameters]);
+    setSearchParameters(normalizedSearchParameters, { replace: true });
+  }, [searchParameters, setSearchParameters]);
 
   const handleSearch = useCallback(
     (searchTerm: string): void => {
+      setSearchParameters((currentSearchParameters) => {
+        return getSearchParametersWithSearchTerm(
+          currentSearchParameters,
+          searchTerm
+        );
+      });
       setStoredSearchTerm(searchTerm);
-      setSearchParameters(getFirstPageSearchParameters);
     },
     [setSearchParameters, setStoredSearchTerm]
   );
@@ -69,13 +55,10 @@ function Home() {
       <main className="application-page">
         <SearchSection
           handleSearch={handleSearch}
-          storedSearchTerm={storedSearchTerm}
+          storedSearchTerm={currentSearchTerm}
         />
         <PokemonResultsLayout>
-          <ResultsSection
-            currentPage={currentPage}
-            searchTerm={storedSearchTerm}
-          />
+          <ResultsSection />
         </PokemonResultsLayout>
         <ErrorTestButton />
         <Flyout />

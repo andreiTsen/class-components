@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ComponentProps } from 'react';
 import { render, screen, userEvent } from '../test-utils';
 import { pokemonList } from '../test-utils/mockData';
 import ResultsSection from '../../components/ResultsSection/ResultsSection';
@@ -32,9 +31,7 @@ const mockGetPokemonsQuery = (queryResult: Record<string, unknown> = {}) => {
   });
 };
 
-const renderResultsSection = (
-  properties: Partial<ComponentProps<typeof ResultsSection>> = {}
-) => render(<ResultsSection currentPage={1} searchTerm="" {...properties} />);
+const renderResultsSection = () => render(<ResultsSection />);
 
 describe('ResultsSection', () => {
   beforeEach(() => {
@@ -43,11 +40,12 @@ describe('ResultsSection', () => {
   });
 
   it('loads Pokemons for the current page', () => {
+    globalThis.history.replaceState({}, '', '/?page=2');
     mockGetPokemonsQuery({
       data: { pokemons: pokemonList, totalPages: 3 },
     });
 
-    renderResultsSection({ currentPage: 2 });
+    renderResultsSection();
 
     expect(getPokemonsQueryMock).toHaveBeenCalledWith(
       {
@@ -59,8 +57,10 @@ describe('ResultsSection', () => {
     expect(screen.getByText('Page 2 of 3')).toBeInTheDocument();
   });
 
-  it('loads Pokemons with the search term from props', () => {
-    renderResultsSection({ searchTerm: '  pika  ' });
+  it('loads Pokemons with the search term from URL', () => {
+    globalThis.history.replaceState({}, '', '/?search=pika');
+
+    renderResultsSection();
 
     expect(getPokemonsQueryMock).toHaveBeenCalledWith(
       {
@@ -163,7 +163,8 @@ describe('ResultsSection', () => {
       data: { pokemons: pokemonList, totalPages: 3 },
     });
 
-    renderResultsSection({ currentPage: 2 });
+    globalThis.history.replaceState({}, '', '/?page=2');
+    renderResultsSection();
 
     expect(
       screen.getByRole('navigation', { name: 'Pagination' })
@@ -188,7 +189,8 @@ describe('ResultsSection', () => {
       isFetching: true,
     });
 
-    renderResultsSection({ currentPage: 2 });
+    globalThis.history.replaceState({}, '', '/?page=2');
+    renderResultsSection();
 
     expect(
       screen.getByRole('navigation', { name: 'Pagination' })

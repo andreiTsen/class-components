@@ -1,8 +1,4 @@
-import type {
-  PokemonListItem,
-  PokemonListResponse,
-  PokemonPage,
-} from '../types';
+import type { PokemonListItem, PokemonListResponse } from '../types';
 
 const FIRST_PAGE_OFFSET = 0;
 export const PAGE_SIZE = 10;
@@ -47,11 +43,3 @@ export const getPagedPokemonList = (
     totalItems: searchTerm ? filteredResults.length : data.count,
   };
 };
-
-export const getPokemonPage = (
-  pokemons: PokemonPage['pokemons'],
-  totalItems: number
-): PokemonPage => ({
-  pokemons,
-  totalPages: Math.ceil(totalItems / PAGE_SIZE),
-});
