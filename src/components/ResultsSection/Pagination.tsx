@@ -1,8 +1,16 @@
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { Link, usePathname } from '../../i18n/navigation';
 
-const getPageHref = (pathname: string, page: number): string => {
-  return `${pathname}?page=${String(page)}`;
+const getPageHref = (
+  pathname: string,
+  currentSearchParameters: URLSearchParams,
+  page: number
+): string => {
+  const nextSearchParameters = new URLSearchParams(currentSearchParameters);
+  nextSearchParameters.set('page', String(page));
+
+  return `${pathname}?${nextSearchParameters.toString()}`;
 };
 
 type PaginationProperties = {
@@ -17,6 +25,10 @@ function Pagination({
   totalPages,
 }: PaginationProperties) {
   const pathname = usePathname();
+  const searchParameters = useSearchParams();
+  const currentSearchParameters = new URLSearchParams(
+    searchParameters.toString()
+  );
   const t = useTranslations('Pagination');
   const isPreviousDisabled: boolean = isLoading || currentPage === 1;
   const isNextDisabled: boolean = isLoading || currentPage === totalPages;
@@ -30,7 +42,7 @@ function Pagination({
       ) : (
         <Link
           className="pagination-link"
-          href={getPageHref(pathname, currentPage - 1)}
+          href={getPageHref(pathname, currentSearchParameters, currentPage - 1)}
         >
           {t('previous')}
         </Link>
@@ -45,7 +57,7 @@ function Pagination({
       ) : (
         <Link
           className="pagination-link"
-          href={getPageHref(pathname, currentPage + 1)}
+          href={getPageHref(pathname, currentSearchParameters, currentPage + 1)}
         >
           {t('next')}
         </Link>

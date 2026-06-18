@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ComponentProps } from 'react';
 import { render, screen, userEvent } from '../test-utils';
 import { pokemonList } from '../test-utils/mockData';
 import ResultsSection from '../../components/ResultsSection/ResultsSection';
@@ -7,6 +6,11 @@ import ResultsSection from '../../components/ResultsSection/ResultsSection';
 const { getPokemonsQueryMock } = vi.hoisted(() => ({
   getPokemonsQueryMock: vi.fn(),
 }));
+
+const POKEMON_LIST_QUERY_OPTIONS = {
+  refetchOnFocus: false,
+  refetchOnReconnect: false,
+};
 
 vi.mock('../../services/pokemonApi', async () => {
   const actual = await vi.importActual('../../services/pokemonApi');
@@ -22,20 +26,12 @@ const mockGetPokemonsQuery = (queryResult: Record<string, unknown> = {}) => {
     data: { pokemons: [], totalPages: 1 },
     isError: false,
     isFetching: false,
+    refetch: vi.fn(),
     ...queryResult,
   });
 };
 
-const renderResultsSection = (
-  properties: Partial<ComponentProps<typeof ResultsSection>> = {}
-) =>
-  render(
-    <ResultsSection
-      handleRefresh={() => undefined}
-      searchTerm=""
-      {...properties}
-    />
-  );
+const renderResultsSection = () => render(<ResultsSection />);
 
 describe('ResultsSection', () => {
   beforeEach(() => {
@@ -43,7 +39,7 @@ describe('ResultsSection', () => {
     mockGetPokemonsQuery();
   });
 
-  it('loads Pokemons for the page from URL', () => {
+  it('loads Pokemons for the current page', () => {
     globalThis.history.replaceState({}, '', '/?page=2');
     mockGetPokemonsQuery({
       data: { pokemons: pokemonList, totalPages: 3 },
@@ -51,24 +47,32 @@ describe('ResultsSection', () => {
 
     renderResultsSection();
 
-    expect(getPokemonsQueryMock).toHaveBeenCalledWith({
-      page: 2,
-      searchTerm: '',
-    });
+    expect(getPokemonsQueryMock).toHaveBeenCalledWith(
+      {
+        page: 2,
+        searchTerm: '',
+      },
+      POKEMON_LIST_QUERY_OPTIONS
+    );
     expect(screen.getByText('Page 2 of 3')).toBeInTheDocument();
   });
 
-  it('loads Pokemons with the search term from props', () => {
-    renderResultsSection({ searchTerm: '  pika  ' });
+  it('loads Pokemons with the search term from URL', () => {
+    globalThis.history.replaceState({}, '', '/?search=pika');
 
-    expect(getPokemonsQueryMock).toHaveBeenCalledWith({
-      page: 1,
-      searchTerm: 'pika',
-    });
+    renderResultsSection();
+
+    expect(getPokemonsQueryMock).toHaveBeenCalledWith(
+      {
+        page: 1,
+        searchTerm: 'pika',
+      },
+      POKEMON_LIST_QUERY_OPTIONS
+    );
   });
 
   it('renders loader', () => {
-    mockGetPokemonsQuery({ data: undefined, isFetching: true });
+    mockGetPokemonsQuery({ data: undefined, isLoading: true });
 
     renderResultsSection();
 
@@ -85,13 +89,14 @@ describe('ResultsSection', () => {
 
   it('refreshes results on button click', async () => {
     const user = userEvent.setup();
-    const handleRefresh = vi.fn();
+    const refetch = vi.fn();
 
-    renderResultsSection({ handleRefresh });
+    mockGetPokemonsQuery({ refetch });
+    renderResultsSection();
 
     await user.click(screen.getByRole('button', { name: 'Refresh results' }));
 
-    expect(handleRefresh).toHaveBeenCalled();
+    expect(refetch).toHaveBeenCalled();
   });
 
   it('renders emptiness with an empty list', () => {
@@ -154,11 +159,11 @@ describe('ResultsSection', () => {
   });
 
   it('renders pagination after loading multiple pages', () => {
-    globalThis.history.replaceState({}, '', '/?page=2');
     mockGetPokemonsQuery({
       data: { pokemons: pokemonList, totalPages: 3 },
     });
 
+    globalThis.history.replaceState({}, '', '/?page=2');
     renderResultsSection();
 
     expect(
@@ -179,12 +184,12 @@ describe('ResultsSection', () => {
   });
 
   it('keeps pagination usable during background fetching', () => {
-    globalThis.history.replaceState({}, '', '/?page=2');
     mockGetPokemonsQuery({
       data: { pokemons: pokemonList, totalPages: 3 },
       isFetching: true,
     });
 
+    globalThis.history.replaceState({}, '', '/?page=2');
     renderResultsSection();
 
     expect(

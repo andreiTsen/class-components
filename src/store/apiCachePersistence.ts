@@ -10,7 +10,7 @@ type PersistedApiCache = {
 };
 
 const API_CACHE_STORAGE_KEY = 'pokemon-api-cache';
-const MILLISECONDS_PER_SECOND = Number('1000');
+const MILLISECONDS_PER_SECOND = 1000;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null;

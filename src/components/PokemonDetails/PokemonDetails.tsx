@@ -1,14 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from '../../i18n/navigation';
 import { getAppLocale } from '../../i18n/pathname';
 import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
-import { pokemonApi, useGetPokemonByIdQuery } from '../../services/pokemonApi';
-import { useAppDispatch } from '../../store/hooks';
+import { useGetPokemonByIdQuery } from '../../services/pokemonApi';
 import '../StatusMessage.css';
 import './PokemonDetails.css';
 
@@ -22,24 +20,14 @@ function PokemonDetails({ pokemonId }: PokemonDetailsProperties) {
   const t = useTranslations('PokemonDetails');
   const loadingT = useTranslations('Loading');
   const searchParameters = useSearchParams();
-  const dispatch = useAppDispatch();
   const {
     data: pokemon,
     isError,
     isFetching,
+    isLoading,
+    refetch,
   } = useGetPokemonByIdQuery(pokemonId, { skip: !pokemonId });
-  const [isLoading, setIsLoading] = useState(isFetching && !pokemon);
-  const shouldShowLoader = !pokemon && (isLoading || !isError);
-
-  useEffect(() => {
-    const timeoutId = globalThis.setTimeout(() => {
-      setIsLoading(isFetching && !pokemon);
-    }, 0);
-
-    return (): void => {
-      globalThis.clearTimeout(timeoutId);
-    };
-  }, [isFetching, pokemon]);
+  const shouldShowLoader = isLoading || isFetching;
 
   const handleCloseDetails = (): void => {
     const search = searchParameters.toString();
@@ -52,11 +40,7 @@ function PokemonDetails({ pokemonId }: PokemonDetailsProperties) {
       return;
     }
 
-    dispatch(
-      pokemonApi.util.invalidateTags([
-        { type: 'PokemonDetails', id: pokemon?.id ?? pokemonId },
-      ])
-    );
+    void refetch();
   };
 
   return (
@@ -78,7 +62,7 @@ function PokemonDetails({ pokemonId }: PokemonDetailsProperties) {
         <p className="status-message status-message-error">{t('error')}</p>
       )}
 
-      {pokemon && !shouldShowLoader && !isError && (
+      {pokemon && !shouldShowLoader && (
         <div className="details-content">
           {pokemon.imageUrl && (
             <Image

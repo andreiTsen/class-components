@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { usePathname, useRouter } from '../../i18n/navigation';
 import { useGetPokemonsQuery } from '../../services/pokemonApi';
 import type { Pokemon } from '../../types';
-import { parsePositiveInteger } from '../../utils/parsePositiveInteger';
+import useLocalStorage from '../../hooks/useLocalStorage';
+import {
+  getPageFromSearchParameters,
+  getSearchTermFromSearchParameters,
+} from '../../utils/pokemonSearchParameters';
 import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
 import '../StatusMessage.css';
 import Pagination from './Pagination';
@@ -12,91 +14,52 @@ import PokemonResultItem from './PokemonResultItem';
 import './ResultsSection.css';
 
 const EMPTY_POKEMONS: Pokemon[] = [];
+const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
 
-const getPageFromSearchParameters = (
-  searchParameters: URLSearchParams
-): number => {
-  return parsePositiveInteger(searchParameters.get('page')) ?? 1;
-};
-
-const usePageParameterNormalization = (
-  pathname: string,
-  router: ReturnType<typeof useRouter>,
-  searchParameters: URLSearchParams
-): number => {
-  const currentPage = getPageFromSearchParameters(searchParameters);
-
-  useEffect(() => {
-    if (searchParameters.get('page') === String(currentPage)) {
-      return;
-    }
-
-    const nextSearchParameters = new URLSearchParams(searchParameters);
-    nextSearchParameters.set('page', String(currentPage));
-
-    router.replace(`${pathname}?${nextSearchParameters.toString()}`);
-  }, [currentPage, pathname, router, searchParameters]);
-
-  return currentPage;
-};
-
-type ResultsSectionProperties = {
-  handleRefresh: () => void;
-  searchTerm: string;
-};
-
-function ResultsSection({
-  handleRefresh,
-  searchTerm,
-}: ResultsSectionProperties) {
-  const pathname = usePathname();
-  const router = useRouter();
+function ResultsSection() {
   const t = useTranslations('Results');
   const searchParameters = useSearchParams();
-  const search = searchParameters.toString();
-  const currentPage = usePageParameterNormalization(
-    pathname,
-    router,
-    new URLSearchParams(search)
+  const currentSearchParameters = new URLSearchParams(
+    searchParameters.toString()
   );
-  const { data, isError, isFetching } = useGetPokemonsQuery({
-    page: currentPage,
-    searchTerm: searchTerm.trim(),
-  });
-  const [isLoading, setIsLoading] = useState(isFetching && !data);
+  const [storedSearchTerm] = useLocalStorage(SEARCH_TERM_STORAGE_KEY);
+  const currentPage = getPageFromSearchParameters(currentSearchParameters);
+  const searchTerm = getSearchTermFromSearchParameters(
+    currentSearchParameters,
+    storedSearchTerm
+  );
+  const { data, isError, isLoading, refetch } = useGetPokemonsQuery(
+    {
+      page: currentPage,
+      searchTerm: searchTerm.trim(),
+    },
+    {
+      refetchOnFocus: false,
+      refetchOnReconnect: false,
+    }
+  );
   const error = isError ? t('error') : '';
   const pokemons = data?.pokemons ?? EMPTY_POKEMONS;
   const totalPages = data?.totalPages ?? 0;
-  const shouldShowLoader = isLoading && !data;
   const showPagination: boolean = !error && totalPages > 1;
 
-  useEffect(() => {
-    const timeoutId = globalThis.setTimeout(() => {
-      setIsLoading(isFetching && !data);
-    }, 0);
-
-    return (): void => {
-      globalThis.clearTimeout(timeoutId);
-    };
-  }, [data, isFetching]);
+  const handleRefresh = (): void => {
+    void refetch();
+  };
 
   return (
     <section className="results-section" aria-labelledby="results-title">
       <div>
         <h2 id="results-title">{t('title')}</h2>
         <p>{t('subtitle')}</p>
-        <button
-          type="button"
-          onClick={handleRefresh}
-          disabled={shouldShowLoader}
-        >
+        <button type="button" onClick={handleRefresh} disabled={isLoading}>
           {t('refresh')}
         </button>
       </div>
 
-      {shouldShowLoader && <LoadingIndicator />}
+      {isLoading && <LoadingIndicator />}
       {error && <p className="status-message status-message-error">{error}</p>}
-      {!shouldShowLoader && !error && pokemons.length === 0 && (
+      {!isLoading && !error && pokemons.length === 0 && (
         <p className="status-message">{t('noResults')}</p>
       )}
 
@@ -109,7 +72,7 @@ function ResultsSection({
       {showPagination && (
         <Pagination
           currentPage={currentPage}
-          isLoading={shouldShowLoader}
+          isLoading={isLoading}
           totalPages={totalPages}
         />
       )}

@@ -14,6 +14,7 @@ export default defineConfig([
       '**/dist/**',
       '**/build/**',
       '**/coverage/**',
+      '**/.next/**',
       '**/*.d.ts',
       'eslint.config.js',
       'lint-staged.config.js',
