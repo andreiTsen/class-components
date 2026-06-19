@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, type ChangeEvent, type SyntheticEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import './SearchSection.css';

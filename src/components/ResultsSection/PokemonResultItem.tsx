@@ -1,16 +1,14 @@
-import type { KeyboardEvent, MouseEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
-import { usePathname, useRouter } from '../../i18n/navigation';
-import { getAppLocale, getPathnameWithoutLocale } from '../../i18n/pathname';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { setPokemonSelection } from '../../store/selectedPokemonSlice';
+import { Link } from '../../i18n/navigation';
+import { getAppLocale } from '../../i18n/pathname';
 import type { Pokemon } from '../../types';
-import { parsePositiveInteger } from '../../utils/parsePositiveInteger';
+import SelectedPokemonCheckbox from './client/SelectedPokemonCheckbox';
 
 type PokemonResultItemProperties = {
+  currentSearchParameters: URLSearchParams;
   pokemon: Pokemon;
+  selectedPokemonId?: number | null;
 };
 
 type PokemonImageProperties = {
@@ -27,84 +25,44 @@ function PokemonImage({ pokemon }: PokemonImageProperties) {
   );
 }
 
-function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
-  const dispatch = useAppDispatch();
+function PokemonResultItem({
+  currentSearchParameters,
+  pokemon,
+  selectedPokemonId = null,
+}: PokemonResultItemProperties) {
   const locale = getAppLocale(useLocale());
-  const pathname = usePathname();
-  const router = useRouter();
   const t = useTranslations('Results');
-  const searchParameters = useSearchParams();
-  const search = searchParameters.toString();
-  const selectedPokemonId = parsePositiveInteger(
-    /^\/details\/(\d+)$/.exec(getPathnameWithoutLocale(pathname))?.[1]
-  );
-  const selectedPokemonIds = useAppSelector(
-    (state) => state.selectedPokemon.selectedPokemonIds
-  );
-  const isChecked = selectedPokemonIds.includes(pokemon.id);
   const isSelected = selectedPokemonId === pokemon.id;
-
-  const openPokemonDetails = (): void => {
-    const detailsPathname = `/details/${String(pokemon.id)}`;
-
-    router.push(search ? `${detailsPathname}?${search}` : detailsPathname, {
-      locale,
-    });
-  };
+  const search = currentSearchParameters.toString();
+  const href = search
+    ? `/details/${String(pokemon.id)}?${search}`
+    : `/details/${String(pokemon.id)}`;
 
   return (
-    <article
-      className="result-item"
-      tabIndex={0}
-      aria-current={isSelected ? 'true' : undefined}
-      aria-label={pokemon.name}
-      onClick={(event: MouseEvent<HTMLElement>): void => {
-        event.stopPropagation();
-        openPokemonDetails();
-      }}
-      onKeyDown={(event: KeyboardEvent<HTMLElement>): void => {
-        if (event.target !== event.currentTarget) {
-          return;
-        }
-
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          openPokemonDetails();
-        }
-      }}
-    >
-      <label
-        className="result-checkbox"
-        onClick={(event: MouseEvent<HTMLLabelElement>): void => {
-          event.stopPropagation();
-        }}
+    <div className="result-list-item">
+      <SelectedPokemonCheckbox
+        ariaLabel={t('selectPokemon', { name: pokemon.name })}
+        pokemon={pokemon}
+      />
+      <Link
+        className="result-item"
+        href={href}
+        locale={locale}
+        role="article"
+        scroll={false}
+        aria-current={isSelected ? 'true' : undefined}
+        aria-label={pokemon.name}
       >
-        <input
-          type="checkbox"
-          aria-label={t('selectPokemon', { name: pokemon.name })}
-          checked={isChecked}
-          onChange={(event): void => {
-            dispatch(
-              setPokemonSelection({
-                isSelected: event.target.checked,
-                pokemon,
-              })
-            );
-          }}
-          onKeyDown={(event): void => {
-            event.stopPropagation();
-          }}
-        />
-      </label>
-      <div className="pokemon-info">
-        <PokemonImage pokemon={pokemon} />
-        <div>
-          <h3>{pokemon.name}</h3>
-          <p>{pokemon.description}</p>
+        <div className="pokemon-info">
+          <PokemonImage pokemon={pokemon} />
+          <div>
+            <h3>{pokemon.name}</h3>
+            <p>{pokemon.description}</p>
+          </div>
         </div>
-      </div>
-      <strong>#{pokemon.id}</strong>
-    </article>
+        <strong>#{pokemon.id}</strong>
+      </Link>
+    </div>
   );
 }
 

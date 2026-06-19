@@ -36,6 +36,7 @@
   },
   "PokemonDetails": {
     "close": "Close",
+    "empty": "Select a Pokemon to see details.",
     "error": "Failed to load Pokemon data.",
     "refresh": "Refresh details",
     "title": "Pokemon details"

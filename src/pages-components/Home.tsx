@@ -1,80 +1,50 @@
-'use client';
-
 import type { ReactNode } from 'react';
-import { useCallback, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
 import ErrorTestButton from '../components/ErrorTestButton/ErrorTestButton';
 import Flyout from '../components/Flyout/Flyout';
 import Layout from '../components/Layout/Layout';
 import PokemonResultsLayout from '../components/PokemonResultsLayout/PokemonResultsLayout';
 import ResultsSection from '../components/ResultsSection/ResultsSection';
-import SearchSection from '../components/SearchSection/SearchSection';
-import useLocalStorage from '../hooks/useLocalStorage';
-import { usePathname, useRouter } from '../i18n/navigation';
-import {
-  getNormalizedSearchParameters,
-  getSearchParametersWithSearchTerm,
-  getSearchTermFromSearchParameters,
-} from '../utils/pokemonSearchParameters';
+import SearchSectionController from '../components/SearchSection/SearchSectionController';
+import type { PokemonPage } from '../types';
 import './Home.css';
 
-const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
-
 type HomeProperties = {
+  currentPage?: number;
+  currentSearchParameters?: URLSearchParams;
   details?: ReactNode;
+  initialSearchTerm?: string;
+  isResultsLoading?: boolean;
+  onRefreshResults?: () => void;
+  pokemonPage?: PokemonPage;
+  resultsError?: boolean;
+  selectedPokemonId?: number | null;
 };
 
-function Home({ details }: HomeProperties) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParameters = useSearchParams();
-  const search = searchParameters.toString();
-  const currentSearchParameters = useMemo(
-    () => new URLSearchParams(search),
-    [search]
-  );
-  const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(
-    SEARCH_TERM_STORAGE_KEY
-  );
-  const currentSearchTerm = getSearchTermFromSearchParameters(
-    currentSearchParameters,
-    storedSearchTerm
-  );
-
-  useEffect(() => {
-    const normalizedSearchParameters = getNormalizedSearchParameters(
-      currentSearchParameters
-    );
-
-    if (!normalizedSearchParameters) {
-      return;
-    }
-
-    router.replace(`${pathname}?${normalizedSearchParameters.toString()}`);
-  }, [currentSearchParameters, pathname, router]);
-
-  const handleSearch = useCallback(
-    (searchTerm: string): void => {
-      const nextSearchParameters = getSearchParametersWithSearchTerm(
-        currentSearchParameters,
-        searchTerm
-      );
-
-      router.push(`${pathname}?${nextSearchParameters.toString()}`);
-      setStoredSearchTerm(searchTerm);
-    },
-    [currentSearchParameters, pathname, router, setStoredSearchTerm]
-  );
-
+function Home({
+  currentPage,
+  currentSearchParameters,
+  details,
+  initialSearchTerm = '',
+  isResultsLoading,
+  onRefreshResults,
+  pokemonPage,
+  resultsError,
+  selectedPokemonId,
+}: HomeProperties) {
   return (
     <Layout>
       <main className="application-page">
-        <SearchSection
-          handleSearch={handleSearch}
-          storedSearchTerm={currentSearchTerm}
-        />
+        <SearchSectionController initialSearchTerm={initialSearchTerm} />
         <PokemonResultsLayout details={details}>
-          <ResultsSection />
+          <ResultsSection
+            currentPage={currentPage}
+            currentSearchParameters={currentSearchParameters}
+            error={resultsError}
+            isLoading={isResultsLoading}
+            onRefresh={onRefreshResults}
+            pokemonPage={pokemonPage}
+            selectedPokemonId={selectedPokemonId}
+          />
         </PokemonResultsLayout>
         <ErrorTestButton />
         <Flyout />

@@ -36,6 +36,7 @@
   },
   "PokemonDetails": {
     "close": "Закрыть",
+    "empty": "Выберите Pokemon, чтобы увидеть детали.",
     "error": "Не удалось загрузить данные Pokemon.",
     "refresh": "Обновить детали",
     "title": "Детали Pokemon"

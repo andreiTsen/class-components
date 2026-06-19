@@ -240,7 +240,9 @@ describe('App', () => {
 
     await user.click(screen.getByRole('button', { name: 'Close' }));
     await waitFor(() => {
-      expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+      expect(
+        screen.getByText('Select a Pokemon to see details.')
+      ).toBeInTheDocument();
     });
     await user.click(screen.getByRole('article', { name: /bulbasaur/i }));
 
@@ -455,8 +457,8 @@ describe('App', () => {
 
     expect(bulbasaurCheckbox).toBeChecked();
     expect(
-      screen.queryByRole('complementary', { name: 'Pokemon details' })
-    ).not.toBeInTheDocument();
+      screen.getByText('Select a Pokemon to see details.')
+    ).toBeInTheDocument();
     expect(getPokemonDetailsFetchCalls(fetchMock)).toHaveLength(2);
     expect(globalThis.location.pathname).toBe('/');
   });
@@ -638,7 +640,9 @@ describe('App', () => {
     await waitFor(() => {
       expect(globalThis.location.pathname).toBe('/en');
       expect(globalThis.location.search).toBe('?page=1');
-      expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+      expect(
+        screen.getByText('Select a Pokemon to see details.')
+      ).toBeInTheDocument();
     });
   });
 
@@ -714,7 +718,9 @@ describe('App', () => {
     render(<App />);
 
     await screen.findByRole('heading', { name: 'Pokemon Results' });
-    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Select a Pokemon to see details.')
+    ).toBeInTheDocument();
     expect(globalThis.location.pathname).toBe('/');
   });
 });

@@ -1,6 +1,5 @@
 import { useTranslations } from 'next-intl';
-import { useSearchParams } from 'next/navigation';
-import { Link, usePathname } from '../../i18n/navigation';
+import { Link } from '../../i18n/navigation';
 
 const getPageHref = (
   pathname: string,
@@ -15,20 +14,19 @@ const getPageHref = (
 
 type PaginationProperties = {
   currentPage: number;
+  currentSearchParameters: URLSearchParams;
   isLoading: boolean;
+  pathname: string;
   totalPages: number;
 };
 
 function Pagination({
   currentPage,
+  currentSearchParameters,
   isLoading,
+  pathname,
   totalPages,
 }: PaginationProperties) {
-  const pathname = usePathname();
-  const searchParameters = useSearchParams();
-  const currentSearchParameters = new URLSearchParams(
-    searchParameters.toString()
-  );
   const t = useTranslations('Pagination');
   const isPreviousDisabled: boolean = isLoading || currentPage === 1;
   const isNextDisabled: boolean = isLoading || currentPage === totalPages;
@@ -43,6 +41,7 @@ function Pagination({
         <Link
           className="pagination-link"
           href={getPageHref(pathname, currentSearchParameters, currentPage - 1)}
+          scroll={false}
         >
           {t('previous')}
         </Link>
@@ -58,6 +57,7 @@ function Pagination({
         <Link
           className="pagination-link"
           href={getPageHref(pathname, currentSearchParameters, currentPage + 1)}
+          scroll={false}
         >
           {t('next')}
         </Link>

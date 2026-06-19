@@ -1,68 +1,30 @@
-'use client';
-
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
-import { useRouter } from '../../i18n/navigation';
-import { getAppLocale } from '../../i18n/pathname';
-import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
-import { useGetPokemonByIdQuery } from '../../services/pokemonApi';
+import type { Pokemon } from '../../types';
 import '../StatusMessage.css';
 import './PokemonDetails.css';
+import PokemonDetailsActions from './PokemonDetailsActions';
 
 type PokemonDetailsProperties = {
-  pokemonId: string;
+  error?: boolean;
+  pokemon?: Pokemon;
 };
 
-function PokemonDetails({ pokemonId }: PokemonDetailsProperties) {
-  const router = useRouter();
-  const locale = getAppLocale(useLocale());
+function PokemonDetails({ error = false, pokemon }: PokemonDetailsProperties) {
   const t = useTranslations('PokemonDetails');
-  const loadingT = useTranslations('Loading');
-  const searchParameters = useSearchParams();
-  const {
-    data: pokemon,
-    isError,
-    isFetching,
-    isLoading,
-    refetch,
-  } = useGetPokemonByIdQuery(pokemonId, { skip: !pokemonId });
-  const shouldShowLoader = isLoading || isFetching;
-
-  const handleCloseDetails = (): void => {
-    const search = searchParameters.toString();
-
-    router.push(search ? `/?${search}` : '/', { locale });
-  };
-
-  const handleRefresh = (): void => {
-    if (!pokemonId) {
-      return;
-    }
-
-    void refetch();
-  };
 
   return (
     <aside className="details-pane" aria-label={t('title')}>
-      <button
-        className="details-close-button"
-        type="button"
-        onClick={handleCloseDetails}
-      >
-        {t('close')}
-      </button>
-      <button type="button" onClick={handleRefresh} disabled={isFetching}>
-        {t('refresh')}
-      </button>
+      <PokemonDetailsActions
+        closeLabel={t('close')}
+        refreshLabel={t('refresh')}
+      />
 
-      {shouldShowLoader && <LoadingIndicator label={loadingT('details')} />}
-
-      {isError && (
+      {error && (
         <p className="status-message status-message-error">{t('error')}</p>
       )}
 
-      {pokemon && !shouldShowLoader && (
+      {pokemon && (
         <div className="details-content">
           {pokemon.imageUrl && (
             <Image

@@ -1,102 +1,52 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ComponentProps } from 'react';
+import { describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent } from '../test-utils';
 import { pokemonList } from '../test-utils/mockData';
 import ResultsSection from '../../components/ResultsSection/ResultsSection';
 
-const { getPokemonsQueryMock } = vi.hoisted(() => ({
-  getPokemonsQueryMock: vi.fn(),
-}));
+type ResultsSectionProperties = ComponentProps<typeof ResultsSection>;
 
-const POKEMON_LIST_QUERY_OPTIONS = {
-  refetchOnFocus: false,
-  refetchOnReconnect: false,
-};
-
-vi.mock('../../services/pokemonApi', async () => {
-  const actual = await vi.importActual('../../services/pokemonApi');
-
-  return {
-    ...actual,
-    useGetPokemonsQuery: getPokemonsQueryMock,
-  };
-});
-
-const mockGetPokemonsQuery = (queryResult: Record<string, unknown> = {}) => {
-  getPokemonsQueryMock.mockReturnValue({
-    data: { pokemons: [], totalPages: 1 },
-    isError: false,
-    isFetching: false,
-    refetch: vi.fn(),
-    ...queryResult,
-  });
-};
-
-const renderResultsSection = () => render(<ResultsSection />);
+const renderResultsSection = (properties: ResultsSectionProperties = {}) =>
+  render(
+    <ResultsSection
+      currentPage={1}
+      currentSearchParameters={new URLSearchParams()}
+      pokemonPage={{ pokemons: [], totalPages: 0 }}
+      {...properties}
+    />
+  );
 
 describe('ResultsSection', () => {
-  beforeEach(() => {
-    globalThis.history.replaceState({}, '', '/');
-    mockGetPokemonsQuery();
-  });
-
-  it('loads Pokemons for the current page', () => {
-    globalThis.history.replaceState({}, '', '/?page=2');
-    mockGetPokemonsQuery({
-      data: { pokemons: pokemonList, totalPages: 3 },
+  it('renders the server-provided current page', () => {
+    renderResultsSection({
+      currentPage: 2,
+      currentSearchParameters: new URLSearchParams('page=2'),
+      pokemonPage: { pokemons: pokemonList, totalPages: 3 },
     });
 
-    renderResultsSection();
-
-    expect(getPokemonsQueryMock).toHaveBeenCalledWith(
-      {
-        page: 2,
-        searchTerm: '',
-      },
-      POKEMON_LIST_QUERY_OPTIONS
-    );
     expect(screen.getByText('Page 2 of 3')).toBeInTheDocument();
   });
 
-  it('loads Pokemons with the search term from URL', () => {
-    globalThis.history.replaceState({}, '', '/?search=pika');
-
-    renderResultsSection();
-
-    expect(getPokemonsQueryMock).toHaveBeenCalledWith(
-      {
-        page: 1,
-        searchTerm: 'pika',
-      },
-      POKEMON_LIST_QUERY_OPTIONS
-    );
-  });
-
   it('renders loader', () => {
-    mockGetPokemonsQuery({ data: undefined, isLoading: true });
-
-    renderResultsSection();
+    renderResultsSection({ isLoading: true });
 
     expect(screen.getByRole('status')).toHaveTextContent('Loading...');
   });
 
   it('renders error message', () => {
-    mockGetPokemonsQuery({ data: undefined, isError: true });
-
-    renderResultsSection();
+    renderResultsSection({ error: true });
 
     expect(screen.getByText('Failed to load data')).toBeInTheDocument();
   });
 
   it('refreshes results on button click', async () => {
     const user = userEvent.setup();
-    const refetch = vi.fn();
+    const onRefresh = vi.fn();
 
-    mockGetPokemonsQuery({ refetch });
-    renderResultsSection();
-
+    renderResultsSection({ onRefresh });
     await user.click(screen.getByRole('button', { name: 'Refresh results' }));
 
-    expect(refetch).toHaveBeenCalled();
+    expect(onRefresh).toHaveBeenCalled();
   });
 
   it('renders emptiness with an empty list', () => {
@@ -106,11 +56,9 @@ describe('ResultsSection', () => {
   });
 
   it('renders Pokemon cards', () => {
-    mockGetPokemonsQuery({
-      data: { pokemons: pokemonList, totalPages: 1 },
+    renderResultsSection({
+      pokemonPage: { pokemons: pokemonList, totalPages: 1 },
     });
-
-    renderResultsSection();
 
     expect(
       screen.getByRole('heading', { name: 'bulbasaur' })
@@ -126,11 +74,9 @@ describe('ResultsSection', () => {
   });
 
   it('renders a checkbox for each Pokemon', () => {
-    mockGetPokemonsQuery({
-      data: { pokemons: pokemonList, totalPages: 1 },
+    renderResultsSection({
+      pokemonPage: { pokemons: pokemonList, totalPages: 1 },
     });
-
-    renderResultsSection();
 
     expect(
       screen.getByRole('checkbox', { name: 'Select bulbasaur' })
@@ -142,11 +88,10 @@ describe('ResultsSection', () => {
 
   it('changes checkbox selection without opening details', async () => {
     const user = userEvent.setup();
-    mockGetPokemonsQuery({
-      data: { pokemons: pokemonList, totalPages: 1 },
-    });
 
-    renderResultsSection();
+    renderResultsSection({
+      pokemonPage: { pokemons: pokemonList, totalPages: 1 },
+    });
 
     await user.click(
       screen.getByRole('checkbox', { name: 'Select bulbasaur' })
@@ -159,12 +104,11 @@ describe('ResultsSection', () => {
   });
 
   it('renders pagination after loading multiple pages', () => {
-    mockGetPokemonsQuery({
-      data: { pokemons: pokemonList, totalPages: 3 },
+    renderResultsSection({
+      currentPage: 2,
+      currentSearchParameters: new URLSearchParams('page=2'),
+      pokemonPage: { pokemons: pokemonList, totalPages: 3 },
     });
-
-    globalThis.history.replaceState({}, '', '/?page=2');
-    renderResultsSection();
 
     expect(
       screen.getByRole('navigation', { name: 'Pagination' })
@@ -183,26 +127,17 @@ describe('ResultsSection', () => {
     );
   });
 
-  it('keeps pagination usable during background fetching', () => {
-    mockGetPokemonsQuery({
-      data: { pokemons: pokemonList, totalPages: 3 },
-      isFetching: true,
+  it('keeps pagination usable during loading', () => {
+    renderResultsSection({
+      currentPage: 2,
+      currentSearchParameters: new URLSearchParams('page=2'),
+      isLoading: true,
+      pokemonPage: { pokemons: pokemonList, totalPages: 3 },
     });
-
-    globalThis.history.replaceState({}, '', '/?page=2');
-    renderResultsSection();
 
     expect(
       screen.getByRole('navigation', { name: 'Pagination' })
     ).toBeInTheDocument();
     expect(screen.getByText('Page 2 of 3')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Previous' })).toHaveAttribute(
-      'href',
-      '/?page=1'
-    );
-    expect(screen.getByRole('link', { name: 'Next' })).toHaveAttribute(
-      'href',
-      '/?page=3'
-    );
   });
 });
