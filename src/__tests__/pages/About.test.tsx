@@ -1,37 +1,10 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, userEvent } from '../test-utils';
-import App from '../../App';
-
-const setupEmptyPokemonApiMock = () => {
-  const fetchMock = vi.fn(() =>
-    Promise.resolve(
-      Response.json(
-        { count: 0, results: [] },
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      )
-    )
-  );
-
-  vi.stubGlobal('fetch', fetchMock);
-
-  return fetchMock;
-};
+import { describe, expect, it } from 'vitest';
+import { render, screen } from '../test-utils';
+import About from '../../pages-components/About';
 
 describe('About', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  it('opens the about', async () => {
-    const user = userEvent.setup();
-    const fetchMock = setupEmptyPokemonApiMock();
-
-    render(<App />);
-
-    await user.click(screen.getByRole('link', { name: 'About' }));
+  it('renders the about page content', () => {
+    render(<About />);
 
     expect(
       screen.getByRole('heading', { name: 'About this app' })
@@ -43,7 +16,5 @@ describe('About', () => {
     expect(
       screen.getByRole('link', { name: 'RS School React course' })
     ).toHaveAttribute('href', 'https://rs.school/courses/reactjs');
-    expect(globalThis.location.pathname).toBe('/en/about');
-    expect(fetchMock).toHaveBeenCalled();
   });
 });

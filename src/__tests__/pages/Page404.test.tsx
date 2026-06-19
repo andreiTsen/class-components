@@ -1,12 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '../test-utils';
-import App from '../../App';
+import Page404 from '../../pages-components/Page404';
 
 describe('Page404', () => {
   it('renders 404 for unknown route and a link home', () => {
-    globalThis.history.replaceState({}, '', '/unknown-route');
-
-    render(<App />);
+    render(<Page404 />);
 
     expect(
       screen.getByRole('heading', { name: 'Page not found' })

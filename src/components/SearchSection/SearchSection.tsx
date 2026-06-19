@@ -1,44 +1,38 @@
-'use client';
-
-import { useState, type ChangeEvent, type SyntheticEvent } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { submitSearchAction } from '../../actions/searchAction';
+import { getAppLocale } from '../../i18n/pathname';
 import './SearchSection.css';
 
 type SearchSectionProperties = {
-  handleSearch: (searchTerm: string) => void;
+  currentSearchParameters?: URLSearchParams;
+  pathname?: string;
   storedSearchTerm?: string;
 };
 
 function SearchSection({
-  handleSearch,
+  currentSearchParameters = new URLSearchParams(),
+  pathname = '/',
   storedSearchTerm = '',
 }: SearchSectionProperties) {
-  const [searchTerm, setSearchTerm] = useState(storedSearchTerm);
+  const locale = getAppLocale(useLocale());
   const t = useTranslations('Search');
-
-  const handleSearchTermChange = (
-    event: ChangeEvent<HTMLInputElement>
-  ): void => {
-    setSearchTerm(event.target.value);
-  };
-
-  const handleSubmit = (event: SyntheticEvent<HTMLFormElement>): void => {
-    event.preventDefault();
-    const normalizedSearchTerm: string = searchTerm.trim();
-
-    setSearchTerm(normalizedSearchTerm);
-    handleSearch(normalizedSearchTerm);
-  };
 
   return (
     <section className="search-section" aria-labelledby="search-title">
       <h1 id="search-title">{t('title')}</h1>
-      <form className="search-form" onSubmit={handleSubmit}>
+      <form className="search-form" action={submitSearchAction}>
+        <input type="hidden" name="locale" value={locale} />
+        <input type="hidden" name="pathname" value={pathname} />
         <input
+          type="hidden"
+          name="currentSearch"
+          value={currentSearchParameters.toString()}
+        />
+        <input
+          name="search"
           type="search"
           placeholder={t('placeholder')}
-          value={searchTerm}
-          onChange={handleSearchTermChange}
+          defaultValue={storedSearchTerm}
         />
         <button type="submit">{t('submit')}</button>
       </form>

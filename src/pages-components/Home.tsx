@@ -4,7 +4,7 @@ import Flyout from '../components/Flyout/Flyout';
 import Layout from '../components/Layout/Layout';
 import PokemonResultsLayout from '../components/PokemonResultsLayout/PokemonResultsLayout';
 import ResultsSection from '../components/ResultsSection/ResultsSection';
-import SearchSectionController from '../components/SearchSection/SearchSectionController';
+import SearchSection from '../components/SearchSection/SearchSection';
 import type { PokemonPage } from '../types';
 import './Home.css';
 
@@ -17,6 +17,7 @@ type HomeProperties = {
   onRefreshResults?: () => void;
   pokemonPage?: PokemonPage;
   resultsError?: boolean;
+  search?: ReactNode;
   selectedPokemonId?: number | null;
 };
 
@@ -29,12 +30,23 @@ function Home({
   onRefreshResults,
   pokemonPage,
   resultsError,
+  search,
   selectedPokemonId,
 }: HomeProperties) {
+  const searchPathname = selectedPokemonId
+    ? `/details/${String(selectedPokemonId)}`
+    : '/';
+
   return (
     <Layout>
       <main className="application-page">
-        <SearchSectionController initialSearchTerm={initialSearchTerm} />
+        {search ?? (
+          <SearchSection
+            currentSearchParameters={currentSearchParameters}
+            pathname={searchPathname}
+            storedSearchTerm={initialSearchTerm}
+          />
+        )}
         <PokemonResultsLayout details={details}>
           <ResultsSection
             currentPage={currentPage}
