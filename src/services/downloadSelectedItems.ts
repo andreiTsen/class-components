@@ -1,22 +1,11 @@
 import type { Pokemon } from '../types';
-import { downloadBlob } from '../utils/downloadBlob';
 
-export const downloadSelectedItems = async (
-  selectedItems: Pokemon[]
-): Promise<void> => {
-  const response = await fetch('/api/export-csv', {
-    body: JSON.stringify({ items: selectedItems }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    method: 'POST',
-  });
+export const downloadSelectedItems = (selectedItems: Pokemon[]): void => {
+  const ids = selectedItems.map((item) => String(item.id)).join(',');
 
-  if (!response.ok) {
-    throw new Error('Failed to export selected items.');
+  if (!ids) {
+    return;
   }
 
-  const blob = await response.blob();
-
-  downloadBlob(blob, `${String(selectedItems.length)}_items.csv`);
+  globalThis.location.assign(`/api/export-csv?ids=${encodeURIComponent(ids)}`);
 };

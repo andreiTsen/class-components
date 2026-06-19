@@ -4,9 +4,12 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Suspense } from 'react';
+import Footer from '../../components/Footer/Footer';
+import Header from '../../components/Header/Header';
 import { routing } from '../../i18n/routing';
 import Providers from '../providers';
 import '../../App.css';
+import '../../components/Layout/Layout.css';
 
 type LocaleLayoutProperties = {
   children: ReactNode;
@@ -48,7 +51,13 @@ export default async function LocaleLayout({
       <body>
         <NextIntlClientProvider>
           <Suspense>
-            <Providers>{children}</Providers>
+            <Providers>
+              <div className="page">
+                <Header />
+                {children}
+                <Footer />
+              </div>
+            </Providers>
           </Suspense>
         </NextIntlClientProvider>
       </body>

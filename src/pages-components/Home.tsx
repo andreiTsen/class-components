@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import ErrorTestButton from '../components/ErrorTestButton/ErrorTestButton';
 import Flyout from '../components/Flyout/Flyout';
-import Layout from '../components/Layout/Layout';
 import PokemonResultsLayout from '../components/PokemonResultsLayout/PokemonResultsLayout';
 import ResultsSection from '../components/ResultsSection/ResultsSection';
 import SearchSection from '../components/SearchSection/SearchSection';
@@ -38,30 +37,28 @@ function Home({
     : '/';
 
   return (
-    <Layout>
-      <main className="application-page">
-        {search ?? (
-          <SearchSection
-            currentSearchParameters={currentSearchParameters}
-            pathname={searchPathname}
-            storedSearchTerm={initialSearchTerm}
-          />
-        )}
-        <PokemonResultsLayout details={details}>
-          <ResultsSection
-            currentPage={currentPage}
-            currentSearchParameters={currentSearchParameters}
-            error={resultsError}
-            isLoading={isResultsLoading}
-            onRefresh={onRefreshResults}
-            pokemonPage={pokemonPage}
-            selectedPokemonId={selectedPokemonId}
-          />
-        </PokemonResultsLayout>
-        <ErrorTestButton />
-        <Flyout />
-      </main>
-    </Layout>
+    <main className="application-page">
+      {search ?? (
+        <SearchSection
+          currentSearchParameters={currentSearchParameters}
+          pathname={searchPathname}
+          storedSearchTerm={initialSearchTerm}
+        />
+      )}
+      <PokemonResultsLayout details={details}>
+        <ResultsSection
+          currentPage={currentPage}
+          currentSearchParameters={currentSearchParameters}
+          error={resultsError}
+          isLoading={isResultsLoading}
+          onRefresh={onRefreshResults}
+          pokemonPage={pokemonPage}
+          selectedPokemonId={selectedPokemonId}
+        />
+      </PokemonResultsLayout>
+      <ErrorTestButton />
+      <Flyout />
+    </main>
   );
 }
 
