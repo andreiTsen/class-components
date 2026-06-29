@@ -8,52 +8,31 @@ import type { PokemonPage } from '../types';
 import './Home.css';
 
 type HomeProperties = {
-  currentPage?: number;
-  currentSearchParameters?: URLSearchParams;
   details?: ReactNode;
-  initialSearchTerm?: string;
   isResultsLoading?: boolean;
   onRefreshResults?: () => void;
   pokemonPage?: PokemonPage;
   resultsError?: boolean;
   search?: ReactNode;
-  selectedPokemonId?: number | null;
 };
 
 function Home({
-  currentPage,
-  currentSearchParameters,
   details,
-  initialSearchTerm = '',
   isResultsLoading,
   onRefreshResults,
   pokemonPage,
   resultsError,
   search,
-  selectedPokemonId,
 }: HomeProperties) {
-  const searchPathname = selectedPokemonId
-    ? `/details/${String(selectedPokemonId)}`
-    : '/';
-
   return (
     <main className="application-page">
-      {search ?? (
-        <SearchSection
-          currentSearchParameters={currentSearchParameters}
-          pathname={searchPathname}
-          storedSearchTerm={initialSearchTerm}
-        />
-      )}
+      {search ?? <SearchSection />}
       <PokemonResultsLayout details={details}>
         <ResultsSection
-          currentPage={currentPage}
-          currentSearchParameters={currentSearchParameters}
           error={resultsError}
           isLoading={isResultsLoading}
           onRefresh={onRefreshResults}
           pokemonPage={pokemonPage}
-          selectedPokemonId={selectedPokemonId}
         />
       </PokemonResultsLayout>
       <ErrorTestButton />

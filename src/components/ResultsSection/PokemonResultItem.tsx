@@ -1,14 +1,16 @@
+'use client';
+
 import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { Link } from '../../i18n/navigation';
+import { useSearchParams } from 'next/navigation';
+import { Link, usePathname } from '../../i18n/navigation';
 import { getAppLocale } from '../../i18n/pathname';
 import type { Pokemon } from '../../types';
+import { parsePositiveInteger } from '../../utils/parsePositiveInteger';
 import SelectedPokemonCheckbox from './client/SelectedPokemonCheckbox';
 
 type PokemonResultItemProperties = {
-  currentSearchParameters: URLSearchParams;
   pokemon: Pokemon;
-  selectedPokemonId?: number | null;
 };
 
 type PokemonImageProperties = {
@@ -25,15 +27,20 @@ function PokemonImage({ pokemon }: PokemonImageProperties) {
   );
 }
 
-function PokemonResultItem({
-  currentSearchParameters,
-  pokemon,
-  selectedPokemonId = null,
-}: PokemonResultItemProperties) {
+const getSelectedPokemonId = (pathname: string): number | null => {
+  const detailsMatch = /^\/details\/([^/]+)$/.exec(pathname);
+
+  return detailsMatch ? parsePositiveInteger(detailsMatch[1]) : null;
+};
+
+function PokemonResultItem({ pokemon }: PokemonResultItemProperties) {
   const locale = getAppLocale(useLocale());
+  const pathname = usePathname();
+  const searchParameters = useSearchParams();
   const t = useTranslations('Results');
+  const selectedPokemonId = getSelectedPokemonId(pathname);
   const isSelected = selectedPokemonId === pokemon.id;
-  const search = currentSearchParameters.toString();
+  const search = searchParameters.toString();
   const href = search
     ? `/details/${String(pokemon.id)}?${search}`
     : `/details/${String(pokemon.id)}`;

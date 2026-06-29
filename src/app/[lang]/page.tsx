@@ -1,5 +1,4 @@
 import { setRequestLocale } from 'next-intl/server';
-import { Suspense } from 'react';
 import Home from '../../pages-components/Home';
 import { loadPokemonPageOnServer } from '../../services/pokemonServerLoaders';
 import { isQueryError } from '../../services/queryHelpers';
@@ -43,16 +42,11 @@ export default async function Page({ params, searchParams }: PageProperties) {
   setRequestLocale(lang);
 
   return (
-    <Suspense>
-      <Home
-        currentPage={currentPage}
-        currentSearchParameters={currentSearchParameters}
-        initialSearchTerm={searchTerm}
-        pokemonPage={
-          hasResultsError ? { pokemons: [], totalPages: 0 } : pokemonPage
-        }
-        resultsError={hasResultsError}
-      />
-    </Suspense>
+    <Home
+      pokemonPage={
+        hasResultsError ? { pokemons: [], totalPages: 0 } : pokemonPage
+      }
+      resultsError={hasResultsError}
+    />
   );
 }

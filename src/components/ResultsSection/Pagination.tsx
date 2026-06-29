@@ -1,5 +1,9 @@
+'use client';
+
 import { useTranslations } from 'next-intl';
-import { Link } from '../../i18n/navigation';
+import { useSearchParams } from 'next/navigation';
+import { Link, usePathname } from '../../i18n/navigation';
+import { getPageFromSearchParameters } from '../../utils/pokemonSearchParameters';
 
 const getPageHref = (
   pathname: string,
@@ -13,21 +17,18 @@ const getPageHref = (
 };
 
 type PaginationProperties = {
-  currentPage: number;
-  currentSearchParameters: URLSearchParams;
   isLoading: boolean;
-  pathname: string;
   totalPages: number;
 };
 
-function Pagination({
-  currentPage,
-  currentSearchParameters,
-  isLoading,
-  pathname,
-  totalPages,
-}: PaginationProperties) {
+function Pagination({ isLoading, totalPages }: PaginationProperties) {
   const t = useTranslations('Pagination');
+  const pathname = usePathname();
+  const searchParameters = useSearchParams();
+  const currentSearchParameters = new URLSearchParams(
+    searchParameters.toString()
+  );
+  const currentPage = getPageFromSearchParameters(currentSearchParameters);
   const isPreviousDisabled: boolean = isLoading || currentPage === 1;
   const isNextDisabled: boolean = isLoading || currentPage === totalPages;
 

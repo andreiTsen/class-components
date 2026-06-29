@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, userEvent } from '../test-utils';
 import { pokemonList } from '../test-utils/mockData';
 import ResultsSection from '../../components/ResultsSection/ResultsSection';
@@ -9,18 +9,20 @@ type ResultsSectionProperties = ComponentProps<typeof ResultsSection>;
 const renderResultsSection = (properties: ResultsSectionProperties = {}) =>
   render(
     <ResultsSection
-      currentPage={1}
-      currentSearchParameters={new URLSearchParams()}
       pokemonPage={{ pokemons: [], totalPages: 0 }}
       {...properties}
     />
   );
 
 describe('ResultsSection', () => {
-  it('renders the server-provided current page', () => {
+  beforeEach(() => {
+    globalThis.history.replaceState({}, '', '/');
+  });
+
+  it('renders the current page from URL', () => {
+    globalThis.history.replaceState({}, '', '/?page=2');
+
     renderResultsSection({
-      currentPage: 2,
-      currentSearchParameters: new URLSearchParams('page=2'),
       pokemonPage: { pokemons: pokemonList, totalPages: 3 },
     });
 
@@ -104,9 +106,9 @@ describe('ResultsSection', () => {
   });
 
   it('renders pagination after loading multiple pages', () => {
+    globalThis.history.replaceState({}, '', '/?page=2');
+
     renderResultsSection({
-      currentPage: 2,
-      currentSearchParameters: new URLSearchParams('page=2'),
       pokemonPage: { pokemons: pokemonList, totalPages: 3 },
     });
 
@@ -128,9 +130,9 @@ describe('ResultsSection', () => {
   });
 
   it('keeps pagination usable during loading', () => {
+    globalThis.history.replaceState({}, '', '/?page=2');
+
     renderResultsSection({
-      currentPage: 2,
-      currentSearchParameters: new URLSearchParams('page=2'),
       isLoading: true,
       pokemonPage: { pokemons: pokemonList, totalPages: 3 },
     });

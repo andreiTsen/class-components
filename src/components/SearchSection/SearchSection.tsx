@@ -1,21 +1,20 @@
+'use client';
+
 import { useLocale, useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { submitSearchAction } from '../../actions/searchAction';
 import { getAppLocale } from '../../i18n/pathname';
+import { usePathname } from '../../i18n/navigation';
+import { getSearchTermFromSearchParameters } from '../../utils/pokemonSearchParameters';
 import './SearchSection.css';
 
-type SearchSectionProperties = {
-  currentSearchParameters?: URLSearchParams;
-  pathname?: string;
-  storedSearchTerm?: string;
-};
-
-function SearchSection({
-  currentSearchParameters = new URLSearchParams(),
-  pathname = '/',
-  storedSearchTerm = '',
-}: SearchSectionProperties) {
+function SearchSection() {
   const locale = getAppLocale(useLocale());
+  const pathname = usePathname();
+  const searchParameters = useSearchParams();
   const t = useTranslations('Search');
+  const currentSearch = searchParameters.toString();
+  const searchTerm = getSearchTermFromSearchParameters(searchParameters);
 
   return (
     <section className="search-section" aria-labelledby="search-title">
@@ -23,16 +22,13 @@ function SearchSection({
       <form className="search-form" action={submitSearchAction}>
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="pathname" value={pathname} />
+        <input type="hidden" name="currentSearch" value={currentSearch} />
         <input
-          type="hidden"
-          name="currentSearch"
-          value={currentSearchParameters.toString()}
-        />
-        <input
+          key={searchTerm}
           name="search"
           type="search"
           placeholder={t('placeholder')}
-          defaultValue={storedSearchTerm}
+          defaultValue={searchTerm}
         />
         <button type="submit">{t('submit')}</button>
       </form>

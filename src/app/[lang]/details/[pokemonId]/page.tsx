@@ -1,5 +1,4 @@
 import { setRequestLocale } from 'next-intl/server';
-import { Suspense } from 'react';
 import PokemonDetails from '../../../../components/PokemonDetails/PokemonDetails';
 import Home from '../../../../pages-components/Home';
 import {
@@ -11,7 +10,6 @@ import {
   getPageFromSearchParameters,
   getSearchTermFromSearchParameters,
 } from '../../../../utils/pokemonSearchParameters';
-import { parsePositiveInteger } from '../../../../utils/parsePositiveInteger';
 
 type DetailsPageProperties = {
   params: Promise<{
@@ -54,23 +52,17 @@ export default async function DetailsPage({
   setRequestLocale(lang);
 
   return (
-    <Suspense>
-      <Home
-        currentPage={currentPage}
-        currentSearchParameters={currentSearchParameters}
-        details={
-          <PokemonDetails
-            error={hasDetailsError}
-            pokemon={hasDetailsError ? undefined : selectedPokemon}
-          />
-        }
-        initialSearchTerm={searchTerm}
-        pokemonPage={
-          hasResultsError ? { pokemons: [], totalPages: 0 } : pokemonPage
-        }
-        resultsError={hasResultsError}
-        selectedPokemonId={parsePositiveInteger(pokemonId)}
-      />
-    </Suspense>
+    <Home
+      details={
+        <PokemonDetails
+          error={hasDetailsError}
+          pokemon={hasDetailsError ? undefined : selectedPokemon}
+        />
+      }
+      pokemonPage={
+        hasResultsError ? { pokemons: [], totalPages: 0 } : pokemonPage
+      }
+      resultsError={hasResultsError}
+    />
   );
 }
