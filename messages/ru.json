@@ -1,0 +1,76 @@
+{
+  "About": {
+    "author": "Автор: andreiTsen. Это безумный проект",
+    "githubLink": "Меня зовут Андрей, мой GitHub",
+    "intro": "Покемоны - моя любовь",
+    "rsSchoolLink": "Курс React от RS School",
+    "title": "О приложении"
+  },
+  "ErrorBoundary": {
+    "description": "Произошла ошибка. Можно вернуться к работе.",
+    "reset": "Попробовать снова",
+    "title": "Что-то пошло не так"
+  },
+  "Footer": {
+    "text": "Приложение Pokemon от andreiTsen"
+  },
+  "Header": {
+    "about": "О проекте",
+    "home": "Главная",
+    "languageLabel": "Язык",
+    "mainNavigation": "Основная навигация",
+    "pageHeader": "Шапка страницы",
+    "switchTheme": "Переключить на {theme} тему",
+    "themeDark": "темную",
+    "themeLight": "светлую",
+    "title": "Pokemon super monster"
+  },
+  "Loading": {
+    "details": "Загрузка деталей...",
+    "default": "Загрузка..."
+  },
+  "NotFound": {
+    "back": "Вернуться в приложение",
+    "description": "Страница, которую вы ищете, не существует.",
+    "title": "Страница не найдена"
+  },
+  "PokemonDetails": {
+    "close": "Закрыть",
+    "empty": "Выберите Pokemon, чтобы увидеть детали.",
+    "error": "Не удалось загрузить данные Pokemon.",
+    "refresh": "Обновить детали",
+    "title": "Детали Pokemon"
+  },
+  "Results": {
+    "error": "Не удалось загрузить данные",
+    "noResults": "Покемоны не найдены.",
+    "refresh": "Обновить результаты",
+    "selected": "Выбрано: {count}",
+    "selectPokemon": "Выбрать {name}",
+    "subtitle": "Отправленные Pokemon",
+    "title": "Результаты Pokemon"
+  },
+  "Search": {
+    "placeholder": "Искать покемонов",
+    "submit": "Поиск",
+    "title": "Поиск Pokemon"
+  },
+  "SelectedActions": {
+    "download": "Скачать",
+    "label": "Действия с выбранными Pokemon",
+    "unselectAll": "Снять выбор"
+  },
+  "TestError": {
+    "button": "Тест ошибки"
+  },
+  "Pagination": {
+    "label": "Пагинация",
+    "next": "Следующая",
+    "page": "Страница {currentPage} из {totalPages}",
+    "previous": "Предыдущая"
+  },
+  "Metadata": {
+    "description": "Приложение для поиска Pokemon",
+    "title": "Pokemon super monster"
+  }
+}

@@ -18,6 +18,12 @@
   gap: 16px;
 }
 
+.page-header-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
 .main-nav {
   display: flex;
   gap: 14px;
@@ -56,5 +62,9 @@
   .page-header-top {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .page-header-actions {
+    flex-wrap: wrap;
   }
 }

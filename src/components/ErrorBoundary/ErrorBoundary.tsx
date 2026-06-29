@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import ErrorBoundaryFallback from './ErrorBoundaryFallback';
 import './ErrorBoundary.css';
 
 type ErrorBoundaryProperties = {
@@ -31,15 +32,7 @@ class ErrorBoundary extends Component<
 
   public render(): ReactNode {
     if (this.state.hasError) {
-      return (
-        <section className="error-boundary">
-          <h2>Something went wrong</h2>
-          <p>An error occurred. You can return to work.</p>
-          <button type="button" onClick={this.handleReset}>
-            Try again
-          </button>
-        </section>
-      );
+      return <ErrorBoundaryFallback onReset={this.handleReset} />;
     }
 
     return this.props.children;

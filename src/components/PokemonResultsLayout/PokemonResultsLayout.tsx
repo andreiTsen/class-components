@@ -1,21 +1,29 @@
+import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
-import { Outlet, useMatch } from 'react-router';
-import { parsePositiveInteger } from '../../utils/parsePositiveInteger';
 import './PokemonResultsLayout.css';
 
 type PokemonResultsLayoutProperties = {
   children: ReactNode;
+  details?: ReactNode;
 };
 
-function PokemonResultsLayout({ children }: PokemonResultsLayoutProperties) {
-  const selectedPokemonId = parsePositiveInteger(
-    useMatch('/details/:pokemonId')?.params.pokemonId
-  );
+function PokemonResultsLayout({
+  children,
+  details,
+}: PokemonResultsLayoutProperties) {
+  const t = useTranslations('PokemonDetails');
 
   return (
     <div className="master-detail-layout">
       <div className="master-pane">{children}</div>
-      {selectedPokemonId && <Outlet />}
+      {details ?? (
+        <aside
+          className="details-pane details-pane-empty"
+          aria-label={t('title')}
+        >
+          <p>{t('empty')}</p>
+        </aside>
+      )}
     </div>
   );
 }

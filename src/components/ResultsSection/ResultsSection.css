@@ -25,6 +25,13 @@
   gap: 12px;
 }
 
+.result-list-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
 .result-item {
   display: flex;
   align-items: center;
@@ -38,6 +45,7 @@
   color: inherit;
   cursor: pointer;
   text-align: left;
+  text-decoration: none;
 }
 
 .result-item[aria-current='true'] {
@@ -75,6 +83,7 @@
   flex: 0 0 auto;
   width: 40px;
   height: 40px;
+  object-fit: contain;
 }
 
 .pokemon-info h3 {

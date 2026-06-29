@@ -1,55 +1,66 @@
-import { Link, useSearchParams } from 'react-router';
+'use client';
 
-const getPageSearch = (
+import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
+import { Link, usePathname } from '../../i18n/navigation';
+import { getPageFromSearchParameters } from '../../utils/pokemonSearchParameters';
+
+const getPageHref = (
+  pathname: string,
   currentSearchParameters: URLSearchParams,
   page: number
 ): string => {
   const nextSearchParameters = new URLSearchParams(currentSearchParameters);
   nextSearchParameters.set('page', String(page));
 
-  return `?${nextSearchParameters.toString()}`;
+  return `${pathname}?${nextSearchParameters.toString()}`;
 };
 
 type PaginationProperties = {
-  currentPage: number;
   isLoading: boolean;
   totalPages: number;
 };
 
-function Pagination({
-  currentPage,
-  isLoading,
-  totalPages,
-}: PaginationProperties) {
-  const [searchParameters] = useSearchParams();
+function Pagination({ isLoading, totalPages }: PaginationProperties) {
+  const t = useTranslations('Pagination');
+  const pathname = usePathname();
+  const searchParameters = useSearchParams();
+  const currentSearchParameters = new URLSearchParams(
+    searchParameters.toString()
+  );
+  const currentPage = getPageFromSearchParameters(currentSearchParameters);
   const isPreviousDisabled: boolean = isLoading || currentPage === 1;
   const isNextDisabled: boolean = isLoading || currentPage === totalPages;
 
   return (
-    <nav className="pagination" aria-label="Pagination">
+    <nav className="pagination" aria-label={t('label')}>
       {isPreviousDisabled ? (
         <span className="pagination-link pagination-link-disabled">
-          Previous
+          {t('previous')}
         </span>
       ) : (
         <Link
           className="pagination-link"
-          to={{ search: getPageSearch(searchParameters, currentPage - 1) }}
+          href={getPageHref(pathname, currentSearchParameters, currentPage - 1)}
+          scroll={false}
         >
-          Previous
+          {t('previous')}
         </Link>
       )}
       <span className="pagination-current" aria-current="page">
-        Page {currentPage} of {totalPages}
+        {t('page', { currentPage, totalPages })}
       </span>
       {isNextDisabled ? (
-        <span className="pagination-link pagination-link-disabled">Next</span>
+        <span className="pagination-link pagination-link-disabled">
+          {t('next')}
+        </span>
       ) : (
         <Link
           className="pagination-link"
-          to={{ search: getPageSearch(searchParameters, currentPage + 1) }}
+          href={getPageHref(pathname, currentSearchParameters, currentPage + 1)}
+          scroll={false}
         >
-          Next
+          {t('next')}
         </Link>
       )}
     </nav>

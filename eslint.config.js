@@ -2,7 +2,6 @@ import js from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
-import reactRefresh from 'eslint-plugin-react-refresh';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -11,6 +10,7 @@ export default defineConfig([
   {
     ignores: [
       '**/node_modules/**',
+      '**/.next/**',
       '**/dist/**',
       '**/build/**',
       '**/coverage/**',
@@ -18,6 +18,7 @@ export default defineConfig([
       '**/*.d.ts',
       'eslint.config.js',
       'lint-staged.config.js',
+      'next.config.mjs',
     ],
   },
   js.configs.recommended,
@@ -25,7 +26,6 @@ export default defineConfig([
   tseslint.configs.stylisticTypeChecked,
   reactPlugin.configs.flat.recommended,
   reactHooks.configs.flat.recommended,
-  reactRefresh.configs.vite,
   eslintPluginUnicorn.configs.recommended,
 
   {
@@ -164,6 +164,18 @@ export default defineConfig([
     files: ['**/*.test.ts', '**/*.test.tsx'],
     rules: {
       'max-lines-per-function': 'off',
+    },
+  },
+  {
+    files: ['src/app/**/*.{ts,tsx}'],
+    rules: {
+      'unicorn/prevent-abbreviations': 'off',
+    },
+  },
+  {
+    files: ['src/proxy.ts'],
+    rules: {
+      'unicorn/prefer-string-raw': 'off',
     },
   },
 ]);

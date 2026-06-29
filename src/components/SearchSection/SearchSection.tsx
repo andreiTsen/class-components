@@ -1,42 +1,36 @@
-import { useState, type ChangeEvent, type SyntheticEvent } from 'react';
+'use client';
+
+import { useLocale, useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
+import { submitSearchAction } from '../../actions/searchAction';
+import { getAppLocale } from '../../i18n/pathname';
+import { usePathname } from '../../i18n/navigation';
+import { getSearchTermFromSearchParameters } from '../../utils/pokemonSearchParameters';
 import './SearchSection.css';
 
-type SearchSectionProperties = {
-  handleSearch: (searchTerm: string) => void;
-  storedSearchTerm?: string;
-};
-
-function SearchSection({
-  handleSearch,
-  storedSearchTerm = '',
-}: SearchSectionProperties) {
-  const [searchTerm, setSearchTerm] = useState(storedSearchTerm);
-
-  const handleSearchTermChange = (
-    event: ChangeEvent<HTMLInputElement>
-  ): void => {
-    setSearchTerm(event.target.value);
-  };
-
-  const handleSubmit = (event: SyntheticEvent<HTMLFormElement>): void => {
-    event.preventDefault();
-    const normalizedSearchTerm: string = searchTerm.trim();
-
-    setSearchTerm(normalizedSearchTerm);
-    handleSearch(normalizedSearchTerm);
-  };
+function SearchSection() {
+  const locale = getAppLocale(useLocale());
+  const pathname = usePathname();
+  const searchParameters = useSearchParams();
+  const t = useTranslations('Search');
+  const currentSearch = searchParameters.toString();
+  const searchTerm = getSearchTermFromSearchParameters(searchParameters);
 
   return (
     <section className="search-section" aria-labelledby="search-title">
-      <h1 id="search-title">Pokemon Search</h1>
-      <form className="search-form" onSubmit={handleSubmit}>
+      <h1 id="search-title">{t('title')}</h1>
+      <form className="search-form" action={submitSearchAction}>
+        <input type="hidden" name="locale" value={locale} />
+        <input type="hidden" name="pathname" value={pathname} />
+        <input type="hidden" name="currentSearch" value={currentSearch} />
         <input
+          key={searchTerm}
+          name="search"
           type="search"
-          placeholder="Search pokemons"
-          value={searchTerm}
-          onChange={handleSearchTermChange}
+          placeholder={t('placeholder')}
+          defaultValue={searchTerm}
         />
-        <button type="submit">Search</button>
+        <button type="submit">{t('submit')}</button>
       </form>
     </section>
   );

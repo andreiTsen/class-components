@@ -1,60 +1,49 @@
-import { useSearchParams } from 'react-router';
-import { useGetPokemonsQuery } from '../../services/pokemonApi';
-import type { Pokemon } from '../../types';
-import useLocalStorage from '../../hooks/useLocalStorage';
-import {
-  getPageFromSearchParameters,
-  getSearchTermFromSearchParameters,
-} from '../../utils/pokemonSearchParameters';
+import { useTranslations } from 'next-intl';
+import type { PokemonPage } from '../../types';
 import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
 import '../StatusMessage.css';
 import Pagination from './Pagination';
 import PokemonResultItem from './PokemonResultItem';
+import ResultsRefreshButton from './client/ResultsRefreshButton';
 import './ResultsSection.css';
 
-const EMPTY_POKEMONS: Pokemon[] = [];
-const SEARCH_TERM_STORAGE_KEY = 'pokemon-search-term';
+type ResultsSectionProperties = {
+  error?: boolean;
+  isLoading?: boolean;
+  onRefresh?: () => void;
+  pokemonPage?: PokemonPage;
+};
 
-function ResultsSection() {
-  const [searchParameters] = useSearchParams();
-  const [storedSearchTerm] = useLocalStorage(SEARCH_TERM_STORAGE_KEY);
-  const currentPage = getPageFromSearchParameters(searchParameters);
-  const searchTerm = getSearchTermFromSearchParameters(
-    searchParameters,
-    storedSearchTerm
-  );
-  const { data, isError, isLoading, refetch } = useGetPokemonsQuery(
-    {
-      page: currentPage,
-      searchTerm: searchTerm.trim(),
-    },
-    {
-      refetchOnFocus: false,
-      refetchOnReconnect: false,
-    }
-  );
-  const error = isError ? 'Failed to load data' : '';
-  const pokemons = data?.pokemons ?? EMPTY_POKEMONS;
-  const totalPages = data?.totalPages ?? 0;
-  const showPagination: boolean = !error && totalPages > 1;
-  const handleRefresh = (): void => {
-    void refetch();
-  };
+function ResultsSection({
+  error = false,
+  isLoading = false,
+  onRefresh,
+  pokemonPage,
+}: ResultsSectionProperties) {
+  const t = useTranslations('Results');
+  const resolvedPokemonPage = pokemonPage ?? { pokemons: [], totalPages: 0 };
+  const errorMessage = error ? t('error') : '';
+  const { pokemons, totalPages } = resolvedPokemonPage;
+  const showPagination: boolean = !errorMessage && totalPages > 1;
 
   return (
     <section className="results-section" aria-labelledby="results-title">
       <div>
-        <h2 id="results-title">Pokemon Results</h2>
-        <p>Submitted Pokemon</p>
-        <button type="button" onClick={handleRefresh} disabled={isLoading}>
-          Refresh results
-        </button>
+        <h2 id="results-title">{t('title')}</h2>
+        <p>{t('subtitle')}</p>
+        <ResultsRefreshButton
+          disabled={isLoading}
+          label={t('refresh')}
+          onRefresh={onRefresh}
+        />
       </div>
 
       {isLoading && <LoadingIndicator />}
-      {error && <p className="status-message status-message-error">{error}</p>}
-      {!isLoading && !error && pokemons.length === 0 && (
-        <p className="status-message">No pokemons found.</p>
+      {errorMessage && (
+        <p className="status-message status-message-error">{errorMessage}</p>
+      )}
+      {!isLoading && !errorMessage && pokemons.length === 0 && (
+        <p className="status-message">{t('noResults')}</p>
       )}
 
       <div className="result-list">
@@ -64,11 +53,7 @@ function ResultsSection() {
       </div>
 
       {showPagination && (
-        <Pagination
-          currentPage={currentPage}
-          isLoading={isLoading}
-          totalPages={totalPages}
-        />
+        <Pagination isLoading={false} totalPages={totalPages} />
       )}
     </section>
   );

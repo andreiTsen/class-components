@@ -1,0 +1,76 @@
+{
+  "About": {
+    "author": "Author: andreiTsen. This is a crazy project",
+    "githubLink": "My name is Andrei, My GitHub",
+    "intro": "Pokemons are my love",
+    "rsSchoolLink": "RS School React course",
+    "title": "About this app"
+  },
+  "ErrorBoundary": {
+    "description": "An error occurred. You can return to work.",
+    "reset": "Try again",
+    "title": "Something went wrong"
+  },
+  "Footer": {
+    "text": "Pokemon application by andreiTsen"
+  },
+  "Header": {
+    "about": "About",
+    "home": "Home",
+    "languageLabel": "Language",
+    "mainNavigation": "Main navigation",
+    "pageHeader": "Page header",
+    "switchTheme": "Switch to {theme} theme",
+    "themeDark": "dark",
+    "themeLight": "light",
+    "title": "Pokemon super monster"
+  },
+  "Loading": {
+    "details": "Loading details...",
+    "default": "Loading..."
+  },
+  "NotFound": {
+    "back": "Back to app",
+    "description": "The page you are looking for does not exist.",
+    "title": "Page not found"
+  },
+  "PokemonDetails": {
+    "close": "Close",
+    "empty": "Select a Pokemon to see details.",
+    "error": "Failed to load Pokemon data.",
+    "refresh": "Refresh details",
+    "title": "Pokemon details"
+  },
+  "Results": {
+    "error": "Failed to load data",
+    "noResults": "No pokemons found.",
+    "refresh": "Refresh results",
+    "selected": "{count} selected",
+    "selectPokemon": "Select {name}",
+    "subtitle": "Submitted Pokemon",
+    "title": "Pokemon Results"
+  },
+  "Search": {
+    "placeholder": "Search pokemons",
+    "submit": "Search",
+    "title": "Pokemon Search"
+  },
+  "SelectedActions": {
+    "download": "Download",
+    "label": "Selected Pokemon actions",
+    "unselectAll": "Unselect all"
+  },
+  "TestError": {
+    "button": "Test Error"
+  },
+  "Pagination": {
+    "label": "Pagination",
+    "next": "Next",
+    "page": "Page {currentPage} of {totalPages}",
+    "previous": "Previous"
+  },
+  "Metadata": {
+    "description": "Pokemon search application",
+    "title": "Pokemon super monster"
+  }
+}

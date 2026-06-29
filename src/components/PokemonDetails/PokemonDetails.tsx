@@ -1,64 +1,38 @@
-import { useNavigate, useParams, useSearchParams } from 'react-router';
-import LoadingIndicator from '../LoadingIndicator/LoadingIndicator';
-import { useGetPokemonByIdQuery } from '../../services/pokemonApi';
+import { useTranslations } from 'next-intl';
+import Image from 'next/image';
+import type { Pokemon } from '../../types';
 import '../StatusMessage.css';
 import './PokemonDetails.css';
+import PokemonDetailsActions from './PokemonDetailsActions';
 
-function PokemonDetails() {
-  const { pokemonId } = useParams();
-  const navigate = useNavigate();
-  const [searchParameters] = useSearchParams();
-  const {
-    data: pokemon,
-    isError,
-    isFetching,
-    isLoading,
-    refetch,
-  } = useGetPokemonByIdQuery(pokemonId ?? '', { skip: !pokemonId });
-  const shouldShowLoader = isLoading || isFetching;
+type PokemonDetailsProperties = {
+  error?: boolean;
+  pokemon?: Pokemon;
+};
 
-  const handleCloseDetails = (): void => {
-    const search = searchParameters.toString();
-
-    void navigate({
-      pathname: '/',
-      search: search ? `?${search}` : '',
-    });
-  };
-
-  const handleRefresh = (): void => {
-    if (!pokemonId) {
-      return;
-    }
-
-    void refetch();
-  };
+function PokemonDetails({ error = false, pokemon }: PokemonDetailsProperties) {
+  const t = useTranslations('PokemonDetails');
 
   return (
-    <aside className="details-pane" aria-label="Pokemon details">
-      <button
-        className="details-close-button"
-        type="button"
-        onClick={handleCloseDetails}
-      >
-        Close
-      </button>
-      <button type="button" onClick={handleRefresh} disabled={isFetching}>
-        Refresh details
-      </button>
+    <aside className="details-pane" aria-label={t('title')}>
+      <PokemonDetailsActions
+        closeLabel={t('close')}
+        refreshLabel={t('refresh')}
+      />
 
-      {shouldShowLoader && <LoadingIndicator label="Loading details..." />}
-
-      {isError && (
-        <p className="status-message status-message-error">
-          Failed to load Pokemon data.
-        </p>
+      {error && (
+        <p className="status-message status-message-error">{t('error')}</p>
       )}
 
-      {pokemon && !shouldShowLoader && (
+      {pokemon && (
         <div className="details-content">
           {pokemon.imageUrl && (
-            <img src={pokemon.imageUrl} alt={pokemon.name} />
+            <Image
+              src={pokemon.imageUrl}
+              alt={pokemon.name}
+              width={96}
+              height={96}
+            />
           )}
           <div>
             <h2>{pokemon.name}</h2>
